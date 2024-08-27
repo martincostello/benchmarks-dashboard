@@ -49,12 +49,14 @@ img.user-profile {
   margin-right: 4px;
 }
 
-a.header-content {
-  display: inline-grid;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  width: 55vw;
+@media (max-width: 576px) {
+  a.header-content {
+    display: inline-grid;
+    max-width: 55vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .benchmark-set {
