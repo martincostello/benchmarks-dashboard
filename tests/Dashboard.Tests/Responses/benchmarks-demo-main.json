@@ -1,0 +1,1145 @@
+{
+  "lastUpdated": 1724648394718,
+  "repoUrl": "https://github.com/martincostello/benchmarks-demo",
+  "entries": {
+    "DotNetBenchmarks.IndexOfAnyBenchmarks": [
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "42e2392ea5cb0bc5e40dc6d83209adedfcba3ec2",
+          "message": "Fix benchmarks (#2)\n\nRemove the `-Filter` parameter and just pass a literal `*` as otherwise PowerShell keeps trying to expand it, breaking the invocation.",
+          "timestamp": "2024-08-20T12:34:24Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/42e2392ea5cb0bc5e40dc6d83209adedfcba3ec2"
+        },
+        "date": 1724157458526,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_String",
+            "value": 5.440263656278451,
+            "unit": "ns",
+            "range": "± 0.028783044585658987",
+            "bytesAllocated": 0
+          },
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_Span_Array",
+            "value": 4.98829476748194,
+            "unit": "ns",
+            "range": "± 0.026116498350482",
+            "bytesAllocated": 0
+          },
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_Span_Two_Chars",
+            "value": 3.0429915810624757,
+            "unit": "ns",
+            "range": "± 0.0186205371414151",
+            "bytesAllocated": 0
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "a068bbdc833f14b79dcaac2b6f796446c0c69eef",
+          "message": "Update README (#5)\n\nAdd more information about the repo.",
+          "timestamp": "2024-08-20T14:03:56Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/a068bbdc833f14b79dcaac2b6f796446c0c69eef"
+        },
+        "date": 1724203935984,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_String",
+            "value": 5.447264830768108,
+            "unit": "ns",
+            "range": "± 0.02785123429477825",
+            "bytesAllocated": 0
+          },
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_Span_Array",
+            "value": 4.9910386820634205,
+            "unit": "ns",
+            "range": "± 0.022312651357161283",
+            "bytesAllocated": 0
+          },
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_Span_Two_Chars",
+            "value": 3.3138482943177223,
+            "unit": "ns",
+            "range": "± 0.003090921829832131",
+            "bytesAllocated": 0
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "4f5594bf3eff2c7be2751424e186012811e7cdbc",
+          "message": "Add sample HTTP benchmark\n\nAdd an example of benchmarking an ASP.NET Core HTTP API.",
+          "timestamp": "2024-08-21T11:39:04Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/4f5594bf3eff2c7be2751424e186012811e7cdbc"
+        },
+        "date": 1724240628798,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_String",
+            "value": 5.434052627285322,
+            "unit": "ns",
+            "range": "± 0.021735783450896887",
+            "bytesAllocated": 0
+          },
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_Span_Array",
+            "value": 5.007710431516171,
+            "unit": "ns",
+            "range": "± 0.02403939259316126",
+            "bytesAllocated": 0
+          },
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_Span_Two_Chars",
+            "value": 3.3229733476681367,
+            "unit": "ns",
+            "range": "± 0.01974343981981938",
+            "bytesAllocated": 0
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "0cc49d64e3c185e283a55118e587a077c24674d8",
+          "message": "Ignore IDE0058\n\nIgnore any IDE0058 warnings.",
+          "timestamp": "2024-08-21T17:25:04Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/0cc49d64e3c185e283a55118e587a077c24674d8"
+        },
+        "date": 1724261393323,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_String",
+            "value": 5.309171788394451,
+            "unit": "ns",
+            "range": "± 0.023318954778493797",
+            "bytesAllocated": 0
+          },
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_Span_Array",
+            "value": 4.99934409186244,
+            "unit": "ns",
+            "range": "± 0.026517431408746125",
+            "bytesAllocated": 0
+          },
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_Span_Two_Chars",
+            "value": 3.327849443256855,
+            "unit": "ns",
+            "range": "± 0.023413330823636922",
+            "bytesAllocated": 0
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "0cc49d64e3c185e283a55118e587a077c24674d8",
+          "message": "Ignore IDE0058\n\nIgnore any IDE0058 warnings.",
+          "timestamp": "2024-08-21T17:25:04Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/0cc49d64e3c185e283a55118e587a077c24674d8"
+        },
+        "date": 1724290438622,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_String",
+            "value": 5.435692943135897,
+            "unit": "ns",
+            "range": "± 0.013968982605730911",
+            "bytesAllocated": 0
+          },
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_Span_Array",
+            "value": 4.988302313323532,
+            "unit": "ns",
+            "range": "± 0.014762095766271292",
+            "bytesAllocated": 0
+          },
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_Span_Two_Chars",
+            "value": 3.3168431451278075,
+            "unit": "ns",
+            "range": "± 0.007450097723075452",
+            "bytesAllocated": 0
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "370e778727550fa3b7b04119bd0a32425e11d6f3",
+          "message": "Pin GitHub Actions by SHA\n\nMainly to get more natural change in the repo to populate the dashboard data.",
+          "timestamp": "2024-08-22T08:39:53Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/370e778727550fa3b7b04119bd0a32425e11d6f3"
+        },
+        "date": 1724316293557,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_String",
+            "value": 5.310240373547588,
+            "unit": "ns",
+            "range": "± 0.02199625459767542",
+            "bytesAllocated": 0
+          },
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_Span_Array",
+            "value": 4.995737495024999,
+            "unit": "ns",
+            "range": "± 0.030158771783691276",
+            "bytesAllocated": 0
+          },
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_Span_Two_Chars",
+            "value": 3.333376571536064,
+            "unit": "ns",
+            "range": "± 0.03184229998535449",
+            "bytesAllocated": 0
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "370e778727550fa3b7b04119bd0a32425e11d6f3",
+          "message": "Pin GitHub Actions by SHA\n\nMainly to get more natural change in the repo to populate the dashboard data.",
+          "timestamp": "2024-08-22T08:39:53Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/370e778727550fa3b7b04119bd0a32425e11d6f3"
+        },
+        "date": 1724376834064,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_String",
+            "value": 5.324624564747015,
+            "unit": "ns",
+            "range": "± 0.02391639643398936",
+            "bytesAllocated": 0
+          },
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_Span_Array",
+            "value": 4.996949345370134,
+            "unit": "ns",
+            "range": "± 0.02185782406463126",
+            "bytesAllocated": 0
+          },
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_Span_Two_Chars",
+            "value": 3.332772054310356,
+            "unit": "ns",
+            "range": "± 0.029302530233462885",
+            "bytesAllocated": 0
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "370e778727550fa3b7b04119bd0a32425e11d6f3",
+          "message": "Pin GitHub Actions by SHA\n\nMainly to get more natural change in the repo to populate the dashboard data.",
+          "timestamp": "2024-08-22T08:39:53Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/370e778727550fa3b7b04119bd0a32425e11d6f3"
+        },
+        "date": 1724636066279,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_String",
+            "value": 5.3211248939236,
+            "unit": "ns",
+            "range": "± 0.02408726826147421",
+            "bytesAllocated": 0
+          },
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_Span_Array",
+            "value": 4.99283388789211,
+            "unit": "ns",
+            "range": "± 0.02277644947150226",
+            "bytesAllocated": 0
+          },
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_Span_Two_Chars",
+            "value": 3.3304973723632947,
+            "unit": "ns",
+            "range": "± 0.021624365774530033",
+            "bytesAllocated": 0
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "a4ba507a6e549244ec5142e47d65ac7f6abebc32",
+          "message": "Bump github/codeql-action from 3.26.4 to 3.26.5 (#13)\n\nBumps [github/codeql-action](https://github.com/github/codeql-action) from 3.26.4 to 3.26.5.\n- [Release notes](https://github.com/github/codeql-action/releases)\n- [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)\n- [Commits](https://github.com/github/codeql-action/compare/f0f3afee809481da311ca3a6ff1ff51d81dbeb24...2c779ab0d087cd7fe7b826087247c2c81f27bfa6)\n\n---\nupdated-dependencies:\n- dependency-name: github/codeql-action\n  dependency-type: direct:production\n  update-type: version-update:semver-patch\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2024-08-26T04:54:59Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/a4ba507a6e549244ec5142e47d65ac7f6abebc32"
+        },
+        "date": 1724648394718,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_String",
+            "value": 5.330822458366553,
+            "unit": "ns",
+            "range": "± 0.029350836389583135",
+            "bytesAllocated": 0
+          },
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_Span_Array",
+            "value": 5.007583210865657,
+            "unit": "ns",
+            "range": "± 0.027794549095834748",
+            "bytesAllocated": 0
+          },
+          {
+            "name": "DotNetBenchmarks.IndexOfAnyBenchmarks.IndexOfAny_Span_Two_Chars",
+            "value": 3.3131673123974066,
+            "unit": "ns",
+            "range": "± 0.002702821694134898",
+            "bytesAllocated": 0
+          }
+        ]
+      }
+    ],
+    "DotNetBenchmarks.HashBenchmarks": [
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "42e2392ea5cb0bc5e40dc6d83209adedfcba3ec2",
+          "message": "Fix benchmarks (#2)\n\nRemove the `-Filter` parameter and just pass a literal `*` as otherwise PowerShell keeps trying to expand it, breaking the invocation.",
+          "timestamp": "2024-08-20T12:34:24Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/42e2392ea5cb0bc5e40dc6d83209adedfcba3ec2"
+        },
+        "date": 1724157458526,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.HashBenchmarks.Sha256ComputeHash",
+            "value": 7.6533789127894805,
+            "unit": "µs",
+            "range": "± 0.0469595028403772",
+            "bytesAllocated": 248
+          },
+          {
+            "name": "DotNetBenchmarks.HashBenchmarks.Sha256HashData",
+            "value": 7.08960852595738,
+            "unit": "µs",
+            "range": "± 0.00927703688202347",
+            "bytesAllocated": 56
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "a068bbdc833f14b79dcaac2b6f796446c0c69eef",
+          "message": "Update README (#5)\n\nAdd more information about the repo.",
+          "timestamp": "2024-08-20T14:03:56Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/a068bbdc833f14b79dcaac2b6f796446c0c69eef"
+        },
+        "date": 1724203935984,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.HashBenchmarks.Sha256ComputeHash",
+            "value": 7.64344580078125,
+            "unit": "µs",
+            "range": "± 0.019623151638751394",
+            "bytesAllocated": 248
+          },
+          {
+            "name": "DotNetBenchmarks.HashBenchmarks.Sha256HashData",
+            "value": 7.101761590685164,
+            "unit": "µs",
+            "range": "± 0.013610975444317969",
+            "bytesAllocated": 56
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "4f5594bf3eff2c7be2751424e186012811e7cdbc",
+          "message": "Add sample HTTP benchmark\n\nAdd an example of benchmarking an ASP.NET Core HTTP API.",
+          "timestamp": "2024-08-21T11:39:04Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/4f5594bf3eff2c7be2751424e186012811e7cdbc"
+        },
+        "date": 1724240628798,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.HashBenchmarks.Sha256ComputeHash",
+            "value": 7.653214499840369,
+            "unit": "µs",
+            "range": "± 0.03771378726147944",
+            "bytesAllocated": 248
+          },
+          {
+            "name": "DotNetBenchmarks.HashBenchmarks.Sha256HashData",
+            "value": 7.095113506862095,
+            "unit": "µs",
+            "range": "± 0.010778049358630528",
+            "bytesAllocated": 56
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "0cc49d64e3c185e283a55118e587a077c24674d8",
+          "message": "Ignore IDE0058\n\nIgnore any IDE0058 warnings.",
+          "timestamp": "2024-08-21T17:25:04Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/0cc49d64e3c185e283a55118e587a077c24674d8"
+        },
+        "date": 1724261393323,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.HashBenchmarks.Sha256ComputeHash",
+            "value": 7.635607596842448,
+            "unit": "µs",
+            "range": "± 0.03292712091668185",
+            "bytesAllocated": 248
+          },
+          {
+            "name": "DotNetBenchmarks.HashBenchmarks.Sha256HashData",
+            "value": 7.102007508497972,
+            "unit": "µs",
+            "range": "± 0.009605392452714094",
+            "bytesAllocated": 56
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "0cc49d64e3c185e283a55118e587a077c24674d8",
+          "message": "Ignore IDE0058\n\nIgnore any IDE0058 warnings.",
+          "timestamp": "2024-08-21T17:25:04Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/0cc49d64e3c185e283a55118e587a077c24674d8"
+        },
+        "date": 1724290438622,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.HashBenchmarks.Sha256ComputeHash",
+            "value": 7.619996730804443,
+            "unit": "µs",
+            "range": "± 0.009072894565218367",
+            "bytesAllocated": 248
+          },
+          {
+            "name": "DotNetBenchmarks.HashBenchmarks.Sha256HashData",
+            "value": 7.095207282002767,
+            "unit": "µs",
+            "range": "± 0.009285339256348682",
+            "bytesAllocated": 56
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "370e778727550fa3b7b04119bd0a32425e11d6f3",
+          "message": "Pin GitHub Actions by SHA\n\nMainly to get more natural change in the repo to populate the dashboard data.",
+          "timestamp": "2024-08-22T08:39:53Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/370e778727550fa3b7b04119bd0a32425e11d6f3"
+        },
+        "date": 1724316293557,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.HashBenchmarks.Sha256ComputeHash",
+            "value": 7.501030318123953,
+            "unit": "µs",
+            "range": "± 0.0266999065397225",
+            "bytesAllocated": 248
+          },
+          {
+            "name": "DotNetBenchmarks.HashBenchmarks.Sha256HashData",
+            "value": 7.0998878514607755,
+            "unit": "µs",
+            "range": "± 0.009158800794158607",
+            "bytesAllocated": 56
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "370e778727550fa3b7b04119bd0a32425e11d6f3",
+          "message": "Pin GitHub Actions by SHA\n\nMainly to get more natural change in the repo to populate the dashboard data.",
+          "timestamp": "2024-08-22T08:39:53Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/370e778727550fa3b7b04119bd0a32425e11d6f3"
+        },
+        "date": 1724376834064,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.HashBenchmarks.Sha256ComputeHash",
+            "value": 7.62995932006836,
+            "unit": "µs",
+            "range": "± 0.017629816860629356",
+            "bytesAllocated": 248
+          },
+          {
+            "name": "DotNetBenchmarks.HashBenchmarks.Sha256HashData",
+            "value": 7.104699725850423,
+            "unit": "µs",
+            "range": "± 0.010321689603408858",
+            "bytesAllocated": 56
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "370e778727550fa3b7b04119bd0a32425e11d6f3",
+          "message": "Pin GitHub Actions by SHA\n\nMainly to get more natural change in the repo to populate the dashboard data.",
+          "timestamp": "2024-08-22T08:39:53Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/370e778727550fa3b7b04119bd0a32425e11d6f3"
+        },
+        "date": 1724636066279,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.HashBenchmarks.Sha256ComputeHash",
+            "value": 7.510874960092398,
+            "unit": "µs",
+            "range": "± 0.022791515998769787",
+            "bytesAllocated": 248
+          },
+          {
+            "name": "DotNetBenchmarks.HashBenchmarks.Sha256HashData",
+            "value": 7.096136353556315,
+            "unit": "µs",
+            "range": "± 0.013054837304361513",
+            "bytesAllocated": 56
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "a4ba507a6e549244ec5142e47d65ac7f6abebc32",
+          "message": "Bump github/codeql-action from 3.26.4 to 3.26.5 (#13)\n\nBumps [github/codeql-action](https://github.com/github/codeql-action) from 3.26.4 to 3.26.5.\n- [Release notes](https://github.com/github/codeql-action/releases)\n- [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)\n- [Commits](https://github.com/github/codeql-action/compare/f0f3afee809481da311ca3a6ff1ff51d81dbeb24...2c779ab0d087cd7fe7b826087247c2c81f27bfa6)\n\n---\nupdated-dependencies:\n- dependency-name: github/codeql-action\n  dependency-type: direct:production\n  update-type: version-update:semver-patch\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2024-08-26T04:54:59Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/a4ba507a6e549244ec5142e47d65ac7f6abebc32"
+        },
+        "date": 1724648394718,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.HashBenchmarks.Sha256ComputeHash",
+            "value": 7.6813466766357426,
+            "unit": "µs",
+            "range": "± 0.03223129116217942",
+            "bytesAllocated": 248
+          },
+          {
+            "name": "DotNetBenchmarks.HashBenchmarks.Sha256HashData",
+            "value": 7.113975109863282,
+            "unit": "µs",
+            "range": "± 0.0209574440938778",
+            "bytesAllocated": 56
+          }
+        ]
+      }
+    ],
+    "DotNetBenchmarks.ILoggerFactoryBenchmarks": [
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "42e2392ea5cb0bc5e40dc6d83209adedfcba3ec2",
+          "message": "Fix benchmarks (#2)\n\nRemove the `-Filter` parameter and just pass a literal `*` as otherwise PowerShell keeps trying to expand it, breaking the invocation.",
+          "timestamp": "2024-08-20T12:34:24Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/42e2392ea5cb0bc5e40dc6d83209adedfcba3ec2"
+        },
+        "date": 1724157458526,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.ILoggerFactoryBenchmarks.CreateLogger_Generic",
+            "value": 70.3433185060819,
+            "unit": "ns",
+            "range": "± 0.5665478886134108",
+            "bytesAllocated": 144
+          },
+          {
+            "name": "DotNetBenchmarks.ILoggerFactoryBenchmarks.CreateLogger_Type",
+            "value": 59.05663513285773,
+            "unit": "ns",
+            "range": "± 0.36423715525413614",
+            "bytesAllocated": 120
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "a068bbdc833f14b79dcaac2b6f796446c0c69eef",
+          "message": "Update README (#5)\n\nAdd more information about the repo.",
+          "timestamp": "2024-08-20T14:03:56Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/a068bbdc833f14b79dcaac2b6f796446c0c69eef"
+        },
+        "date": 1724203935984,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.ILoggerFactoryBenchmarks.CreateLogger_Generic",
+            "value": 71.50056258042653,
+            "unit": "ns",
+            "range": "± 0.4736300479630378",
+            "bytesAllocated": 144
+          },
+          {
+            "name": "DotNetBenchmarks.ILoggerFactoryBenchmarks.CreateLogger_Type",
+            "value": 60.195156918122215,
+            "unit": "ns",
+            "range": "± 0.38394483115161887",
+            "bytesAllocated": 120
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "4f5594bf3eff2c7be2751424e186012811e7cdbc",
+          "message": "Add sample HTTP benchmark\n\nAdd an example of benchmarking an ASP.NET Core HTTP API.",
+          "timestamp": "2024-08-21T11:39:04Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/4f5594bf3eff2c7be2751424e186012811e7cdbc"
+        },
+        "date": 1724240628798,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.ILoggerFactoryBenchmarks.CreateLogger_Generic",
+            "value": 73.48430520693461,
+            "unit": "ns",
+            "range": "± 0.40448693356706295",
+            "bytesAllocated": 144
+          },
+          {
+            "name": "DotNetBenchmarks.ILoggerFactoryBenchmarks.CreateLogger_Type",
+            "value": 68.26109742323557,
+            "unit": "ns",
+            "range": "± 0.45430033996902197",
+            "bytesAllocated": 120
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "0cc49d64e3c185e283a55118e587a077c24674d8",
+          "message": "Ignore IDE0058\n\nIgnore any IDE0058 warnings.",
+          "timestamp": "2024-08-21T17:25:04Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/0cc49d64e3c185e283a55118e587a077c24674d8"
+        },
+        "date": 1724261393323,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.ILoggerFactoryBenchmarks.CreateLogger_Generic",
+            "value": 74.79849828992572,
+            "unit": "ns",
+            "range": "± 0.3612244583659088",
+            "bytesAllocated": 144
+          },
+          {
+            "name": "DotNetBenchmarks.ILoggerFactoryBenchmarks.CreateLogger_Type",
+            "value": 68.7298298733575,
+            "unit": "ns",
+            "range": "± 0.5749558547933226",
+            "bytesAllocated": 120
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "0cc49d64e3c185e283a55118e587a077c24674d8",
+          "message": "Ignore IDE0058\n\nIgnore any IDE0058 warnings.",
+          "timestamp": "2024-08-21T17:25:04Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/0cc49d64e3c185e283a55118e587a077c24674d8"
+        },
+        "date": 1724290438622,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.ILoggerFactoryBenchmarks.CreateLogger_Generic",
+            "value": 77.11626216343471,
+            "unit": "ns",
+            "range": "± 0.24161630914758905",
+            "bytesAllocated": 144
+          },
+          {
+            "name": "DotNetBenchmarks.ILoggerFactoryBenchmarks.CreateLogger_Type",
+            "value": 67.8462511698405,
+            "unit": "ns",
+            "range": "± 0.3701129577775242",
+            "bytesAllocated": 120
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "370e778727550fa3b7b04119bd0a32425e11d6f3",
+          "message": "Pin GitHub Actions by SHA\n\nMainly to get more natural change in the repo to populate the dashboard data.",
+          "timestamp": "2024-08-22T08:39:53Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/370e778727550fa3b7b04119bd0a32425e11d6f3"
+        },
+        "date": 1724316293557,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.ILoggerFactoryBenchmarks.CreateLogger_Generic",
+            "value": 77.92319514751435,
+            "unit": "ns",
+            "range": "± 0.2261855086455258",
+            "bytesAllocated": 144
+          },
+          {
+            "name": "DotNetBenchmarks.ILoggerFactoryBenchmarks.CreateLogger_Type",
+            "value": 68.09122494550851,
+            "unit": "ns",
+            "range": "± 0.26270978474727785",
+            "bytesAllocated": 120
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "370e778727550fa3b7b04119bd0a32425e11d6f3",
+          "message": "Pin GitHub Actions by SHA\n\nMainly to get more natural change in the repo to populate the dashboard data.",
+          "timestamp": "2024-08-22T08:39:53Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/370e778727550fa3b7b04119bd0a32425e11d6f3"
+        },
+        "date": 1724376834064,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.ILoggerFactoryBenchmarks.CreateLogger_Generic",
+            "value": 72.71970921754837,
+            "unit": "ns",
+            "range": "± 0.41382018376773383",
+            "bytesAllocated": 144
+          },
+          {
+            "name": "DotNetBenchmarks.ILoggerFactoryBenchmarks.CreateLogger_Type",
+            "value": 67.98748752276103,
+            "unit": "ns",
+            "range": "± 0.4534550266814177",
+            "bytesAllocated": 120
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "370e778727550fa3b7b04119bd0a32425e11d6f3",
+          "message": "Pin GitHub Actions by SHA\n\nMainly to get more natural change in the repo to populate the dashboard data.",
+          "timestamp": "2024-08-22T08:39:53Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/370e778727550fa3b7b04119bd0a32425e11d6f3"
+        },
+        "date": 1724636066279,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.ILoggerFactoryBenchmarks.CreateLogger_Generic",
+            "value": 73.75227094491323,
+            "unit": "ns",
+            "range": "± 0.3421688991430908",
+            "bytesAllocated": 144
+          },
+          {
+            "name": "DotNetBenchmarks.ILoggerFactoryBenchmarks.CreateLogger_Type",
+            "value": 67.09426524241765,
+            "unit": "ns",
+            "range": "± 0.15996779531866895",
+            "bytesAllocated": 120
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "a4ba507a6e549244ec5142e47d65ac7f6abebc32",
+          "message": "Bump github/codeql-action from 3.26.4 to 3.26.5 (#13)\n\nBumps [github/codeql-action](https://github.com/github/codeql-action) from 3.26.4 to 3.26.5.\n- [Release notes](https://github.com/github/codeql-action/releases)\n- [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)\n- [Commits](https://github.com/github/codeql-action/compare/f0f3afee809481da311ca3a6ff1ff51d81dbeb24...2c779ab0d087cd7fe7b826087247c2c81f27bfa6)\n\n---\nupdated-dependencies:\n- dependency-name: github/codeql-action\n  dependency-type: direct:production\n  update-type: version-update:semver-patch\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2024-08-26T04:54:59Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/a4ba507a6e549244ec5142e47d65ac7f6abebc32"
+        },
+        "date": 1724648394718,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.ILoggerFactoryBenchmarks.CreateLogger_Generic",
+            "value": 79.3699027299881,
+            "unit": "ns",
+            "range": "± 0.4206326039368404",
+            "bytesAllocated": 144
+          },
+          {
+            "name": "DotNetBenchmarks.ILoggerFactoryBenchmarks.CreateLogger_Type",
+            "value": 68.83188482920329,
+            "unit": "ns",
+            "range": "± 0.6923308835124543",
+            "bytesAllocated": 120
+          }
+        ]
+      }
+    ],
+    "DotNetBenchmarks.TodoAppBenchmarks": [
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "4f5594bf3eff2c7be2751424e186012811e7cdbc",
+          "message": "Add sample HTTP benchmark\n\nAdd an example of benchmarking an ASP.NET Core HTTP API.",
+          "timestamp": "2024-08-21T11:39:04Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/4f5594bf3eff2c7be2751424e186012811e7cdbc"
+        },
+        "date": 1724240628798,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.TodoAppBenchmarks.GetAllTodos",
+            "value": 79.51709608845538,
+            "unit": "µs",
+            "range": "± 4.238666597631018",
+            "bytesAllocated": 3.087,
+            "memoryUnit": "KB"
+          },
+          {
+            "name": "DotNetBenchmarks.TodoAppBenchmarks.GetOneTodo",
+            "value": 85.78780440063477,
+            "unit": "µs",
+            "range": "± 2.9979865678997935",
+            "bytesAllocated": 2.947,
+            "memoryUnit": "KB"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "0cc49d64e3c185e283a55118e587a077c24674d8",
+          "message": "Ignore IDE0058\n\nIgnore any IDE0058 warnings.",
+          "timestamp": "2024-08-21T17:25:04Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/0cc49d64e3c185e283a55118e587a077c24674d8"
+        },
+        "date": 1724261393323,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.TodoAppBenchmarks.GetAllTodos",
+            "value": 82.1332328515625,
+            "unit": "µs",
+            "range": "± 4.115588369612483",
+            "bytesAllocated": 3.063,
+            "memoryUnit": "KB"
+          },
+          {
+            "name": "DotNetBenchmarks.TodoAppBenchmarks.GetOneTodo",
+            "value": 84.09317596324574,
+            "unit": "µs",
+            "range": "± 3.5596993582018226",
+            "bytesAllocated": 2.886,
+            "memoryUnit": "KB"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "0cc49d64e3c185e283a55118e587a077c24674d8",
+          "message": "Ignore IDE0058\n\nIgnore any IDE0058 warnings.",
+          "timestamp": "2024-08-21T17:25:04Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/0cc49d64e3c185e283a55118e587a077c24674d8"
+        },
+        "date": 1724290438622,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.TodoAppBenchmarks.GetAllTodos",
+            "value": 82.42254240676591,
+            "unit": "µs",
+            "range": "± 3.422283139446354",
+            "bytesAllocated": 3.084,
+            "memoryUnit": "KB"
+          },
+          {
+            "name": "DotNetBenchmarks.TodoAppBenchmarks.GetOneTodo",
+            "value": 83.19952397772606,
+            "unit": "µs",
+            "range": "± 3.228381715359706",
+            "bytesAllocated": 2.936,
+            "memoryUnit": "KB"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "370e778727550fa3b7b04119bd0a32425e11d6f3",
+          "message": "Pin GitHub Actions by SHA\n\nMainly to get more natural change in the repo to populate the dashboard data.",
+          "timestamp": "2024-08-22T08:39:53Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/370e778727550fa3b7b04119bd0a32425e11d6f3"
+        },
+        "date": 1724316293557,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.TodoAppBenchmarks.GetAllTodos",
+            "value": 81.85429492575025,
+            "unit": "µs",
+            "range": "± 3.7279490447881107",
+            "bytesAllocated": 3.083,
+            "memoryUnit": "KB"
+          },
+          {
+            "name": "DotNetBenchmarks.TodoAppBenchmarks.GetOneTodo",
+            "value": 86.76723916625977,
+            "unit": "µs",
+            "range": "± 3.964887304039661",
+            "bytesAllocated": 2.945,
+            "memoryUnit": "KB"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "370e778727550fa3b7b04119bd0a32425e11d6f3",
+          "message": "Pin GitHub Actions by SHA\n\nMainly to get more natural change in the repo to populate the dashboard data.",
+          "timestamp": "2024-08-22T08:39:53Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/370e778727550fa3b7b04119bd0a32425e11d6f3"
+        },
+        "date": 1724376834064,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.TodoAppBenchmarks.GetAllTodos",
+            "value": 81.85691759033203,
+            "unit": "µs",
+            "range": "± 4.278887701271778",
+            "bytesAllocated": 3.06,
+            "memoryUnit": "KB"
+          },
+          {
+            "name": "DotNetBenchmarks.TodoAppBenchmarks.GetOneTodo",
+            "value": 83.93517058520047,
+            "unit": "µs",
+            "range": "± 3.4820291543567063",
+            "bytesAllocated": 2.922,
+            "memoryUnit": "KB"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "370e778727550fa3b7b04119bd0a32425e11d6f3",
+          "message": "Pin GitHub Actions by SHA\n\nMainly to get more natural change in the repo to populate the dashboard data.",
+          "timestamp": "2024-08-22T08:39:53Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/370e778727550fa3b7b04119bd0a32425e11d6f3"
+        },
+        "date": 1724636066279,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.TodoAppBenchmarks.GetAllTodos",
+            "value": 76.62951105957032,
+            "unit": "µs",
+            "range": "± 4.8630932190066565",
+            "bytesAllocated": 3.068,
+            "memoryUnit": "KB"
+          },
+          {
+            "name": "DotNetBenchmarks.TodoAppBenchmarks.GetOneTodo",
+            "value": 83.02745597922585,
+            "unit": "µs",
+            "range": "± 3.4833063904824573",
+            "bytesAllocated": 2.943,
+            "memoryUnit": "KB"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "a4ba507a6e549244ec5142e47d65ac7f6abebc32",
+          "message": "Bump github/codeql-action from 3.26.4 to 3.26.5 (#13)\n\nBumps [github/codeql-action](https://github.com/github/codeql-action) from 3.26.4 to 3.26.5.\n- [Release notes](https://github.com/github/codeql-action/releases)\n- [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)\n- [Commits](https://github.com/github/codeql-action/compare/f0f3afee809481da311ca3a6ff1ff51d81dbeb24...2c779ab0d087cd7fe7b826087247c2c81f27bfa6)\n\n---\nupdated-dependencies:\n- dependency-name: github/codeql-action\n  dependency-type: direct:production\n  update-type: version-update:semver-patch\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2024-08-26T04:54:59Z",
+          "url": "https://github.com/martincostello/benchmarks-demo/commit/a4ba507a6e549244ec5142e47d65ac7f6abebc32"
+        },
+        "date": 1724648394718,
+        "benches": [
+          {
+            "name": "DotNetBenchmarks.TodoAppBenchmarks.GetAllTodos",
+            "value": 80.37913678722846,
+            "unit": "µs",
+            "range": "± 4.224966133815963",
+            "bytesAllocated": 3.017,
+            "memoryUnit": "KB"
+          },
+          {
+            "name": "DotNetBenchmarks.TodoAppBenchmarks.GetOneTodo",
+            "value": 82.18024786677125,
+            "unit": "µs",
+            "range": "± 3.658568887824449",
+            "bytesAllocated": 2.9330000000000003,
+            "memoryUnit": "KB"
+          }
+        ]
+      }
+    ]
+  }
+}

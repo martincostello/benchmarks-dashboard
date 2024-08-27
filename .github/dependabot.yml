@@ -1,0 +1,26 @@
+version: 2
+updates:
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    day: thursday
+    interval: weekly
+    time: "05:30"
+    timezone: Europe/London
+  reviewers:
+    - "martincostello"
+- package-ecosystem: nuget
+  directory: "/"
+  groups:
+    xunit:
+      patterns:
+        - Verify*
+        - xunit*
+  schedule:
+    day: thursday
+    interval: weekly
+    time: "05:30"
+    timezone: Europe/London
+  reviewers:
+    - "martincostello"
+  open-pull-requests-limit: 99

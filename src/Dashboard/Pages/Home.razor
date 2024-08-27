@@ -1,0 +1,346 @@
+@page "/"
+@inject IJSRuntime JS
+
+<PageTitle>Benchmarks - @(Options.Value.BrandName)</PageTitle>
+
+<header>
+    <form>
+        <div class="g-3 row row-cols-6">
+            <div class="input-group col">
+                <label class="input-group-text col-auto col-xl-1" for="repository">
+                    Repository &nbsp;
+                    <Icon Name="@(Icons.Code)" />
+                </label>
+                <select class="form-select" id="repository" name="repo" disabled="@(DisableRepositories)" @onchange="RepositoryChangedAsync">
+                    @if (GitHubService.Repositories.Count < 1)
+                    {
+                        <option>Loading...</option>
+                    }
+                    else
+                    {
+                        @foreach (var repo in GitHubService.Repositories)
+                        {
+                            var selected = Repository is not null && repo == Repository;
+                            <option value="@(repo)" selected="@(selected)">@(repo)</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="input-group col">
+                <label class="input-group-text col-auto col-xl-1" for="branch">
+                    Branch &nbsp;
+                    <Icon Name="@(Icons.CodeBranch)" />
+                </label>
+                <select class="form-select" id="branch" name="branch" disabled="@(DisableBranches)" @onchange="BranchChangedAsync">
+                    @if (GitHubService.Branches.Count < 1)
+                    {
+                        <option>Loading...</option>
+                    }
+                    else
+                    {
+                        @foreach (var branch in GitHubService.Branches)
+                        {
+                            var selected =
+                                Branch is not null && branch == Branch ||
+                                Branch is null && branch == GitHubService.CurrentRepository?.DefaultBranch;
+
+                            <option value="@(branch)" selected="@(selected)">@(branch)</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+    </form>
+    <hr />
+    @if (_notFound && !ShowLoaders)
+    {
+        <div class="alert alert-danger m-2" id="no-benchmarks" role="alert">
+            Failed benchmark data for found for branch <span class="font-monospace">@(GitHubService.CurrentBranch)</span>.
+        </div>
+    }
+    else if (GitHubService.Benchmarks is not null)
+    {
+        <div class="header-item">
+            <strong class="header-label">
+                <span class="fa-regular fa-clock fa-fw" aria-hidden="true"></span>
+                Last Updated:
+            </strong>
+            @if (GitHubService.Benchmarks.LastUpdated is { } timestamp && !ShowLoaders)
+            {
+                <span title="@timestamp.ToString("s", CultureInfo.InvariantCulture)">
+                    @(timestamp.ToLocalTime().ToString("G"))
+                </span>
+            }
+            else
+            {
+                <Spinner />
+            }
+        </div>
+        <div class="header-item">
+            <strong class="header-label">
+                <span class="fa-brands fa-github fa-fw" aria-hidden="true"></span>
+                Repository:
+            </strong>
+            @if (GitHubService.CurrentRepository is null || ShowLoaders)
+            {
+                <Spinner />
+            }
+            else
+            {
+                <a class="header-content" href="@(GitHubService.CurrentRepository.HtmlUrl ?? "#")" rel="noopener" target="_blank">
+                    @(GitHubService.CurrentRepository.FullName)
+                </a>
+            }
+        </div>
+        <div class="header-item">
+            <strong class="header-label">
+                <span class="fa-solid fa-code-branch fa-fw" aria-hidden="true"></span>
+                Branch:
+            </strong>
+            @if (GitHubService.CurrentBranch is null || ShowLoaders)
+            {
+                <Spinner Color="text-dark" />
+            }
+            else
+            {
+                <a class="font-monospace" href="@(GitHubService.BranchUrl())" rel="noopener" target="_blank">
+                    @(GitHubService.CurrentBranch)
+                </a>
+            }
+        </div>
+        <div class="header-item">
+            <strong class="header-label">
+                <span class="fa-solid fa-code-commit fa-fw" aria-hidden="true"></span>
+                Commit:
+            </strong>
+            @if (GitHubService.CurrentCommit is null || ShowLoaders)
+            {
+                <Spinner Color="text-dark" />
+            }
+            else
+            {
+                <a class="font-monospace" href="@(GitHubService.CommitUrl())" rel="noopener" target="_blank">
+                    @(GitHubService.CurrentCommit[..7])
+                </a>
+            }
+        </div>
+    }
+</header>
+
+@if (ShowLoaders)
+{
+    <div class="d-flex justify-content-center">
+        <Spinner SpinnerType="@(SpinnerType.Border)" Large="true" LoadingText="Fetching data..." />
+    </div>
+}
+else if (GitHubService.Benchmarks?.Suites.Count > 0)
+{
+    <div id="benchmarks">
+        @foreach ((var name, var runs) in GitHubService.Benchmarks.Suites)
+        {
+            var items = GroupBenchmarks(runs);
+            <BenchmarkSuite Name="@(name)" Benchmarks="@(items)" />
+        }
+
+        <button class="btn btn-primary btn-sm d-block" id="download-json" type="button">
+            Download as JSON
+            <Icon Name="@(Icons.FileArrowDown)" />
+        </button>
+    </div>
+}
+
+@code {
+    public bool DisableRepositories => GitHubService.Repositories.Count < 1 || _loading;
+    public bool DisableBranches => GitHubService.Branches.Count < 1 || _loading;
+    public bool ShowLoaders => _loading;
+
+    [SupplyParameterFromQuery(Name = "branch")]
+    public string? Branch { get; set; }
+
+    [SupplyParameterFromQuery(Name = "repo")]
+    public string? Repository { get; set; }
+
+    private bool _loading = true;
+    private bool _notFound;
+
+    protected async override Task OnInitializedAsync()
+    {
+        var options = Options.Value;
+
+        if ((options.IsGitHubEnterprise || GitHubService.HasToken) &&
+            !await GitHubService.VerifyTokenAsync())
+        {
+            Navigation.NavigateTo(Routes.Token);
+            return;
+        }
+
+        if (GitHubService.Repositories.Count > 0)
+        {
+            var repo = GitHubService.Repositories[0];
+
+            if (Repository is { Length: > 0 } name &&
+                GitHubService.Repositories.Contains(name, StringComparer.Ordinal))
+            {
+                repo = name;
+            }
+
+            try
+            {
+                await LoadAsync(() => GitHubService.LoadRepositoryAsync(repo));
+
+                if (Branch is { Length: > 0 } branch &&
+                    GitHubService.Branches.Contains(branch, StringComparer.Ordinal))
+                {
+                    await LoadAsync(() => GitHubService.LoadBenchmarksAsync(branch));
+                }
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode is System.Net.HttpStatusCode.Forbidden && !GitHubService.HasToken)
+            {
+                // User was rate-limited with anonymous access
+                Navigation.NavigateTo(Routes.Token);
+            }
+        }
+    }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _loading = false;
+        }
+
+        if (GitHubService.Benchmarks is { } data)
+        {
+            var json = System.Text.Json.JsonSerializer.Serialize(data, AppJsonSerializerContext.Default.BenchmarkResults);
+            await JS.InvokeVoidAsync("configureDataDownload", [json, Options.Value.BenchmarkFileName]);
+        }
+    }
+
+    private async Task RepositoryChangedAsync(ChangeEventArgs args)
+    {
+        if (args.Value is string repository)
+        {
+            await LoadAsync(() => GitHubService.LoadRepositoryAsync(repository));
+        }
+    }
+
+    private async Task BranchChangedAsync(ChangeEventArgs args)
+    {
+        if (args.Value is string branch)
+        {
+            await LoadAsync(() => GitHubService.LoadBenchmarksAsync(branch));
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadAsync(Func<Task> loader)
+    {
+        try
+        {
+            _loading = true;
+            await loader();
+        }
+        finally
+        {
+            _loading = false;
+            _notFound = GitHubService.Benchmarks is null;
+        }
+    }
+
+    private static Dictionary<string, IList<BenchmarkItem>> GroupBenchmarks(IList<BenchmarkRun> runs)
+    {
+        Dictionary<string, SortedList<DateTimeOffset, BenchmarkItem>> sortedGroups = new();
+
+        foreach (var run in runs)
+        {
+            foreach (var benchmark in run.Benchmarks)
+            {
+                if (!sortedGroups.TryGetValue(benchmark.Name, out var results))
+                {
+                    sortedGroups[benchmark.Name] = results = [];
+                }
+
+                results.Add(run.Timestamp, new(run.Commit, benchmark));
+            }
+        }
+
+        Dictionary<string, IList<BenchmarkItem>> grouped = new();
+
+        foreach ((var suite, var results) in sortedGroups)
+        {
+            var items = results.Select((p) => p.Value).ToList();
+
+            NormalizeUnits(items);
+
+            grouped[suite] = items;
+        }
+
+        return grouped;
+    }
+
+    private static void NormalizeUnits(IList<BenchmarkItem> items)
+    {
+        if (items.Count < 1)
+        {
+            return;
+        }
+
+        const double Factor = 1e-3;
+        const double Limit = 1_000;
+
+        var minimumTime = items.Min((p) => p.Result.Value);
+        string[] timeUnits = ["µs", "ms", "s"];
+
+        for (int i = 0; i < timeUnits.Length; i++)
+        {
+            if (minimumTime < Limit)
+            {
+                break;
+            }
+
+            minimumTime *= Factor;
+
+            for (int j = 0; j < items.Count; j++)
+            {
+                var item = items[j];
+
+                item.Result.Value *= Factor;
+                item.Result.Unit = timeUnits[i];
+
+                if (item.Result.Range is { Length: > 0 } range)
+                {
+                    var rangeValue = double.Parse(range[2..], CultureInfo.InvariantCulture);
+                    rangeValue *= Factor;
+
+                    item.Result.Range = $"± {rangeValue}";
+                }
+            }
+        }
+
+        if (items.Where((p) => p is not null).Min((p) => p.Result!.BytesAllocated) is { } minimumBytes)
+        {
+            string[] memoryUnits = ["KB", "MB"];
+
+            for (int i = 0; i < memoryUnits.Length; i++)
+            {
+                if (minimumBytes < Limit)
+                {
+                    break;
+                }
+
+                minimumBytes *= Factor;
+
+                for (int j = 0; j < items.Count; j++)
+                {
+                    var item = items[j];
+
+                    if (item.Result.BytesAllocated is not null)
+                    {
+                        item.Result.BytesAllocated *= Factor;
+                        item.Result.MemoryUnit = memoryUnits[i];
+                    }
+                }
+            }
+        }
+    }
+}

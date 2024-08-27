@@ -1,0 +1,64 @@
+@inject IJSRuntime JS
+
+<div class="benchmark-chart-container col" id="@(Id)">
+    <canvas class="benchmark-chart" id="@(CanvasId)" name="@(Name)" />
+</div>
+
+@code {
+    /// <summary>
+    /// Gets the benchmark name.
+    /// </summary>
+    [Parameter]
+    public required string Name { get; init; }
+
+    /// <summary>
+    /// Gets the name of the associated benchmark suite.
+    /// </summary>
+    [Parameter]
+    public required string Suite { get; init; }
+
+    /// <summary>
+    /// Gets the benchmark items.
+    /// </summary>
+    [Parameter]
+    public required IList<BenchmarkItem> Items { get; init; }
+
+    private string Id => $"{Suite}-{Name}";
+    private string CanvasId => $"{Suite}-{Name}-canvas";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!Options.Value.DataSetColors.TryGetValue("Memory", out var memoryColor) ||
+            memoryColor is not { Length: > 0 })
+        {
+            memoryColor = "#e34c26";
+        }
+
+        if (!Options.Value.DataSetColors.TryGetValue("Time", out var timeColor) ||
+            timeColor is not { Length: > 0 })
+        {
+            timeColor = "#178600";
+        }
+
+        var options = System.Text.Json.JsonSerializer.Serialize(new
+        {
+            colors = new
+            {
+                memory = memoryColor,
+                time = timeColor,
+            },
+            dataset = Items,
+            name = Name,
+            suiteName = Suite,
+        });
+
+        await JS.InvokeVoidAsync("renderChart", [CanvasId, options]);
+
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("scrollToActiveChart", []);
+        }
+    }
+
+    protected override bool ShouldRender() => true;
+}

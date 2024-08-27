@@ -1,0 +1,1127 @@
+{
+  "lastUpdated": 1724655457119,
+  "repoUrl": "https://github.com/martincostello/website",
+  "entries": {
+    "Website": [
+      {
+        "commit": {
+          "author": {
+            "email": "martin@martincostello.com",
+            "name": "martincostello",
+            "username": "martincostello"
+          },
+          "committer": {
+            "email": "martin@martincostello.com",
+            "name": "Martin Costello",
+            "username": "martincostello"
+          },
+          "distinct": true,
+          "sha": "c3b2faa9c3bcd635d801f3986caf64cbd2b67cd1",
+          "message": "Add continuous benchmarks\n\nAdd GitHub Actions workflow to run continuous benchmarks and publish to a tracking website.",
+          "timestamp": "2024-08-11T19:51:17+01:00",
+          "tree_id": "16b098f3a6ab7f82356f434bc038fd0cdc8c020f",
+          "url": "https://github.com/martincostello/website/commit/c3b2faa9c3bcd635d801f3986caf64cbd2b67cd1"
+        },
+        "date": 1723402496165,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 357282.72691127233,
+            "unit": "ns",
+            "range": "± 2040.5396756827827"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 363987.29952566966,
+            "unit": "ns",
+            "range": "± 1214.6813098482532"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 426331.0557154605,
+            "unit": "ns",
+            "range": "± 7598.8265487841745"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 397010.9130859375,
+            "unit": "ns",
+            "range": "± 3186.389732625971"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "martin@martincostello.com",
+            "name": "Martin Costello",
+            "username": "martincostello"
+          },
+          "committer": {
+            "email": "martin@martincostello.com",
+            "name": "Martin Costello",
+            "username": "martincostello"
+          },
+          "distinct": true,
+          "sha": "d1895da44f19ca851a0921e787a051b48fe88ca5",
+          "message": "Fix benchmarks name\n\nFix copy-pasta name.",
+          "timestamp": "2024-08-11T20:03:33+01:00",
+          "tree_id": "bc049a450638eac49c07003e3f98d1c78cfc231f",
+          "url": "https://github.com/martincostello/website/commit/d1895da44f19ca851a0921e787a051b48fe88ca5"
+        },
+        "date": 1723403220632,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 359526.1261268029,
+            "unit": "ns",
+            "range": "± 1304.7691424072787"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 369322.86822916666,
+            "unit": "ns",
+            "range": "± 1371.9491516697972"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 433646.763671875,
+            "unit": "ns",
+            "range": "± 7881.5391299285475"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 402674.20647321426,
+            "unit": "ns",
+            "range": "± 3928.8380300259378"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "sha": "093ae038a39531f24a7030aeb41d0d4fc3da5c62",
+          "message": "Bump eslint from 9.8.0 to 9.9.0 in /src/Website (#2154)\n\nBumps [eslint](https://github.com/eslint/eslint) from 9.8.0 to 9.9.0.\n- [Release notes](https://github.com/eslint/eslint/releases)\n- [Changelog](https://github.com/eslint/eslint/blob/main/CHANGELOG.md)\n- [Commits](https://github.com/eslint/eslint/compare/v9.8.0...v9.9.0)\n\n---\nupdated-dependencies:\n- dependency-name: eslint\n  dependency-type: direct:development\n  update-type: version-update:semver-minor\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2024-08-11T19:15:13Z",
+          "tree_id": "38594746f3e12d47042df5eec29ff76b5465b0b7",
+          "url": "https://github.com/martincostello/website/commit/093ae038a39531f24a7030aeb41d0d4fc3da5c62"
+        },
+        "date": 1723403931099,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 360146.36851283483,
+            "unit": "ns",
+            "range": "± 1174.142244538584"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 369158.2247596154,
+            "unit": "ns",
+            "range": "± 748.9733201215453"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 433367.13432173297,
+            "unit": "ns",
+            "range": "± 10584.44822701699"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 405278.35226004466,
+            "unit": "ns",
+            "range": "± 2767.140622378607"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "martin@martincostello.com",
+            "name": "martincostello",
+            "username": "martincostello"
+          },
+          "committer": {
+            "email": "martin@martincostello.com",
+            "name": "Martin Costello",
+            "username": "martincostello"
+          },
+          "distinct": true,
+          "sha": "c0fad7edf51d2b6f5878d4db029357483f212276",
+          "message": "Remove redundant files\n\nRemove files that are now served from CDN.",
+          "timestamp": "2024-08-12T08:35:56+01:00",
+          "tree_id": "69ff3bc0f14e4c46ff2071f73656facca8d71b02",
+          "url": "https://github.com/martincostello/website/commit/c0fad7edf51d2b6f5878d4db029357483f212276"
+        },
+        "date": 1723448392814,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 360936.48667689733,
+            "unit": "ns",
+            "range": "± 1198.2093597841854"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 364560.919921875,
+            "unit": "ns",
+            "range": "± 1480.5157940282943"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 426261.303125,
+            "unit": "ns",
+            "range": "± 4858.273744002919"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 401698.4547526042,
+            "unit": "ns",
+            "range": "± 3399.871882809616"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "martin@martincostello.com",
+            "name": "Martin Costello",
+            "username": "martincostello"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "sha": "7ec25052885f6d2354c0ba9106117124a4456772",
+          "message": "Benchmark .NET vNext (#2156)\n\n- Run benchmarks for pushes to the vNext branches.\r\n- Remove concurrency.",
+          "timestamp": "2024-08-12T11:46:40Z",
+          "tree_id": "3bc2f7bad15ffa151c32bacca181fab2222c86c0",
+          "url": "https://github.com/martincostello/website/commit/7ec25052885f6d2354c0ba9106117124a4456772"
+        },
+        "date": 1723463419359,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 360586.700125558,
+            "unit": "ns",
+            "range": "± 1291.0022999464204"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 366761.85110677086,
+            "unit": "ns",
+            "range": "± 1301.4386572565313"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 424211.1795372596,
+            "unit": "ns",
+            "range": "± 4474.121658687336"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 396706.59065755206,
+            "unit": "ns",
+            "range": "± 1335.4324739664567"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "sha": "592460bdb37bb4fd9e5a42043c83b3796e471a0c",
+          "message": "Bump the typescript-eslint group in /src/Website with 2 updates (#2157)\n\nBumps the typescript-eslint group in /src/Website with 2 updates: [@typescript-eslint/eslint-plugin](https://github.com/typescript-eslint/typescript-eslint/tree/HEAD/packages/eslint-plugin) and [@typescript-eslint/parser](https://github.com/typescript-eslint/typescript-eslint/tree/HEAD/packages/parser).\n\n\nUpdates `@typescript-eslint/eslint-plugin` from 8.0.1 to 8.1.0\n- [Release notes](https://github.com/typescript-eslint/typescript-eslint/releases)\n- [Changelog](https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/CHANGELOG.md)\n- [Commits](https://github.com/typescript-eslint/typescript-eslint/commits/v8.1.0/packages/eslint-plugin)\n\nUpdates `@typescript-eslint/parser` from 8.0.1 to 8.1.0\n- [Release notes](https://github.com/typescript-eslint/typescript-eslint/releases)\n- [Changelog](https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/parser/CHANGELOG.md)\n- [Commits](https://github.com/typescript-eslint/typescript-eslint/commits/v8.1.0/packages/parser)\n\n---\nupdated-dependencies:\n- dependency-name: \"@typescript-eslint/eslint-plugin\"\n  dependency-type: direct:development\n  update-type: version-update:semver-minor\n  dependency-group: typescript-eslint\n- dependency-name: \"@typescript-eslint/parser\"\n  dependency-type: direct:development\n  update-type: version-update:semver-minor\n  dependency-group: typescript-eslint\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2024-08-13T04:18:20Z",
+          "tree_id": "2828492fafcbd955dd4c3133118ed4aaf5789f3f",
+          "url": "https://github.com/martincostello/website/commit/592460bdb37bb4fd9e5a42043c83b3796e471a0c"
+        },
+        "date": 1723522955279,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 359793.580859375,
+            "unit": "ns",
+            "range": "± 2301.536128766949"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 368458.5125558036,
+            "unit": "ns",
+            "range": "± 1468.6945575229954"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 427197.57109375,
+            "unit": "ns",
+            "range": "± 4452.966763832347"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 397641.4837890625,
+            "unit": "ns",
+            "range": "± 2498.73529368633"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "sha": "924a7ab26248c77df35a63227db253da31e0aa0f",
+          "message": "Bump Microsoft.Playwright from 1.45.1 to 1.46.0 (#2158)\n\nBumps [Microsoft.Playwright](https://github.com/microsoft/playwright-dotnet) from 1.45.1 to 1.46.0.\n- [Release notes](https://github.com/microsoft/playwright-dotnet/releases)\n- [Commits](https://github.com/microsoft/playwright-dotnet/compare/v1.45.1...v1.46.0)\n\n---\nupdated-dependencies:\n- dependency-name: Microsoft.Playwright\n  dependency-type: direct:production\n  update-type: version-update:semver-minor\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2024-08-13T04:39:08Z",
+          "tree_id": "55a82d5e5c825e7cb388739607b603ef0132246a",
+          "url": "https://github.com/martincostello/website/commit/924a7ab26248c77df35a63227db253da31e0aa0f"
+        },
+        "date": 1723524158261,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 362099.52952223556,
+            "unit": "ns",
+            "range": "± 1324.8273377889816"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 372448.784109933,
+            "unit": "ns",
+            "range": "± 1069.2190153735637"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 430116.9972245066,
+            "unit": "ns",
+            "range": "± 3791.7689883234016"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 402740.71041666664,
+            "unit": "ns",
+            "range": "± 3754.009210593664"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "102549341+costellobot@users.noreply.github.com",
+            "name": "costellobot",
+            "username": "costellobot"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "sha": "8553cf7d430e66068bdb43a31e2028ab871ab994",
+          "message": "Update .NET SDK to 8.0.400 (#2160)\n\n* Update .NET SDK\n\nUpdate .NET SDK to version 8.0.400.\n\n---\nupdated-dependencies:\n- dependency-name: Microsoft.NET.Sdk\n  dependency-type: direct:production\n  update-type: version-update:semver-patch\n...\n\nSigned-off-by: costellobot <102549341+costellobot@users.noreply.github.com>\n\n* Bump .NET NuGet packages\n\nBumps .NET dependencies to their latest versions for the .NET 8.0.400 SDK.\n\nBumps Microsoft.AspNetCore.AzureAppServices.HostingStartup from 8.0.7 to 8.0.8.\nBumps Microsoft.AspNetCore.Mvc.Testing from 8.0.7 to 8.0.8.\n\n---\nupdated-dependencies:\n- dependency-name: Microsoft.AspNetCore.AzureAppServices.HostingStartup\n  dependency-type: direct:production\n  update-type: version-update:semver-patch\n- dependency-name: Microsoft.AspNetCore.Mvc.Testing\n  dependency-type: direct:production\n  update-type: version-update:semver-patch\n...\n\nSigned-off-by: costellobot <102549341+costellobot@users.noreply.github.com>\n\n---------\n\nSigned-off-by: costellobot <102549341+costellobot@users.noreply.github.com>",
+          "timestamp": "2024-08-13T17:28:29Z",
+          "tree_id": "8d64eac4f8eb27bdcb85b610152806c7a79db893",
+          "url": "https://github.com/martincostello/website/commit/8553cf7d430e66068bdb43a31e2028ab871ab994"
+        },
+        "date": 1723570341488,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 365270.95256696426,
+            "unit": "ns",
+            "range": "± 1116.2242634307656"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 375759.5177176339,
+            "unit": "ns",
+            "range": "± 1205.99090063236"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 429932.7344501202,
+            "unit": "ns",
+            "range": "± 8181.141842393783"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 407498.7684151786,
+            "unit": "ns",
+            "range": "± 2035.1393042030627"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "martin@martincostello.com",
+            "name": "martincostello",
+            "username": "martincostello"
+          },
+          "committer": {
+            "email": "martin@martincostello.com",
+            "name": "Martin Costello",
+            "username": "martincostello"
+          },
+          "distinct": true,
+          "sha": "fb0e0aba3b793e3a2690bde2baea975c27eb31e0",
+          "message": "Remove workaround\n\nRemove workaround for bug fixed in .NET 8.0.400 SDK.",
+          "timestamp": "2024-08-13T18:39:14+01:00",
+          "tree_id": "1a37642c7c81bcfcd8996c3579f07350e1ffc09f",
+          "url": "https://github.com/martincostello/website/commit/fb0e0aba3b793e3a2690bde2baea975c27eb31e0"
+        },
+        "date": 1723570984445,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 361223.54161658656,
+            "unit": "ns",
+            "range": "± 1107.9924468351908"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 368416.1183035714,
+            "unit": "ns",
+            "range": "± 1335.7826826574556"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 431330.91354166664,
+            "unit": "ns",
+            "range": "± 7662.33257117401"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 418642.8553292411,
+            "unit": "ns",
+            "range": "± 1680.93556974123"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "martin@martincostello.com",
+            "name": "martincostello",
+            "username": "martincostello"
+          },
+          "committer": {
+            "email": "martin@martincostello.com",
+            "name": "Martin Costello",
+            "username": "martincostello"
+          },
+          "distinct": true,
+          "sha": "ebcba41f0e05656af0a3548e617dccc2d1105fa8",
+          "message": "Bump elliptic\n\nBump elliptic to 6.5.7 to resolve vulnerability alert.",
+          "timestamp": "2024-08-14T12:49:09+01:00",
+          "tree_id": "71c6e75f56253de97c29d253d67a5e8076eae860",
+          "url": "https://github.com/martincostello/website/commit/ebcba41f0e05656af0a3548e617dccc2d1105fa8"
+        },
+        "date": 1723636377555,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 361405.32068810094,
+            "unit": "ns",
+            "range": "± 1688.8471310139628"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 366940.5171875,
+            "unit": "ns",
+            "range": "± 1650.1137800419174"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 427989.21021792764,
+            "unit": "ns",
+            "range": "± 5298.829656463561"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 400126.2820172991,
+            "unit": "ns",
+            "range": "± 2995.5148324224433"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "102549341+costellobot@users.noreply.github.com",
+            "name": "costellobot",
+            "username": "costellobot"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "sha": "54e13509c856ba2236bd7d4c5baf23b746aef31c",
+          "message": "Update .NET SDK (#2167)\n\nUpdate .NET SDK to version 8.0.401.\n\n---\nupdated-dependencies:\n- dependency-name: Microsoft.NET.Sdk\n  dependency-type: direct:production\n  update-type: version-update:semver-patch\n...\n\nSigned-off-by: costellobot <102549341+costellobot@users.noreply.github.com>",
+          "timestamp": "2024-08-15T17:52:23Z",
+          "tree_id": "5959d3a95e7f42d0013b59a0b937d417cf35fdfd",
+          "url": "https://github.com/martincostello/website/commit/54e13509c856ba2236bd7d4c5baf23b746aef31c"
+        },
+        "date": 1723744632547,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 358661.4897836539,
+            "unit": "ns",
+            "range": "± 1070.085898948703"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 364596.5350167411,
+            "unit": "ns",
+            "range": "± 1358.5688701389513"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 424020.5682779948,
+            "unit": "ns",
+            "range": "± 8571.379812912155"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 396734.63902064733,
+            "unit": "ns",
+            "range": "± 3390.8608606836315"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "sha": "3fc73fc640ee875c9bffaad10718af536d0e38b6",
+          "message": "Bump stylelint from 16.8.1 to 16.8.2 in /src/Website (#2169)",
+          "timestamp": "2024-08-16T07:22:24+01:00",
+          "tree_id": "22bcf2addcc21d743a0df760b4dbca5767e0a5ba",
+          "url": "https://github.com/martincostello/website/commit/3fc73fc640ee875c9bffaad10718af536d0e38b6"
+        },
+        "date": 1723789557082,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 362314.9956430289,
+            "unit": "ns",
+            "range": "± 1573.8010165538954"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 370375.36495535716,
+            "unit": "ns",
+            "range": "± 1797.6375042684151"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 429840.934921875,
+            "unit": "ns",
+            "range": "± 6668.607655114476"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 399338.7671875,
+            "unit": "ns",
+            "range": "± 4038.032522167652"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "sha": "eb7f746e5677144a281a358554e00d413a0e0906",
+          "message": "Bump @stylistic/eslint-plugin from 2.6.2 to 2.6.4 in /src/Website (#2168)",
+          "timestamp": "2024-08-16T07:22:38+01:00",
+          "tree_id": "dd45165696aef72b6c66e92f779d953aefb83569",
+          "url": "https://github.com/martincostello/website/commit/eb7f746e5677144a281a358554e00d413a0e0906"
+        },
+        "date": 1723789572524,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 363746.2019981971,
+            "unit": "ns",
+            "range": "± 1088.3539731619614"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 372277.3074869792,
+            "unit": "ns",
+            "range": "± 1843.5501617259554"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 431193.34135298297,
+            "unit": "ns",
+            "range": "± 10397.461889258544"
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 406237.04345703125,
+            "unit": "ns",
+            "range": "± 2752.8261353772787"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "7a14e05522078c214cbc40b5f8776dd51c4d108d",
+          "message": "Use benchmarkdotnet-results-publisher\n\nUse `martincostello/benchmarkdotnet-results-publisher` instead of `benchmark-action/github-action-benchmark`.",
+          "timestamp": "2024-08-18T09:34:11Z",
+          "url": "https://github.com/martincostello/website/commit/7a14e05522078c214cbc40b5f8776dd51c4d108d"
+        },
+        "date": 1723973894476,
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 356708.16650390625,
+            "unit": "ns",
+            "range": "± 1335.1288955429418",
+            "bytesAllocated": 48390
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 365001.9951171875,
+            "unit": "ns",
+            "range": "± 1710.4645172242397",
+            "bytesAllocated": 51332
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 426415.0155436198,
+            "unit": "ns",
+            "range": "± 7420.719177668771",
+            "bytesAllocated": 65236
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 397645.91259765625,
+            "unit": "ns",
+            "range": "± 2699.0473299734977",
+            "bytesAllocated": 59271
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "028307cef2ed957412bc21c78491ca75966959d3",
+          "message": "Enable regression comments\n\nEnable comments when a performance regression is detected.",
+          "timestamp": "2024-08-18T16:30:01Z",
+          "url": "https://github.com/martincostello/website/commit/028307cef2ed957412bc21c78491ca75966959d3"
+        },
+        "date": 1723999109096,
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 554248.6679095645,
+            "unit": "ns",
+            "range": "± 78716.27214406212",
+            "bytesAllocated": 48383
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 544097.7668805803,
+            "unit": "ns",
+            "range": "± 60145.35430385365",
+            "bytesAllocated": 51335
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 616712.8398643092,
+            "unit": "ns",
+            "range": "± 69124.97247206047",
+            "bytesAllocated": 65143
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 588535.6263090093,
+            "unit": "ns",
+            "range": "± 64211.86142784141",
+            "bytesAllocated": 59257
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "47cc87ac48b7e218166ee379eab9d68141858db6",
+          "message": "Publish artifacts (#2175)\n\nPublish the artifact results to the workflow from BenchmarkDotNet before it is processed and summarised.",
+          "timestamp": "2024-08-19T14:48:33Z",
+          "url": "https://github.com/martincostello/website/commit/47cc87ac48b7e218166ee379eab9d68141858db6"
+        },
+        "date": 1724079127018,
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 358377.65857872594,
+            "unit": "ns",
+            "range": "± 1253.6713394640628",
+            "bytesAllocated": 48384
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 367217.8739483173,
+            "unit": "ns",
+            "range": "± 1093.5079633201913",
+            "bytesAllocated": 51334
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 423596.31927083334,
+            "unit": "ns",
+            "range": "± 2780.7171735929774",
+            "bytesAllocated": 65218
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 399358.5078876202,
+            "unit": "ns",
+            "range": "± 2743.2313882239464",
+            "bytesAllocated": 59274
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "015cea13fd0b983061824176225efa62de994030",
+          "message": "Bump the typescript-eslint group in /src/Website with 2 updates (#2176)\n\nBumps the typescript-eslint group in /src/Website with 2 updates: [@typescript-eslint/eslint-plugin](https://github.com/typescript-eslint/typescript-eslint/tree/HEAD/packages/eslint-plugin) and [@typescript-eslint/parser](https://github.com/typescript-eslint/typescript-eslint/tree/HEAD/packages/parser).\n\n\nUpdates `@typescript-eslint/eslint-plugin` from 8.1.0 to 8.2.0\n- [Release notes](https://github.com/typescript-eslint/typescript-eslint/releases)\n- [Changelog](https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/CHANGELOG.md)\n- [Commits](https://github.com/typescript-eslint/typescript-eslint/commits/v8.2.0/packages/eslint-plugin)\n\nUpdates `@typescript-eslint/parser` from 8.1.0 to 8.2.0\n- [Release notes](https://github.com/typescript-eslint/typescript-eslint/releases)\n- [Changelog](https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/parser/CHANGELOG.md)\n- [Commits](https://github.com/typescript-eslint/typescript-eslint/commits/v8.2.0/packages/parser)\n\n---\nupdated-dependencies:\n- dependency-name: \"@typescript-eslint/eslint-plugin\"\n  dependency-type: direct:development\n  update-type: version-update:semver-minor\n  dependency-group: typescript-eslint\n- dependency-name: \"@typescript-eslint/parser\"\n  dependency-type: direct:development\n  update-type: version-update:semver-minor\n  dependency-group: typescript-eslint\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2024-08-20T04:57:31Z",
+          "url": "https://github.com/martincostello/website/commit/015cea13fd0b983061824176225efa62de994030"
+        },
+        "date": 1724130064162,
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 357331.0467998798,
+            "unit": "ns",
+            "range": "± 661.0766359185112",
+            "bytesAllocated": 48385
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 368274.29033954325,
+            "unit": "ns",
+            "range": "± 1118.7896599106105",
+            "bytesAllocated": 51325
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 426392.92054966517,
+            "unit": "ns",
+            "range": "± 4426.308371899361",
+            "bytesAllocated": 65201
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 405909.69375,
+            "unit": "ns",
+            "range": "± 3693.482958068514",
+            "bytesAllocated": 59278
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "17afa807b4ceda19d1192bb27d1c14ac2503006a",
+          "message": "Bump mini-css-extract-plugin from 2.9.0 to 2.9.1 in /src/Website (#2177)",
+          "timestamp": "2024-08-20T05:58:06Z",
+          "url": "https://github.com/martincostello/website/commit/17afa807b4ceda19d1192bb27d1c14ac2503006a"
+        },
+        "date": 1724133703207,
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 358510.94566127233,
+            "unit": "ns",
+            "range": "± 1767.0527276091254",
+            "bytesAllocated": 48385
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 365984.5198567708,
+            "unit": "ns",
+            "range": "± 1562.4743524661003",
+            "bytesAllocated": 51328
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 421509.62360491074,
+            "unit": "ns",
+            "range": "± 3187.1520784375384",
+            "bytesAllocated": 65225
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 400319.9146484375,
+            "unit": "ns",
+            "range": "± 2799.3912182720446",
+            "bytesAllocated": 59266
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "martincostello"
+          },
+          "committer": {
+            "username": "martincostello"
+          },
+          "sha": "b6be00613957615cc3d29a0f33142e4a66f9cde0",
+          "message": "Fix history URL\n\nFix the URL to view the history for the benchmarks.",
+          "timestamp": "2024-08-20T07:10:26Z",
+          "url": "https://github.com/martincostello/website/commit/b6be00613957615cc3d29a0f33142e4a66f9cde0"
+        },
+        "date": 1724138033468,
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 357099.95823317306,
+            "unit": "ns",
+            "range": "± 981.8869095056484",
+            "bytesAllocated": 48382
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 362881.65004185267,
+            "unit": "ns",
+            "range": "± 976.2033487984986",
+            "bytesAllocated": 51327
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 429607.4964717742,
+            "unit": "ns",
+            "range": "± 13086.763667915397",
+            "bytesAllocated": 65225
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 396966.4890625,
+            "unit": "ns",
+            "range": "± 3236.6354566969344",
+            "bytesAllocated": 59284
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "60c117491ba71100562205ecb397399ac4531d6a",
+          "message": "Bump Microsoft.NET.Test.Sdk from 17.10.0 to 17.11.0 (#2179)\n\nBumps [Microsoft.NET.Test.Sdk](https://github.com/microsoft/vstest) from 17.10.0 to 17.11.0.\n- [Release notes](https://github.com/microsoft/vstest/releases)\n- [Changelog](https://github.com/microsoft/vstest/blob/main/docs/releases.md)\n- [Commits](https://github.com/microsoft/vstest/compare/v17.10.0...v17.11.0)\n\n---\nupdated-dependencies:\n- dependency-name: Microsoft.NET.Test.Sdk\n  dependency-type: direct:production\n  update-type: version-update:semver-minor\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2024-08-20T15:03:27Z",
+          "url": "https://github.com/martincostello/website/commit/60c117491ba71100562205ecb397399ac4531d6a"
+        },
+        "date": 1724166472208,
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 361676.98388671875,
+            "unit": "ns",
+            "range": "± 1324.475389493419",
+            "bytesAllocated": 48381
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 368586.18289620534,
+            "unit": "ns",
+            "range": "± 1495.230957258988",
+            "bytesAllocated": 51331
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 431297.85325520835,
+            "unit": "ns",
+            "range": "± 3723.280339301764",
+            "bytesAllocated": 65222
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 407217.0611328125,
+            "unit": "ns",
+            "range": "± 5694.959892739388",
+            "bytesAllocated": 59267
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "6922c80e266318a13694da01175a06a82bccce03",
+          "message": "Bump @babel/preset-env in /src/Website in the babel group (#2183)\n\nBumps the babel group in /src/Website with 1 update: [@babel/preset-env](https://github.com/babel/babel/tree/HEAD/packages/babel-preset-env).\n\n\nUpdates `@babel/preset-env` from 7.25.3 to 7.25.4\n- [Release notes](https://github.com/babel/babel/releases)\n- [Changelog](https://github.com/babel/babel/blob/main/CHANGELOG.md)\n- [Commits](https://github.com/babel/babel/commits/v7.25.4/packages/babel-preset-env)\n\n---\nupdated-dependencies:\n- dependency-name: \"@babel/preset-env\"\n  dependency-type: direct:development\n  update-type: version-update:semver-patch\n  dependency-group: babel\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2024-08-23T04:18:33Z",
+          "url": "https://github.com/martincostello/website/commit/6922c80e266318a13694da01175a06a82bccce03"
+        },
+        "date": 1724386951438,
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 360647.4760366586,
+            "unit": "ns",
+            "range": "± 984.3590278711558",
+            "bytesAllocated": 48378
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 365748.1140625,
+            "unit": "ns",
+            "range": "± 1280.0713121524896",
+            "bytesAllocated": 51329
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 422739.418671875,
+            "unit": "ns",
+            "range": "± 3888.2096604801122",
+            "bytesAllocated": 65228
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 399856.64361979166,
+            "unit": "ns",
+            "range": "± 6348.404254878581",
+            "bytesAllocated": 59275
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "6c28d9372dd1a30d205547c7be0468c9df886bfb",
+          "message": "Bump webpack from 5.93.0 to 5.94.0 in /src/Website (#2184)",
+          "timestamp": "2024-08-23T05:47:21Z",
+          "url": "https://github.com/martincostello/website/commit/6c28d9372dd1a30d205547c7be0468c9df886bfb"
+        },
+        "date": 1724392265061,
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 360372.1026893029,
+            "unit": "ns",
+            "range": "± 1158.961348539652",
+            "bytesAllocated": 48384
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 367336.4851422991,
+            "unit": "ns",
+            "range": "± 1413.5079526191587",
+            "bytesAllocated": 51330
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 422065.15520833334,
+            "unit": "ns",
+            "range": "± 4154.183666412249",
+            "bytesAllocated": 65226
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 398657.0245442708,
+            "unit": "ns",
+            "range": "± 3165.85387571867",
+            "bytesAllocated": 59278
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "95d4c19f66aa68ca669620b26414363b057e57da",
+          "message": "Bump eslint from 9.9.0 to 9.9.1 in /src/Website (#2186)\n\nBumps [eslint](https://github.com/eslint/eslint) from 9.9.0 to 9.9.1.\n- [Release notes](https://github.com/eslint/eslint/releases)\n- [Changelog](https://github.com/eslint/eslint/blob/main/CHANGELOG.md)\n- [Commits](https://github.com/eslint/eslint/compare/v9.9.0...v9.9.1)\n\n---\nupdated-dependencies:\n- dependency-name: eslint\n  dependency-type: direct:development\n  update-type: version-update:semver-patch\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2024-08-26T04:56:43Z",
+          "url": "https://github.com/martincostello/website/commit/95d4c19f66aa68ca669620b26414363b057e57da"
+        },
+        "date": 1724648408833,
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 356023.33733258926,
+            "unit": "ns",
+            "range": "± 963.9801544085616",
+            "bytesAllocated": 48379
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 363981.29375,
+            "unit": "ns",
+            "range": "± 1383.4801511912929",
+            "bytesAllocated": 51332
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 424496.4236778846,
+            "unit": "ns",
+            "range": "± 3411.9311387485004",
+            "bytesAllocated": 65189
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 399969.3886021205,
+            "unit": "ns",
+            "range": "± 3923.571576357754",
+            "bytesAllocated": 59277
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "349c16ff922077402de4777184582bb04d5d9e77",
+          "message": "Bump ts-jest from 29.2.4 to 29.2.5 in /src/Website (#2187)",
+          "timestamp": "2024-08-26T06:54:02Z",
+          "url": "https://github.com/martincostello/website/commit/349c16ff922077402de4777184582bb04d5d9e77"
+        },
+        "date": 1724655457119,
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 361427.4679827009,
+            "unit": "ns",
+            "range": "± 1570.424632626843",
+            "bytesAllocated": 48384
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 368623.5042317708,
+            "unit": "ns",
+            "range": "± 2161.459344681504",
+            "bytesAllocated": 51332
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 421707.49679129466,
+            "unit": "ns",
+            "range": "± 2799.6456303179343",
+            "bytesAllocated": 65221
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 397394.23151041666,
+            "unit": "ns",
+            "range": "± 3102.882628912236",
+            "bytesAllocated": 59275
+          }
+        ]
+      }
+    ]
+  }
+}

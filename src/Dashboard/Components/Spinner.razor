@@ -1,0 +1,55 @@
+@{
+    string spinnerClass = SpinnerType == SpinnerType.Growing ? "spinner-grow" : "spinner-border";
+    List<string> classes = ["spinner", spinnerClass];
+
+    if (Large)
+    {
+        classes.Add("spinner-xl");
+    }
+    else
+    {
+        classes.Add($"{spinnerClass}-sm");
+    }
+
+    if (Color is { Length: > 0 })
+    {
+        classes.Add(Color);
+    }
+
+    string classList = string.Join(' ', classes);
+}
+<div class="@(classList)" id="@(Id)" role="status">
+    <span class="visually-hidden">@(LoadingText)</span>
+</div>
+
+@code {
+    /// <summary>
+    /// Gets the optional color for the spinner.
+    /// </summary>
+    [Parameter]
+    public string? Color { get; init; }
+
+    /// <summary>
+    /// Gets the optional ID for the spinner.
+    /// </summary>
+    [Parameter]
+    public string? Id { get; init; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the spinner is large.
+    /// </summary>
+    [Parameter]
+    public bool Large { get; set; }
+
+    /// <summary>
+    /// Gets the text to show while the spinner is loading.
+    /// </summary>
+    [Parameter]
+    public string LoadingText { get; init; } = "Loading...";
+
+    /// <summary>
+    /// Gets the type of the spinner.
+    /// </summary>
+    [Parameter]
+    public SpinnerType SpinnerType { get; init; }
+}

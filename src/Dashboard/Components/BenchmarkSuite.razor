@@ -1,0 +1,30 @@
+<div id="@(Name)" class="benchmark-set">
+    <h2 class="benchmark-title">
+        @(Name)
+        <a class="benchmark-set-anchor" href="#@(Name)">
+            <Icon Name="@(Icons.Link)" />
+        </a>
+    </h2>
+    <div class="benchmark-graphs row row-cols-1 row-cols-sm-2">
+        @foreach ((var benchmark, var items) in Benchmarks)
+        {
+            <Benchmark Items="@(items)" Name="@(benchmark)" Suite="@(Name)" />
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// Gets the benchmark suite name.
+    /// </summary>
+    [Parameter]
+    public required string Name { get; init; }
+
+    /// <summary>
+    /// Gets the benchmarks for the suite.
+    /// </summary>
+    [Parameter]
+    public required Dictionary<string, IList<BenchmarkItem>> Benchmarks { get; init; }
+
+    protected override bool ShouldRender() => true;
+}

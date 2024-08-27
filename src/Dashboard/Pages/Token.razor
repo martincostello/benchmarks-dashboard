@@ -1,0 +1,199 @@
+@page "/token"
+
+@{
+    var options = Options.Value;
+    var tokenRequired = options.IsGitHubEnterprise;
+}
+
+<PageTitle>Configure @(options.GitHubInstance) Token - @(options.BrandName)</PageTitle>
+
+<div class="row m-2 justify-content-center">
+    <div class="col-12 col-md-8">
+        <div class="card ">
+            <div class="card-header">
+                @(options.GitHubInstance) Token @(tokenRequired ? "Required" : string.Empty)
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    @if (tokenRequired)
+                    {
+                        <text>
+                            A @(options.GitHubInstance) access token is required to load the data for this dashboard.
+                        </text>
+                    }
+                    else
+                    {
+                        <text>
+                            A @(options.GitHubInstance) access token can be configured to load the data for this dashboard to help avoid rate limiting.
+                        </text>
+                    }
+                </p>
+                <p class="card-text">
+                    @if (options.TokenScopes.Count > 1)
+                    {
+                        <text>
+                            Generate a new token with the following scopes and enter it into the form below:
+                            <ul>
+                                @foreach (var scope in options.TokenScopes)
+                                {
+                                    <li>
+                                        <code>@(scope)</code>
+                                    </li>
+                                }
+                            </ul>
+                        </text>
+                    }
+                    else
+                    {
+                        <text>
+                            Generate a new token with the <code>@(options.TokenScopes.FirstOrDefault() ?? "public_repo")</code> scope and enter it into the form below.
+                        </text>
+                    }
+                </p>
+                <form class="row g-2 align-items-center" @onsubmit="(_) => { }">
+                    <div class="col-12">
+                        <label class="visually-hidden" for="github-token">
+                            @(options.GitHubInstance) Token
+                        </label>
+                        <div class="input-group">
+                            <div class="input-group-text">
+                                <Icon Name="@(Icons.GitHub)" />
+                                &nbsp;
+                                <Icon Name="@(Icons.Key)" />
+                            </div>
+                            <input autocomplete="off"
+                                   class="form-control @(GitHubService.InvalidToken ? "is-invalid" : string.Empty)"
+                                   id="token-input"
+                                   placeholder="ghp_repo-scoped-token"
+                                   required
+                                   title="Invalid @(options.GitHubInstance) token."
+                                   type="password"
+                                   data-1p-ignore
+                                   data-lpignore="true"
+                                   @oninput="TokenChanged"
+                                   @onkeydown="@TrySignInAsync"
+                                   @ref="_tokenInput">
+                        </div>
+                    </div>
+                    <div class="col-12 d-grid gap-2 d-xl-inline mx-auto">
+                        <a class="btn btn-github col-xl-2"
+                            href="@(_generateTokenUrl)"
+                            role="button"
+                            target="_blank"
+                            rel="noopener"
+                            data-bs-toggle="tooltip"
+                            data-bs-title="The @(options.GitHubInstance) access token must have at least the public_repo scope">
+                            Generate
+                            <Icon Name="@(Icons.Plus)" />
+                            <Icon Name="@(Icons.GitHub)" />
+                            <Icon Name="@(Icons.Key)" />
+                        </a>
+                        <button class="btn btn-primary col-xl-2"
+                                disabled="@(!HasToken)"
+                                id="save-token"
+                                type="button"
+                                @onclick="SignInAsync">
+                            Save
+                            <Icon Name="@(Icons.FloppyDisk)" />
+                            <Icon Name="@(Icons.GitHub)" />
+                            <Icon Name="@(Icons.Key)" />
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (GitHubService.InvalidToken)
+{
+    <div class="row justify-content-center mx-4" id="invalid-token">
+        <div class="alert alert-warning col-12 col-md-8" role="alert">
+            <h5 class="fw-bolder">
+                <span class="fa-stack">
+                    <i class="fa-solid fa-key fa-stack-1x"></i>
+                    <i class="fa-solid fa-ban fa-stack-1x text-danger"></i>
+                </span>
+                Invalid @(options.GitHubInstance) token
+            </h5>
+            <p>
+                Possible causes:
+                <ul class="fw-light">
+                    <li>
+                        @if (options.IsGitHubEnterprise)
+                        {
+                            <text>The token is for GitHub.com not GitHub Enterprise</text>
+                        }
+                        else
+                        {
+                            <text>The token is not for GitHub.com</text>
+                        }
+                    </li>
+                    <li>The token has been deleted or regenerated</li>
+                    <li>The token has expired</li>
+                    <li>The token does not have the correct scopes</li>
+                </ul>
+            </p>
+        </div>
+    </div>
+}
+
+@code {
+    private string? _generateTokenUrl;
+    private string? _token;
+    private ElementReference _tokenInput;
+
+    private bool HasToken => !string.IsNullOrEmpty(_token);
+
+    protected override void OnInitialized()
+    {
+        var options = Options.Value;
+
+        var description = Uri.EscapeDataString($"{options.RepositoryOwner} benchmarks");
+        var scopes = Uri.EscapeDataString(string.Join(',', options.TokenScopes));
+
+        var builder = new UriBuilder(Options.Value.GitHubServerUrl)
+        {
+            Path = "settings/tokens/new",
+            Query = $"description={description}&scopes={scopes}",
+        };
+
+        _generateTokenUrl = builder.Uri.ToString();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await _tokenInput.FocusAsync();
+    }
+
+    private void TokenChanged(ChangeEventArgs args)
+    {
+        if (args.Value is string token)
+        {
+            _token = token;
+        }
+    }
+
+    private async Task TrySignInAsync(KeyboardEventArgs args)
+    {
+        if (args.Code == "Enter" || args.Code == "NumpadEnter")
+        {
+            await SignInAsync();
+        }
+    }
+
+    private async Task SignInAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(_token))
+        {
+            if (!await GitHubService.SignInAsync(_token))
+            {
+                StateHasChanged();
+            }
+            else
+            {
+                Navigation.NavigateTo(Routes.Home);
+            }
+        }
+    }
+}

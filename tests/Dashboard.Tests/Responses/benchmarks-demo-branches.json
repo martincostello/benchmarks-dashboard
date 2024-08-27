@@ -1,0 +1,23 @@
+[
+  {
+    "name": "dotnet-nightly",
+    "commit": {
+      "sha": "ae93dd040cc0fbf5ff84ce461ef4b99970e396f2",
+      "url": "https://api.github.com/repos/martincostello/benchmarks-demo/commits/ae93dd040cc0fbf5ff84ce461ef4b99970e396f2"
+    }
+  },
+  {
+    "name": "dotnet-vnext",
+    "commit": {
+      "sha": "8123f8be3927f667b4930d3b06947ea901216a33",
+      "url": "https://api.github.com/repos/martincostello/benchmarks-demo/commits/8123f8be3927f667b4930d3b06947ea901216a33"
+    }
+  },
+  {
+    "name": "main",
+    "commit": {
+      "sha": "a4ba507a6e549244ec5142e47d65ac7f6abebc32",
+      "url": "https://api.github.com/repos/martincostello/benchmarks-demo/commits/a4ba507a6e549244ec5142e47d65ac7f6abebc32"
+    }
+  }
+]

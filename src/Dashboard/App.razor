@@ -1,0 +1,13 @@
+<Router AppAssembly="@(typeof(App).Assembly)">
+    <Found Context="routeData">
+        <RouteView RouteData="@(routeData)" DefaultLayout="@(typeof(MainLayout))" />
+    </Found>
+    <NotFound>
+        <PageTitle>Not found - @(Options.Value.BrandName)</PageTitle>
+        <LayoutView Layout="@(typeof(MainLayout))">
+            <div class="alert alert-info" role="alert">
+                Sorry, there's nothing for you here.
+            </div>
+        </LayoutView>
+    </NotFound>
+</Router>
