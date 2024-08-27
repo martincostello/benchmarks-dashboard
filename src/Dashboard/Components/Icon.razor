@@ -1,4 +1,4 @@
-﻿<span class="@(Name)" aria-hidden="true"></span>
+<span class="@(Name)" aria-hidden="true"></span>
 
 @code {
     /// <summary>
@@ -6,4 +6,6 @@
     /// </summary>
     [Parameter]
     public required string Name { get; init; }
+
+    protected override bool ShouldRender() => false;
 }
