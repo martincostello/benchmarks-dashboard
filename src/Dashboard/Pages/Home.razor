@@ -7,9 +7,8 @@
     <form>
         <div class="g-3 row row-cols-6">
             <div class="input-group col">
-                <label class="input-group-text col-auto col-xl-1" for="repository">
-                    Repository &nbsp;
-                    <Icon Name="@(Icons.Code)" />
+                <label class="input-group-text col-auto" for="repository" title="Repository" aria-label="Repository">
+                    <Icon Name="@(Icons.Code)" FixedWidth="true" />
                 </label>
                 <select class="form-select" id="repository" name="repo" disabled="@(DisableRepositories)" @onchange="RepositoryChangedAsync">
                     @if (GitHubService.Repositories.Count < 1)
@@ -27,9 +26,8 @@
                 </select>
             </div>
             <div class="input-group col">
-                <label class="input-group-text col-auto col-xl-1" for="branch">
-                    Branch &nbsp;
-                    <Icon Name="@(Icons.CodeBranch)" />
+                <label class="input-group-text col-auto" for="branch" title="Branch" aria-label="Branch">
+                    <Icon Name="@(Icons.CodeBranch)" FixedWidth="true" />
                 </label>
                 <select class="form-select" id="branch" name="branch" disabled="@(DisableBranches)" @onchange="BranchChangedAsync">
                     @if (GitHubService.Branches.Count < 1)
