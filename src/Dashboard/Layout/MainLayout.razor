@@ -41,7 +41,9 @@
                     </a>
                 </text>
             }
-            <span class="ps-1" title="@(GitMetadata.Timestamp.ToString("u", CultureInfo.InvariantCulture))">@(GitMetadata.Timestamp.Humanize())</span>
+            @*
+            HACK Workaround for https://github.com/dotnet/sdk/issues/43033 and https://github.com/dotnet/aspnetcore/issues/57512
+            <span class="ps-1" title="@(GitMetadata.Timestamp.ToString("u", CultureInfo.InvariantCulture))">@(GitMetadata.Timestamp.Humanize())</span>*@
         </div>
     </div>
 </footer>
