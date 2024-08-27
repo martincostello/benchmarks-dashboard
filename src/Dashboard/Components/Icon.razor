@@ -1,4 +1,25 @@
-<span class="@(Name)" aria-hidden="true"></span>
+@{
+    List<string> classes = [Name];
+
+    if (FixedWidth)
+    {
+        classes.Add("fa-fw");
+    }
+
+    if (Stacked)
+    {
+        classes.Add("fa-stack-1x");
+    }
+
+    if (Color is { Length: > 0 })
+    {
+        classes.Add($"text-{Color}");
+    }
+
+    string classList = string.Join(' ', classes);
+}
+
+<span class="@(classList)" aria-hidden="true"></span>
 
 @code {
     /// <summary>
@@ -6,6 +27,24 @@
     /// </summary>
     [Parameter]
     public required string Name { get; init; }
+
+    /// <summary>
+    /// Gets the optional color to use.
+    /// </summary>
+    [Parameter]
+    public string? Color { get; init; }
+
+    /// <summary>
+    /// Gets whether the icon is fixed-width.
+    /// </summary>
+    [Parameter]
+    public bool FixedWidth { get; init; }
+
+    /// <summary>
+    /// Gets whether the icon is stacked.
+    /// </summary>
+    [Parameter]
+    public bool Stacked { get; init; }
 
     protected override bool ShouldRender() => false;
 }

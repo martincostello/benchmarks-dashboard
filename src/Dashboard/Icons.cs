@@ -9,9 +9,14 @@ namespace MartinCostello.Benchmarks;
 public static class Icons
 {
     /// <summary>
-    /// Gets the <c>cloud-arrow-down</c> icon.
+    /// Gets the <c>ban</c> icon.
     /// </summary>
-    public static string CloudArrowDown => "fa-solid fa-cloud-arrow-down";
+    public static string Ban => "fa-solid fa-ban";
+
+    /// <summary>
+    /// Gets the <c>clock</c> icon.
+    /// </summary>
+    public static string Clock => "fa-regular fa-clock";
 
     /// <summary>
     /// Gets the <c>code</c> icon.
@@ -22,6 +27,11 @@ public static class Icons
     /// Gets the <c>code-branch</c> icon.
     /// </summary>
     public static string CodeBranch => "fa-solid fa-code-branch";
+
+    /// <summary>
+    /// Gets the <c>code-commit</c> icon.
+    /// </summary>
+    public static string CodeCommit => "fa-solid fa-code-commit";
 
     /// <summary>
     /// Gets the <c>file-arrow-down</c> icon.
