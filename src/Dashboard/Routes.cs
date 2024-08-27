@@ -11,10 +11,10 @@ public static class Routes
     /// <summary>
     /// Gets the URL of the home page.
     /// </summary>
-    public static string Home { get; } = "/";
+    public static string Home { get; } = string.Empty;
 
     /// <summary>
     /// Gets the URL of the token page.
     /// </summary>
-    public static string Token { get; } = "/token";
+    public static string Token { get; } = "token";
 }
