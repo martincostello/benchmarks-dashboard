@@ -2,6 +2,7 @@
   <PropertyGroup>
     <RootNamespace>MartinCostello.Benchmarks</RootNamespace>
     <TargetFramework>net8.0</TargetFramework>
+    <!-- Enable AoT/full trimming when https://github.com/dotnet/aspnetcore/issues/51598 is resolved -->
     <!--
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>full</TrimMode>
