@@ -52,4 +52,6 @@
     /// </summary>
     [Parameter]
     public SpinnerType SpinnerType { get; init; }
+
+    protected override bool ShouldRender() => false;
 }

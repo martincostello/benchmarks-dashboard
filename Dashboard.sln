@@ -64,7 +64,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\code-scan.yml = .github\workflows\code-scan.yml
 		.github\workflows\dependency-review.yml = .github\workflows\dependency-review.yml
 		.github\workflows\lint.yml = .github\workflows\lint.yml
-		.github\workflows\sync-pages.yml = .github\workflows\sync-pages.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashboard", "src\Dashboard\Dashboard.csproj", "{D6DC83E5-6821-4059-921B-E72CD5A1C787}"
