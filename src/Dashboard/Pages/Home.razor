@@ -62,7 +62,7 @@
     {
         <div class="header-item">
             <strong class="header-label">
-                <span class="fa-regular fa-clock fa-fw" aria-hidden="true"></span>
+                <Icon Name="@(Icons.Clock)" FixedWidth="true" />
                 Last Updated:
             </strong>
             @if (GitHubService.Benchmarks.LastUpdated is { } timestamp && !ShowLoaders)
@@ -78,7 +78,7 @@
         </div>
         <div class="header-item">
             <strong class="header-label">
-                <span class="fa-brands fa-github fa-fw" aria-hidden="true"></span>
+                <Icon Name="@(Icons.GitHub)" FixedWidth="true" />
                 Repository:
             </strong>
             @if (GitHubService.CurrentRepository is null || ShowLoaders)
@@ -94,7 +94,7 @@
         </div>
         <div class="header-item">
             <strong class="header-label">
-                <span class="fa-solid fa-code-branch fa-fw" aria-hidden="true"></span>
+                <Icon Name="@(Icons.CodeBranch)" FixedWidth="true" />
                 Branch:
             </strong>
             @if (GitHubService.CurrentBranch is null || ShowLoaders)
@@ -110,7 +110,7 @@
         </div>
         <div class="header-item">
             <strong class="header-label">
-                <span class="fa-solid fa-code-commit fa-fw" aria-hidden="true"></span>
+                <Icon Name="@(Icons.CodeCommit)" FixedWidth="true" />
                 Commit:
             </strong>
             @if (GitHubService.CurrentCommit is null || ShowLoaders)
