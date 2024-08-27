@@ -70,6 +70,6 @@ members of the project's leadership.
 This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 1.4,
 available at [https://contributor-covenant.org/version/1/4][version]
 
-[issue]: https://github.com/martincostello/benchmarks/issues
+[issue]: https://github.com/martincostello/benchmarks-dashboard/issues
 [homepage]: https://contributor-covenant.org
 [version]: https://contributor-covenant.org/version/1/4/

@@ -6,5 +6,5 @@ To privately report a security vulnerability, please create a security advisory 
 
 Further details can be found in the [GitHub documentation][reporting].
 
-[advisories]: https://github.com/martincostello/benchmarks/security/advisories
+[advisories]: https://github.com/martincostello/benchmarks-dashboard/security/advisories
 [reporting]: https://docs.github.com/code-security/security-advisories/guidance-on-reporting-and-writing/privately-reporting-a-security-vulnerability

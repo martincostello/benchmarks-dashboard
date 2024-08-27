@@ -2,7 +2,7 @@ name: build
 
 on:
   push:
-    branches: [ gh-pages ]
+    branches: [ main ]
     paths-ignore:
       - '**/*.gitattributes'
       - '**/*.gitignore'
@@ -12,7 +12,6 @@ on:
       - main
       - dotnet-vnext
       - dotnet-nightly
-      - gh-pages
   workflow_dispatch:
 
 permissions: {}
@@ -72,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event.repository.fork == false &&
-      github.ref_name == 'gh-pages'
+      github.ref_name == github.event.repository.default_branch
 
     concurrency:
       group: pages

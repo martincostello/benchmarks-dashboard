@@ -12,4 +12,4 @@ These steps are a guideline for contributing and do not necessarily need to be f
 1. After your Pull Request is created it will build against the repository's continuous integrations.
 1. Once the Pull Request has been reviewed by the project's [contributors][contributors] and the status checks pass your Pull Request will be merged back to the `main` branch, assuming that the changes are deemed appropriate.
 
-[contributors]: https://github.com/martincostello/benchmarks/graphs/contributors
+[contributors]: https://github.com/martincostello/benchmarks-dashboard/graphs/contributors
