@@ -14,6 +14,11 @@ public static class Icons
     public static string Ban => "fa-solid fa-ban";
 
     /// <summary>
+    /// Gets the <c>chart-line</c> icon.
+    /// </summary>
+    public static string ChartLine => "fa-solid fa-chart-line";
+
+    /// <summary>
     /// Gets the <c>clock</c> icon.
     /// </summary>
     public static string Clock => "fa-regular fa-clock";
@@ -32,6 +37,11 @@ public static class Icons
     /// Gets the <c>code-commit</c> icon.
     /// </summary>
     public static string CodeCommit => "fa-solid fa-code-commit";
+
+    /// <summary>
+    /// Gets the <c>database</c> icon.
+    /// </summary>
+    public static string Database => "fa-solid fa-database";
 
     /// <summary>
     /// Gets the <c>file-arrow-down</c> icon.

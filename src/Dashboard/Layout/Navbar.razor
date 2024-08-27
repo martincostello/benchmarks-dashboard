@@ -36,14 +36,29 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link"
-                       href="@(_repositoryUrl)"
+                       href="@(_dataRepoUrl)"
                        rel="noopener"
                        target="_blank"
-                       title="@(options.GitHubInstance)">
-                        @(options.GitHubInstance)
+                       title="Benchmarks data repository in @(options.GitHubInstance)">
+                        Benchmarks
+                        <Icon Name="@(Icons.Database)" />
                         <Icon Name="@(Icons.GitHub)" />
                     </a>
                 </li>
+                @if (!string.Equals(_dataRepoUrl, GitMetadata.RepositoryUrl, StringComparison.Ordinal))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           href="@(GitMetadata.RepositoryUrl)"
+                            rel="noopener"
+                            target="_blank"
+                            title="Benchmarks dashboard repository in @(options.GitHubInstance)">
+                            Dashboard
+                            <Icon Name="@(Icons.ChartLine)" />
+                            <Icon Name="@(Icons.GitHub)" />
+                        </a>
+                    </li>
+                }
             </ul>
             @{
                 var user = GitHubService.CurrentUser;
@@ -91,7 +106,7 @@
 </nav>
 
 @code {
-    private string? _repositoryUrl;
+    private string? _dataRepoUrl;
 
     public ValueTask DisposeAsync()
     {
@@ -108,7 +123,7 @@
             Path = $"{options.RepositoryOwner}/{options.RepositoryName}",
         };
 
-        _repositoryUrl = uriBuilder.Uri.ToString();
+        _dataRepoUrl = uriBuilder.Uri.ToString();
 
         if (GitHubService.HasToken)
         {

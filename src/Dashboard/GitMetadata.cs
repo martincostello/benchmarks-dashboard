@@ -28,7 +28,7 @@ public static class GitMetadata
     /// <summary>
     /// Gets the URL of the GitHub repository.
     /// </summary>
-    public static string RepositoryUrl { get; } = GetMetadataValue("RepositoryUrl", "https://github.com/martincostello/benchmarks-dashboard");
+    public static string RepositoryUrl { get; } = GetRepositoryUrl();
 
     /// <summary>
     /// Gets the date and time the application was built.
@@ -47,5 +47,18 @@ public static class GitMetadata
             .Where((p) => string.Equals(p.Key, name, StringComparison.Ordinal))
             .Select((p) => p.Value)
             .FirstOrDefault() ?? defaultValue;
+    }
+
+    private static string GetRepositoryUrl()
+    {
+        string repository = GetMetadataValue("RepositoryUrl", "https://github.com/martincostello/benchmarks-dashboard");
+
+        const string Suffix = ".git";
+        if (repository.EndsWith(Suffix, StringComparison.Ordinal))
+        {
+            repository = repository[..^Suffix.Length];
+        }
+
+        return repository;
     }
 }
