@@ -8,7 +8,7 @@
 <hr />
 @{
     string author = "Martin Costello";
-    string repository = GitMetadata.RepositoryUrl[..^4];
+    string repository = GitMetadata.RepositoryUrl;
     string branch = repository + "/tree/" + GitMetadata.Branch;
     string build = repository + "/actions/runs/" + GitMetadata.BuildId;
     string commit = repository + "/commit/" + GitMetadata.Commit;
