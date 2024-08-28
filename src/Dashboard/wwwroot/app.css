@@ -152,6 +152,10 @@ img.user-profile {
 }
 
 /* Custom CSS different from just vanilla Bootstrap 5 */
+a {
+  color: #0f7661;
+}
+
 .btn-github {
   background-color: black;
   border-color: white;
