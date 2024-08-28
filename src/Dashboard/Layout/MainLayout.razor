@@ -15,29 +15,35 @@
     string instance = Options.Value.GitHubInstance;
 }
 <footer>
-    <p>
-        &copy; @(author) @(DateTime.UtcNow.Year) |
-        Powered by <a rel="noopener" href="https://github.com/martincostello/benchmarkdotnet-results-publisher">benchmarkdotnet-results-publisher</a>
-        and @(System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription) |
-        Built from
-        <a href="@(commit)" title="View commit @(GitMetadata.Commit) on @(instance)" target="_blank" rel="noopener">
-            <code>@(GitMetadata.Commit[..7])</code>
-        </a>
-        on
-        <a href="@(branch)" title="View branch @(GitMetadata.Branch) on on @(instance)" target="_blank" rel="noopener">
-            <code>@(GitMetadata.Branch)</code>
-        </a>
-        @if (!string.IsNullOrWhiteSpace(GitMetadata.BuildId))
-        {
-            <text>
-                by
-                <a href="@(build)" title="View deployment on on @(instance)" target="_blank" rel="noopener">
-                    GitHub
-                </a>
-            </text>
-        }
-        <span class="ps-1" title="@(GitMetadata.Timestamp.ToString("u", CultureInfo.InvariantCulture))">@(GitMetadata.Timestamp.Humanize())</span>.
-    </p>
+    <div class="pb-3 row row-cols-auto justify-content-left">
+        <div class="col">
+            &copy; @(author) @(DateTime.UtcNow.Year)
+        </div>
+        <div class="col d-none d-lg-block">
+            Powered by <a rel="noopener" href="https://github.com/martincostello/benchmarkdotnet-results-publisher">benchmarkdotnet-results-publisher</a>
+            and @(System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription)
+        </div>
+        <div class="col d-none d-lg-block">
+            Built from
+            <a href="@(commit)" title="View commit @(GitMetadata.Commit) on @(instance)" target="_blank" rel="noopener">
+                <code>@(GitMetadata.Commit[..7])</code>
+            </a>
+            on
+            <a href="@(branch)" title="View branch @(GitMetadata.Branch) on on @(instance)" target="_blank" rel="noopener">
+                <code>@(GitMetadata.Branch)</code>
+            </a>
+            @if (!string.IsNullOrWhiteSpace(GitMetadata.BuildId))
+            {
+                <text>
+                    by
+                    <a href="@(build)" title="View deployment on on @(instance)" target="_blank" rel="noopener">
+                        GitHub
+                    </a>
+                </text>
+            }
+            <span class="ps-1" title="@(GitMetadata.Timestamp.ToString("u", CultureInfo.InvariantCulture))">@(GitMetadata.Timestamp.Humanize())</span>
+        </div>
+    </div>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
