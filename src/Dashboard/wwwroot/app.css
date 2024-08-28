@@ -24,6 +24,17 @@ header {
   margin-right: 1em;
 }
 
+@media (min-width: 576px) {
+  footer > div.row > div.col:not(:first-child) {
+    padding-left: 0rem;
+  }
+
+  footer > div.row > div.col:not(:last-child):after {
+    padding-left: calc(0.5 * var(--bs-body-font-size));
+    content: '|';
+  }
+}
+
 img.user-profile {
   max-height: 1.25em;
   max-width: 1.25em;
