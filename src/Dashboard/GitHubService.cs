@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Martin Costello, 2024. All rights reserved.
 // Licensed under the Apache 2.0 license. See the LICENSE file in the project root for full license information.
 
-using Blazored.LocalStorage;
 using MartinCostello.Benchmarks.Models;
 using Microsoft.Extensions.Options;
 
@@ -12,11 +11,9 @@ namespace MartinCostello.Benchmarks;
 /// </summary>
 public sealed class GitHubService(
     GitHubClient client,
-    ISyncLocalStorageService localStorage,
+    GitHubTokenStore tokenStore,
     IOptions<DashboardOptions> options)
 {
-    private const string TokenKey = "github-token";
-
     private readonly List<string> _branches = [];
     private readonly string[] _repositories = [.. options.Value.Repositories];
     private bool _invalidToken;
@@ -54,7 +51,7 @@ public sealed class GitHubService(
     /// <summary>
     /// Gets a value indicating whether has a GitHub token configured.
     /// </summary>
-    public bool HasToken => !string.IsNullOrEmpty(localStorage.GetItemAsString(TokenKey));
+    public bool HasToken => !string.IsNullOrEmpty(tokenStore.GetToken());
 
     /// <summary>
     /// Gets a value indicating whether the token is invalid.
@@ -190,7 +187,7 @@ public sealed class GitHubService(
     /// </returns>
     public async Task<bool> SignInAsync(string token, CancellationToken cancellationToken = default)
     {
-        localStorage.SetItemAsString(TokenKey, token);
+        await tokenStore.StoreTokenAsync(token, cancellationToken);
 
         if (await VerifyTokenAsync(cancellationToken))
         {
@@ -202,12 +199,15 @@ public sealed class GitHubService(
     }
 
     /// <summary>
-    /// Signs out the user.
-    /// </summary>"Task"/> representing the asynchronous operation to sign out.
+    /// Signs out the user as an asynchronous operation.
+    /// </summary>
+    /// <param name="cancellationToken">The optional <see cref="CancellationToken"/> to use.</param>
+    /// <returns>
+    /// A <see cref="Task"/> representing the asynchronous operation to sign out.
     /// </returns>
-    public void SignOut()
+    public async Task SignOutAsync(CancellationToken cancellationToken = default)
     {
-        localStorage.SetItemAsString(TokenKey, string.Empty);
+        await tokenStore.StoreTokenAsync(string.Empty, cancellationToken);
 
         CurrentUser = null;
         OnUserChanged?.Invoke(this, new(null));
@@ -232,7 +232,7 @@ public sealed class GitHubService(
         }
         catch (HttpRequestException)
         {
-            SignOut();
+            await SignOutAsync(cancellationToken);
             result = false;
         }
 
