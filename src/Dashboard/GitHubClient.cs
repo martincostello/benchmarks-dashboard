@@ -4,7 +4,6 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization.Metadata;
-using Blazored.LocalStorage;
 using MartinCostello.Benchmarks.Models;
 using Microsoft.Extensions.Options;
 
@@ -15,7 +14,7 @@ namespace MartinCostello.Benchmarks;
 /// </summary>
 public sealed class GitHubClient(
     HttpClient client,
-    ILocalStorageService localStorage,
+    GitHubTokenStore tokenStore,
     IOptions<DashboardOptions> options)
 {
     /// <summary>
@@ -121,15 +120,12 @@ public sealed class GitHubClient(
             cancellationToken);
     }
 
-    private async Task<string?> GetTokenAsync(CancellationToken cancellationToken)
-        => await localStorage.GetItemAsStringAsync("github-token", cancellationToken);
-
     private async Task SetHeadersAsync(HttpRequestHeaders headers, CancellationToken cancellationToken)
     {
         headers.Add("Accept", "application/vnd.github+json");
         headers.Add("X-GitHub-Api-Version", options.Value.GitHubApiVersion);
 
-        var token = await GetTokenAsync(cancellationToken);
+        var token = await tokenStore.GetTokenAsync(cancellationToken);
 
         if (!string.IsNullOrEmpty(token))
         {

@@ -79,7 +79,7 @@
                                 id="sign-out"
                                 title="Sign out"
                                 type="button"
-                                @onclick="SignOut">
+                                @onclick="SignOutAsync">
                             Sign out
                             <Icon Name="@(Icons.RightFromBracket)" />
                         </button>
@@ -136,9 +136,9 @@
     private void OnUserChanged(object? sender, GitHubUserChangedEventArgs args)
         => StateHasChanged();
 
-    private void SignOut()
+    private async Task SignOutAsync()
     {
-        GitHubService.SignOut();
+        await GitHubService.SignOutAsync();
 
         var uri = Options.Value.IsGitHubEnterprise ? Routes.Token : Routes.Home;
         Navigation.NavigateTo(uri);

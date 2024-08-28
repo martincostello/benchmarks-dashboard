@@ -21,6 +21,7 @@ builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddScoped<GitHubClient>();
 builder.Services.AddScoped<GitHubService>();
+builder.Services.AddScoped<GitHubTokenStore>();
 
 await builder.Build().RunAsync();
 
