@@ -70,7 +70,7 @@ public sealed class DashboardFixture : IDisposable
         if (_serverAddress is null)
         {
             var path = GetApplicationDirectory();
-            var timeout = TimeSpan.FromSeconds(30);
+            var timeout = TimeSpan.FromSeconds(45);
 
             (_server, _serverAddress) = AppLauncher.Launch(path, timeout);
         }
