@@ -10,6 +10,8 @@ namespace MartinCostello.Benchmarks;
 [ExcludeFromCodeCoverage]
 [JsonSerializable(typeof(BenchmarkResults))]
 [JsonSerializable(typeof(IList<GitHubBranch>))]
+[JsonSerializable(typeof(GitHubAccessToken))]
+[JsonSerializable(typeof(GitHubDeviceCode))]
 [JsonSerializable(typeof(GitHubRepository))]
 [JsonSerializable(typeof(GitHubUser))]
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase, WriteIndented = true)]

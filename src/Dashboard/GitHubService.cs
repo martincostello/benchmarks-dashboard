@@ -115,6 +115,29 @@ public sealed class GitHubService(
     }
 
     /// <summary>
+    /// Gets the URL for the connected application.
+    /// </summary>
+    /// <returns>
+    /// The URL for the connected application.
+    /// </returns>
+    public string ConnectionUrl()
+    {
+        if (CurrentUser is null)
+        {
+            return "#";
+        }
+
+        var current = options.Value;
+
+        var builder = new UriBuilder(current.GitHubServerUrl)
+        {
+            Path = $"settings/connections/applications/{current.GitHubClientId}",
+        };
+
+        return builder.Uri.ToString();
+    }
+
+    /// <summary>
     /// Loads the benchmarks for the specified branch as an asynchronous operation.
     /// </summary>
     /// <param name="branch">The branch to load the benchmarks for.</param>
