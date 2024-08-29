@@ -85,9 +85,9 @@ internal static class AppLauncher
 
         void OnErrorDataReceived(object sender, DataReceivedEventArgs eventArgs)
         {
-            if (!string.IsNullOrEmpty(eventArgs.Data))
+            if (eventArgs.Data is { Length: > 0 } data)
             {
-                completionSource.TrySetException(new InvalidOperationException(eventArgs.Data));
+                completionSource.TrySetException(new InvalidOperationException(data));
                 errorEncountered = true;
             }
         }
@@ -98,18 +98,15 @@ internal static class AppLauncher
             {
                 if (!errorEncountered)
                 {
-                    completionSource.TrySetException(new InvalidOperationException("Expected output has not been received from the application."));
+                    _ = completionSource.TrySetException(new InvalidOperationException("Expected output has not been received from the application."));
                 }
-
-                return;
             }
-
-            if (Regex.IsMatch(eventArgs.Data, @"^\s*Application started\. Press Ctrl\+C to shut down\.$", RegexOptions.None, TimeSpan.FromSeconds(10)))
+            else if (Regex.IsMatch(eventArgs.Data, @"^\s*Application started\. Press Ctrl\+C to shut down\.$", RegexOptions.None, TimeSpan.FromSeconds(10)))
             {
                 process.OutputDataReceived -= OnOutputDataReceived;
                 process.ErrorDataReceived -= OnErrorDataReceived;
 
-                completionSource.SetResult();
+                _ = completionSource.TrySetResult();
             }
         }
     }
