@@ -36,12 +36,14 @@
                     }
                     else
                     {
+                        string? selectedBranch =
+                            Branch ??
+                            GitHubService.CurrentBranch ??
+                            GitHubService.CurrentRepository?.DefaultBranch;
+
                         @foreach (var branch in GitHubService.Branches)
                         {
-                            var selected =
-                                Branch is not null && branch == Branch ||
-                                Branch is null && branch == GitHubService.CurrentRepository?.DefaultBranch;
-
+                            var selected = branch == selectedBranch;
                             <option value="@(branch)" selected="@(selected)">@(branch)</option>
                         }
                     }

@@ -171,8 +171,17 @@ public sealed class GitHubService(
 
         if (_branches?.Count > 0)
         {
-            CurrentBranch = _branches[0];
+            if (CurrentBranch is not { Length: > 0 } ||
+                !_branches.Contains(CurrentBranch, StringComparer.Ordinal))
+            {
+                CurrentBranch = _branches[0];
+            }
+
             await LoadBenchmarksAsync(CurrentBranch);
+        }
+        else
+        {
+            CurrentBranch = null;
         }
     }
 
