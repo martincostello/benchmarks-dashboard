@@ -1,5 +1,8 @@
 @page "/token"
 
+@inject GitHubDeviceTokenService TokenService
+@inject IJSRuntime JS
+
 @{
     var options = Options.Value;
     var tokenRequired = options.IsGitHubEnterprise;
@@ -29,171 +32,134 @@
                     }
                 </p>
                 <p class="card-text">
-                    @if (options.TokenScopes.Count > 1)
+                    @if (_deviceCode?.UserCode is { Length: > 0 } code)
                     {
-                        <text>
-                            Generate a new token with the following scopes and enter it into the form below:
-                            <ul>
-                                @foreach (var scope in options.TokenScopes)
-                                {
-                                    <li>
-                                        <code>@(scope)</code>
-                                    </li>
-                                }
-                            </ul>
-                        </text>
+                        <form>
+                            <div class="mb-3">
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text" id="inputGroup-sizing-default">Code</span>
+                                    <input class="form-control font-monospace"
+                                           id="user-code"
+                                           label="The @(options.GitHubInstance) verification code"
+                                           readonly
+                                           type="text"
+                                           value="@(code)"
+                                           aria-describedby="user-code-help">
+                                    <button class="btn btn-lg btn-secondary copy-button"
+                                            data-clipboard-target="#user-code"
+                                            title="Copy to clipboard"
+                                            aria-label="Copy verification code to clipboard">
+                                        <span class="far fa-clipboard"></span>
+                                    </button>
+                                </div>
+                                <div class="form-text" id="user-code-help">
+                                    Use this code to allow @(options.BrandName) to generate an access token.
+                                </div>
+                            </div>
+                            @* TODO Add some sort of "please wait" message *@
+                            <div class="mb-3">
+                                <div class="d-grid gap-2">
+                                    <a class="btn btn-lg btn-github @(_authorizing ? "disabled" : string.Empty)"
+                                       href="@(_deviceCode?.VerificationUrl ?? "#")"
+                                       role="button"
+                                       target="_blank"
+                                       rel="noopener"
+                                       data-bs-toggle="tooltip"
+                                       data-bs-title="Authorize @(options.BrandName) to access your @(options.GitHubInstance) account"
+                                       @onclick="AuthorizeAsync">
+                                        Authorize
+                                        <Icon Name="@(Icons.Check)" />
+                                        <Icon Name="@(Icons.GitHub)" />
+                                        <Icon Name="@(Icons.Key)" />
+                                        @if (_authorizing)
+                                        {
+                                            <span class="ps-1">
+                                                <Spinner SpinnerType="@(SpinnerType.Border)" LoadingText="Authorizing..." />
+                                            </span>
+                                        }
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
                     }
                     else
                     {
-                        <text>
-                            Generate a new token with the <code>@(options.TokenScopes.FirstOrDefault() ?? "public_repo")</code> scope and enter it into the form below.
-                        </text>
+                        <div class="d-flex justify-content-center">
+                            <Spinner SpinnerType="@(SpinnerType.Border)" Large="true" LoadingText="Generating code..." />
+                        </div>
                     }
                 </p>
-                <form class="row g-2 align-items-center" @onsubmit="(_) => { }">
-                    <div class="col-12">
-                        <label class="visually-hidden" for="github-token">
-                            @(options.GitHubInstance) Token
-                        </label>
-                        <div class="input-group">
-                            <div class="input-group-text">
-                                <Icon Name="@(Icons.GitHub)" />
-                                &nbsp;
-                                <Icon Name="@(Icons.Key)" />
-                            </div>
-                            <input autocomplete="off"
-                                   class="form-control @(GitHubService.InvalidToken ? "is-invalid" : string.Empty)"
-                                   id="token-input"
-                                   placeholder="ghp_repo-scoped-token"
-                                   required
-                                   title="Invalid @(options.GitHubInstance) token."
-                                   type="password"
-                                   data-1p-ignore
-                                   data-lpignore="true"
-                                   @oninput="TokenChanged"
-                                   @onkeydown="@TrySignInAsync"
-                                   @ref="_tokenInput">
+                @if (_deviceCode is not null && _authorizationFailed)
+                {
+                    @* TODO Make this look better *@
+                    <p class="card-text" id="authorization-failed">
+                        <div class="alert alert-warning" role="alert">
+                            <h5 class="fw-bolder">
+                                <span class="fa-stack">
+                                    <Icon Name="@(Icons.Key)" Stacked="true" />
+                                    <Icon Name="@(Icons.Ban)" Stacked="true" Color="danger" />
+                                </span>
+                                @(options.GitHubInstance) authorization failed
+                            </h5>
+                            <p>
+                                Possible causes:
+                                <ul class="fw-light">
+                                    <li>You did not enter the code above within @(TimeSpan.FromSeconds(_deviceCode.ExpiresInSeconds).Minutes) minutes</li>
+                                    <li>You cancelled the authorization process</li>
+                                </ul>
+                            </p>
+                            <p>
+                                <button class="btn btn-lg btn-primary" title="Refresh the code">
+                                    Try again
+                                    @* TODO Refresh the code and reset the UI *@
+                                </button>
+                            </p>
                         </div>
-                    </div>
-                    <div class="col-12 d-grid gap-2 d-xl-inline mx-auto">
-                        <a class="btn btn-github col-xl-2"
-                            href="@(_generateTokenUrl)"
-                            role="button"
-                            target="_blank"
-                            rel="noopener"
-                            data-bs-toggle="tooltip"
-                            data-bs-title="The @(options.GitHubInstance) access token must have at least the public_repo scope">
-                            Generate
-                            <Icon Name="@(Icons.Plus)" />
-                            <Icon Name="@(Icons.GitHub)" />
-                            <Icon Name="@(Icons.Key)" />
-                        </a>
-                        <button class="btn btn-primary col-xl-2"
-                                disabled="@(!HasToken)"
-                                id="save-token"
-                                type="button"
-                                @onclick="SignInAsync">
-                            Save
-                            <Icon Name="@(Icons.FloppyDisk)" />
-                            <Icon Name="@(Icons.GitHub)" />
-                            <Icon Name="@(Icons.Key)" />
-                        </button>
-                    </div>
-                </form>
+                    </p>
+                }
             </div>
         </div>
     </div>
 </div>
 
-@if (GitHubService.InvalidToken)
-{
-    <div class="row justify-content-center mx-4" id="invalid-token">
-        <div class="alert alert-warning col-12 col-md-8" role="alert">
-            <h5 class="fw-bolder">
-                <span class="fa-stack">
-                    <Icon Name="@(Icons.Key)" Stacked="true" />
-                    <Icon Name="@(Icons.Ban)" Stacked="true" Color="danger" />
-                </span>
-                Invalid @(options.GitHubInstance) token
-            </h5>
-            <p>
-                Possible causes:
-                <ul class="fw-light">
-                    <li>
-                        @if (options.IsGitHubEnterprise)
-                        {
-                            <text>The token is for GitHub.com not GitHub Enterprise</text>
-                        }
-                        else
-                        {
-                            <text>The token is not for GitHub.com</text>
-                        }
-                    </li>
-                    <li>The token has been deleted or regenerated</li>
-                    <li>The token has expired</li>
-                    <li>The token does not have the correct scopes</li>
-                </ul>
-            </p>
-        </div>
-    </div>
-}
-
 @code {
-    private string? _generateTokenUrl;
-    private string? _token;
-    private ElementReference _tokenInput;
+    private bool _authorizing;
+    private bool _authorizationFailed;
+    private GitHubDeviceCode? _deviceCode;
 
-    private bool HasToken => !string.IsNullOrEmpty(_token);
-
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        var options = Options.Value;
-
-        var description = Uri.EscapeDataString($"{options.RepositoryOwner} benchmarks");
-        var scopes = Uri.EscapeDataString(string.Join(',', options.TokenScopes));
-
-        var builder = new UriBuilder(Options.Value.GitHubServerUrl)
-        {
-            Path = "settings/tokens/new",
-            Query = $"description={description}&scopes={scopes}",
-        };
-
-        _generateTokenUrl = builder.Uri.ToString();
+        _deviceCode = await TokenService.GetDeviceCodeAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await _tokenInput.FocusAsync();
-    }
-
-    private void TokenChanged(ChangeEventArgs args)
-    {
-        if (args.Value is string token)
+        if (_deviceCode is not null)
         {
-            _token = token;
+            await JS.InvokeVoidAsync("configureClipboard");
         }
     }
 
-    private async Task TrySignInAsync(KeyboardEventArgs args)
+    private async Task AuthorizeAsync()
     {
-        if (args.Code == "Enter" || args.Code == "NumpadEnter")
+        if (_deviceCode is null)
         {
-            await SignInAsync();
+            return;
         }
-    }
 
-    private async Task SignInAsync()
-    {
-        if (!string.IsNullOrWhiteSpace(_token))
+        _authorizing = true;
+
+        StateHasChanged();
+
+        if (await TokenService.WaitForAccessTokenAsync(_deviceCode))
         {
-            if (!await GitHubService.SignInAsync(_token))
-            {
-                StateHasChanged();
-            }
-            else
-            {
-                Navigation.NavigateTo(Routes.Home);
-            }
+            // TODO Fix the navbar not updating the authentication state
+            Navigation.NavigateTo(Routes.Home);
         }
+
+        StateHasChanged();
+
+        _authorizing = false;
+        _authorizationFailed = true;
     }
 }

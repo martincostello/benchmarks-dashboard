@@ -164,6 +164,20 @@ a {
   text-decoration-color: white;
 }
 
+.btn-github.disabled {
+  background-color: color-mix(in srgb, black 60%, transparent);
+  border-color: color-mix(in srgb, black, transparent);
+  color: white;
+  text-decoration-color: white;
+}
+
+.btn-github:active {
+  background-color: color-mix(in srgb, black 90%, transparent) !important;
+  border-color: white !important;
+  color: white !important;
+  text-decoration-color: white !important;
+}
+
 .btn-github:hover {
   background-color: color-mix(in srgb, black 80%, transparent);
   border-color: color-mix(in srgb, black, transparent);
