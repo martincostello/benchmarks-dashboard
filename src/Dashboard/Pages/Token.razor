@@ -43,6 +43,7 @@
                                 <input class="form-control font-monospace"
                                        id="user-code"
                                        label="The @(options.GitHubInstance) verification code"
+                                       disabled="@(_authorizationFailed)"
                                        readonly
                                        type="text"
                                        value="@(code)"
@@ -171,9 +172,9 @@
 
         StateHasChanged();
 
-        if (await TokenService.WaitForAccessTokenAsync(_deviceCode))
+        if (await TokenService.WaitForAccessTokenAsync(_deviceCode) is { Length: > 0 } token &&
+            await GitHubService.SignInAsync(token))
         {
-            // TODO Fix the navbar not updating the authentication state
             Navigation.NavigateTo(Routes.Home);
         }
 

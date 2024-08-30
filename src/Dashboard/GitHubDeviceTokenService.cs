@@ -11,12 +11,10 @@ namespace MartinCostello.Benchmarks;
 /// A class representing a service to acquire a GitHub device token. This class cannot be inherited.
 /// </summary>
 /// <param name="client">The GitHub client to use.</param>
-/// <param name="tokenStore">The GitHub token store to use.</param>
 /// <param name="timeProvider">The <see cref="TimeProvider"/> to use.</param>
 /// <param name="logger">The logger to use.</param>
 public sealed class GitHubDeviceTokenService(
     GitHubClient client,
-    GitHubTokenStore tokenStore,
     TimeProvider timeProvider,
     ILogger<GitHubDeviceTokenService> logger)
 {
@@ -38,11 +36,9 @@ public sealed class GitHubDeviceTokenService(
     /// <param name="deviceCode">The device code to use to acquire the access token.</param>
     /// <param name="cancellationToken">The optional <see cref="CancellationToken"/> to use.</param>
     /// <returns>
-    /// A <see cref="Task"/> representing the asynchronous operation to get an access token
-    /// which returns <see langword="true"/> if the access token was acquired successfully or
-    /// <see langword="false"/> if an access token could not be acquired.
+    /// A <see cref="Task"/> representing the asynchronous operation to get an access token.
     /// </returns>
-    public async Task<bool> WaitForAccessTokenAsync(GitHubDeviceCode deviceCode, CancellationToken cancellationToken = default)
+    public async Task<string?> WaitForAccessTokenAsync(GitHubDeviceCode deviceCode, CancellationToken cancellationToken = default)
     {
         var delay = TimeSpan.FromSeconds(deviceCode.RefreshIntervalInSeconds + 1);
         var expiry = timeProvider.GetUtcNow().AddSeconds(deviceCode.ExpiresInSeconds);
@@ -53,23 +49,22 @@ public sealed class GitHubDeviceTokenService(
 
             if (result.AccessToken is { Length: > 0 } token)
             {
-                await tokenStore.StoreTokenAsync(token, cancellationToken);
-                return true;
+                return token;
             }
 
             switch (result.Error)
             {
                 case "access_denied":
                     logger.LogInformation("The user cancelled the authorization process.");
-                    return false;
+                    return null;
 
                 case "device_flow_disabled":
                     logger.LogWarning("The configured GitHub app has not enabled device flow.");
-                    return false;
+                    return null;
 
                 case "expired_token":
                     logger.LogInformation("The device token has expired.");
-                    return false;
+                    return null;
 
                 default:
                     break;
@@ -86,6 +81,6 @@ public sealed class GitHubDeviceTokenService(
             await Task.Delay(delay, cancellationToken);
         }
 
-        return false;
+        return null;
     }
 }
