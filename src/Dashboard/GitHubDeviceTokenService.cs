@@ -5,15 +5,13 @@ using MartinCostello.Benchmarks.Models;
 
 namespace MartinCostello.Benchmarks;
 
-#pragma warning disable CA1848
-
 /// <summary>
 /// A class representing a service to acquire a GitHub device token. This class cannot be inherited.
 /// </summary>
 /// <param name="client">The GitHub client to use.</param>
 /// <param name="timeProvider">The <see cref="TimeProvider"/> to use.</param>
 /// <param name="logger">The logger to use.</param>
-public sealed class GitHubDeviceTokenService(
+public sealed partial class GitHubDeviceTokenService(
     GitHubClient client,
     TimeProvider timeProvider,
     ILogger<GitHubDeviceTokenService> logger)
@@ -55,15 +53,15 @@ public sealed class GitHubDeviceTokenService(
             switch (result.Error)
             {
                 case "access_denied":
-                    logger.LogInformation("The user cancelled the authorization process.");
+                    Log.AccessDenied(logger);
                     return null;
 
                 case "device_flow_disabled":
-                    logger.LogWarning("The configured GitHub app has not enabled device flow.");
+                    Log.DeviceFlowDisabled(logger);
                     return null;
 
                 case "expired_token":
-                    logger.LogInformation("The device token has expired.");
+                    Log.TokenExpired(logger);
                     return null;
 
                 default:
@@ -72,15 +70,40 @@ public sealed class GitHubDeviceTokenService(
 
             if (logger.IsEnabled(LogLevel.Debug))
             {
-                logger.LogDebug(
-                    "Access token response: {Error}. Waiting {Interval} seconds.",
-                    result.Error,
-                    deviceCode.RefreshIntervalInSeconds);
+                Log.AccessPending(logger, result.Error, deviceCode.RefreshIntervalInSeconds);
             }
 
             await Task.Delay(delay, cancellationToken);
         }
 
         return null;
+    }
+
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+    private static partial class Log
+    {
+        [LoggerMessage(
+            EventId = 1,
+            Level = LogLevel.Debug,
+            Message = "Access token response: {Error}. Waiting {Interval} seconds.")]
+        public static partial void AccessPending(ILogger logger, string? error, int interval);
+
+        [LoggerMessage(
+            EventId = 2,
+            Level = LogLevel.Information,
+            Message = "The user cancelled the authorization process.")]
+        public static partial void AccessDenied(ILogger logger);
+
+        [LoggerMessage(
+            EventId = 3,
+            Level = LogLevel.Information,
+            Message = "The device token has expired.")]
+        public static partial void TokenExpired(ILogger logger);
+
+        [LoggerMessage(
+            EventId = 4,
+            Level = LogLevel.Warning,
+            Message = "The configured GitHub app has not enabled device flow.")]
+        public static partial void DeviceFlowDisabled(ILogger logger);
     }
 }
