@@ -1,0 +1,6 @@
+{
+  "error": null,
+  "access_token": "VALID_GITHUB_ACCESS_TOKEN",
+  "token_type": "bearer",
+  "scope": "public_repo"
+}
