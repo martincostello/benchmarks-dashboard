@@ -39,7 +39,7 @@
                     {
                         <div class="mb-3">
                             <div class="input-group input-group-lg">
-                                <span class="input-group-text" id="inputGroup-sizing-default">Code</span>
+                                <span class="input-group-text">Code</span>
                                 <input class="form-control font-monospace"
                                        id="user-code"
                                        label="The @(options.GitHubInstance) verification code"
@@ -71,6 +71,7 @@
                                 <div class="d-grid gap-2">
                                     <a class="btn btn-lg btn-github"
                                        href="@(_deviceCode?.VerificationUrl ?? "#")"
+                                       id="authorize"
                                        role="button"
                                        target="_blank"
                                        rel="noopener"
@@ -96,7 +97,7 @@
         </div>
         @if (_deviceCode is not null && _authorizationFailed)
         {
-            <div class="card mt-3">
+            <div class="card mt-3" id="authorization-failed">
                 <div class="card-header bg-danger text-white">
                     <span class="fa-stack">
                         <Icon Name="@(Icons.Key)" Stacked="true" />
@@ -112,7 +113,11 @@
                             <li>You cancelled the authorization process</li>
                         </ul>
                     </p>
-                    <button autofocus class="btn btn-primary" title="Refresh the code and try again" @onclick="RefreshCodeAsync">
+                    <button autofocus
+                            class="btn btn-primary"
+                            id="refresh-code"
+                            title="Refresh the code and try again"
+                            @onclick="RefreshCodeAsync">
                         Refresh code
                         <Icon Name="@(Icons.RotateRight)" />
                     </button>
