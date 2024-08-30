@@ -60,10 +60,7 @@
                     </li>
                 }
             </ul>
-            @{
-                var user = GitHubService.CurrentUser;
-            }
-            @if (user is not null)
+            @if (GitHubService.CurrentUser is { } user)
             {
                 <ul class="nav navbar-nav px-1">
                     <li>
