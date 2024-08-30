@@ -18,6 +18,64 @@ public sealed class GitHubClient(
     IOptions<DashboardOptions> options)
 {
     /// <summary>
+    /// The GitHub device code grant type.
+    /// </summary>
+    /// <remarks>
+    /// See https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#step-3-app-polls-github-to-check-if-the-user-authorized-the-device.
+    /// </remarks>
+    private const string GrantType = "urn:ietf:params:oauth:grant-type:device_code";
+
+    /// <summary>
+    /// Gets a GitHub device code as an asynchronous operation.
+    /// </summary>
+    /// <param name="cancellationToken">The optional <see cref="CancellationToken"/> to use.</param>
+    /// <returns>
+    /// A <see cref="Task"/> representing the asynchronous operation to get a device code.
+    /// </returns>
+    public async Task<GitHubDeviceCode> GetDeviceCodeAsync(CancellationToken cancellationToken = default)
+    {
+        var current = options.Value;
+
+        var clientId = Uri.EscapeDataString(current.GitHubClientId);
+        var scope = Uri.EscapeDataString(string.Join(' ', current.TokenScopes ?? ["public_repo"]));
+
+        var relativeUri = $"login/device/code?client_id={clientId}&scope={scope}";
+        var requestUri = new Uri(options.Value.GitHubTokenUrl, relativeUri);
+
+        var response = await client.PostAsync(requestUri, null, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        return (await response.Content.ReadFromJsonAsync(AppJsonSerializerContext.Default.GitHubDeviceCode, cancellationToken))!;
+    }
+
+    /// <summary>
+    /// Gets a GitHub access token as an asynchronous operation.
+    /// </summary>
+    /// <param name="deviceCode">The device code to exchange an access code for.</param>
+    /// <param name="cancellationToken">The optional <see cref="CancellationToken"/> to use.</param>
+    /// <returns>
+    /// A <see cref="Task"/> representing the asynchronous operation to get the access token.
+    /// </returns>
+    public async Task<GitHubAccessToken> GetAccessTokenAsync(
+        string deviceCode,
+        CancellationToken cancellationToken = default)
+    {
+        var current = options.Value;
+
+        var clientId = Uri.EscapeDataString(current.GitHubClientId);
+        var code = Uri.EscapeDataString(deviceCode);
+        var grant = Uri.EscapeDataString(GrantType);
+
+        var relativeUri = $"login/oauth/access_token?client_id={clientId}&device_code={code}&grant_type={grant}";
+        var requestUri = new Uri(options.Value.GitHubTokenUrl, relativeUri);
+
+        var response = await client.PostAsync(requestUri, null, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        return (await response.Content.ReadFromJsonAsync(AppJsonSerializerContext.Default.GitHubAccessToken, cancellationToken))!;
+    }
+
+    /// <summary>
     /// Gets the benchmark data for the specified GitHub repository branch as an asynchronous operation.
     /// </summary>
     /// <param name="repository">The name of the repository.</param>

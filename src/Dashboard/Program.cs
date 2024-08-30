@@ -13,12 +13,15 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.Configure<DashboardOptions>(builder.Configuration.GetSection("Dashboard"));
 
+builder.Services.AddSingleton(TimeProvider.System);
+
 builder.Services.AddScoped(
     (provider) =>
         new HttpClient() { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
 builder.Services.AddBlazoredLocalStorage();
 
+builder.Services.AddScoped<GitHubDeviceTokenService>();
 builder.Services.AddScoped<GitHubClient>();
 builder.Services.AddScoped<GitHubService>();
 builder.Services.AddScoped<GitHubTokenStore>();

@@ -18,7 +18,7 @@
 
     string classList = string.Join(' ', classes);
 }
-<div class="@(classList)" id="@(Id)" role="status">
+<div class="@(classList)" id="@(Id)" role="status" title="@(LoadingText)">
     <span class="visually-hidden">@(LoadingText)</span>
 </div>
 

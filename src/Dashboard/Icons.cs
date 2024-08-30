@@ -19,6 +19,16 @@ public static class Icons
     public static string ChartLine => "fa-solid fa-chart-line";
 
     /// <summary>
+    /// Gets the <c>check</c> icon.
+    /// </summary>
+    public static string Check => "fa-solid fa-check";
+
+    /// <summary>
+    /// Gets the <c>clipboard</c> icon.
+    /// </summary>
+    public static string Clipboard => "fa-regular fa-clipboard";
+
+    /// <summary>
     /// Gets the <c>clock</c> icon.
     /// </summary>
     public static string Clock => "fa-regular fa-clock";
@@ -72,6 +82,11 @@ public static class Icons
     /// Gets the <c>plus</c> icon.
     /// </summary>
     public static string Plus => "fa-solid fa-plus";
+
+    /// <summary>
+    /// Gets the <c>rotate-right</c> icon.
+    /// </summary>
+    public static string RotateRight => "fa-solid fa-rotate-right";
 
     /// <summary>
     /// Gets the <c>right-from-bracket</c> icon.

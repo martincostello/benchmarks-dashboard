@@ -60,20 +60,21 @@
                     </li>
                 }
             </ul>
-            @{
-                var user = GitHubService.CurrentUser;
-            }
-            @if (user is not null)
+            @if (GitHubService.CurrentUser is { } user)
             {
                 <ul class="nav navbar-nav px-1">
-                    <span class="navbar-text"
-                          id="user-name"
-                          title="@(options.GitHubInstance) user"
-                          data-bs-toggle="tooltip"
-                          data-bs-title="Signed in as @(user.Login) (@(user.Name))">
-                        @(user.Login)
-                        <img src="@(user.AvatarUrl)" class="user-profile" alt="@(user.Name)" title="@(user.Name)" aria-hidden="true">
-                    </span>
+                    <li>
+                        <a class="nav-link"
+                           href="@(GitHubService.ConnectionUrl())"
+                           id="user-name"
+                           rel="noopener"
+                           target="_blank"
+                           data-bs-toggle="tooltip"
+                           data-bs-title="Signed in as @(user.Login) (@(user.Name))">
+                            @(user.Login)
+                            <img src="@(user.AvatarUrl)" class="user-profile" alt="@(user.Name)" title="@(user.Name)" aria-hidden="true">
+                        </a>
+                    </li>
                     <li>
                         <button class="btn btn-link navbar-btn nav-link"
                                 id="sign-out"

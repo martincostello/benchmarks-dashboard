@@ -39,6 +39,11 @@ public sealed class DashboardOptions
     public string GitHubApiVersion { get; set; } = "2022-11-28";
 
     /// <summary>
+    /// Gets or sets the GitHub client ID to use to authenticate using the device flow.
+    /// </summary>
+    public string GitHubClientId { get; set; } = string.Empty;
+
+    /// <summary>
     /// Gets or sets the URI to use for the GitHub data.
     /// </summary>
     public Uri GitHubDataUrl { get; set; } = new("https://raw.githubusercontent.com");
@@ -47,6 +52,11 @@ public sealed class DashboardOptions
     /// Gets or sets the URI to use for the GitHub server.
     /// </summary>
     public Uri GitHubServerUrl { get; set; } = new("https://github.com");
+
+    /// <summary>
+    /// Gets or sets the URI to use for acquiring GitHub tokens.
+    /// </summary>
+    public Uri GitHubTokenUrl { get; set; } = new("https://api.martincostello.com/github/");
 
     /// <summary>
     /// Gets or sets the owner of the dashboard repository.

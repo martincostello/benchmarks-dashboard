@@ -8,27 +8,32 @@ namespace MartinCostello.Benchmarks.Pages;
 public sealed class TokenPage(IPage page) : AppPage(page)
 {
     public override async Task WaitForContentAsync()
-        => await Page.WaitForSelectorAsync(Selectors.TokenInput);
+        => await Page.WaitForSelectorAsync(Selectors.UserCode);
 
-    public async Task<bool> TokenIsInvalid()
+    public async Task Authorize()
+        => await Page.ClickAsync(Selectors.Authorize);
+
+    public async Task RefreshUserCode()
+        => await Page.ClickAsync(Selectors.RefreshCode);
+
+    public async Task<bool> AuthorizationFailed()
     {
-        await Page.WaitForSelectorAsync(Selectors.InvalidToken);
-        return await Page.IsVisibleAsync(Selectors.InvalidToken);
+        await Page.WaitForSelectorAsync(Selectors.AuthorizationFailed);
+        return await Page.IsVisibleAsync(Selectors.AuthorizationFailed);
     }
 
-    public async Task<TokenPage> WithToken(string token)
+    public async Task<string> UserCode()
     {
-        await Page.FillAsync(Selectors.TokenInput, token);
-        return this;
+        var element = await Page.WaitForSelectorAsync(Selectors.UserCode);
+        element.ShouldNotBeNull();
+        return await element.InputValueAsync();
     }
-
-    public async Task SaveToken()
-        => await Page.ClickAsync(Selectors.SaveButton);
 
     private static class Selectors
     {
-        internal const string InvalidToken = "id=invalid-token";
-        internal const string TokenInput = "id=token-input";
-        internal const string SaveButton = "id=save-token";
+        internal const string Authorize = "id=authorize";
+        internal const string AuthorizationFailed = "id=authorization-failed";
+        internal const string RefreshCode = "id=refresh-code";
+        internal const string UserCode = "id=user-code";
     }
 }

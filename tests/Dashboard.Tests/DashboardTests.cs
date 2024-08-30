@@ -3,6 +3,7 @@
 
 using System.Runtime.CompilerServices;
 using MartinCostello.Benchmarks.Pages;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Playwright;
 
 namespace MartinCostello.Benchmarks;
@@ -69,7 +70,10 @@ public class DashboardTests(
             await page.GotoAsync(Fixture.ServerAddress);
             await page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
-            await ConfigureMocksAsync(page);
+            var cancelled = new TaskCompletionSource<string>();
+            var authorized = new TaskCompletionSource<string>();
+
+            await ConfigureMocksAsync(page, cancelled, authorized);
 
             var dashboard = new HomePage(page);
 
@@ -130,15 +134,32 @@ public class DashboardTests(
             await token.WaitForContentAsync();
 
             // Act
-            await token.WithToken(Guid.NewGuid().ToString());
-            await token.SaveToken();
+            var firstCode = await token.UserCode();
 
             // Assert
-            await token.TokenIsInvalid().ShouldBeTrue();
+            firstCode.ShouldNotBeNullOrWhiteSpace();
 
             // Act
-            await token.WithToken(ValidFakeToken);
-            await token.SaveToken();
+            await token.Authorize();
+            cancelled.SetResult(firstCode);
+
+            // Assert
+            await token.AuthorizationFailed().ShouldBeTrue();
+
+            // Arrange
+            await token.RefreshUserCode();
+            await token.WaitForContentAsync();
+
+            // Act
+            var secondCode = await token.UserCode();
+
+            // Assert
+            secondCode.ShouldNotBeNullOrWhiteSpace();
+            secondCode.ShouldNotBe(firstCode);
+
+            // Act
+            await token.Authorize();
+            authorized.SetResult(secondCode);
 
             // Assert
             await dashboard.WaitForSignedInAsync();
@@ -236,13 +257,34 @@ public class DashboardTests(
         }
     }
 
-    private static async Task ConfigureMocksAsync(IPage page)
+    private static async Task ConfigureMocksAsync(
+        IPage page,
+        TaskCompletionSource<string> cancelled,
+        TaskCompletionSource<string> authorized)
     {
         const string GitHubApi = "https://api.github.com";
         const string GitHubData = "https://raw.githubusercontent.com";
+        const string GitHubLogin = "https://github.com/login/device";
+        const string GitHubToken = "https://api.martincostello.com/github";
         const string Owner = "martincostello";
 
-        await ConfigureUserAsync(page);
+        page.Popup += async (_, popup) =>
+        {
+            await popup.WaitForLoadStateAsync();
+
+            var uri = new Uri(popup.Url);
+
+            uri.Host.ShouldBe("github.com");
+            uri.Scheme.ShouldBe(Uri.UriSchemeHttps);
+            uri.PathAndQuery.ShouldStartWith("/login");
+
+            var query = QueryHelpers.ParseQuery(uri.Query);
+            query.ShouldContainKeyAndValue("return_to", GitHubLogin);
+
+            await popup.CloseAsync();
+        };
+
+        await ConfigureUserAsync(page, cancelled, authorized);
         await ConfigureRepoAsync(page, "benchmarks-demo", ["main"]);
         await ConfigureRepoAsync(page, "website", ["main", "dev"]);
 
@@ -276,8 +318,78 @@ public class DashboardTests(
             }
         }
 
-        static async Task ConfigureUserAsync(IPage page)
+        static async Task ConfigureUserAsync(
+            IPage page,
+            TaskCompletionSource<string> cancelled,
+            TaskCompletionSource<string> authorized)
         {
+            string clientId = "Ov23likdXQFqdqFST1Ec";
+            string scopes = "public_repo";
+
+            string currentDeviceCode = GenerateDeviceCode();
+            string currentUserCode = GenerateUserCode();
+
+            object NewDeviceCode()
+            {
+                string newDeviceCode = GenerateDeviceCode();
+                string newUserCode = GenerateUserCode();
+
+                currentDeviceCode = newDeviceCode;
+                currentUserCode = newUserCode;
+
+                return new
+                {
+                    device_code = newDeviceCode,
+                    user_code = newUserCode,
+                    verification_uri = GitHubLogin,
+                    expires_in = 899,
+                    interval = 1,
+                };
+            }
+
+            await page.RouteAsync($"{GitHubToken}/login/device/code?client_id={clientId}&scope={scopes}", async (route) =>
+            {
+                await route.FulfillAsync(new()
+                {
+                    Status = 200,
+                    Json = NewDeviceCode(),
+                });
+            });
+
+            await page.RouteAsync($"{GitHubToken}/login/oauth/access_token?client_id={clientId}&*", async (route) =>
+            {
+                var url = new Uri(route.Request.Url);
+                var query = QueryHelpers.ParseQuery(url.Query);
+
+                string response;
+
+                if (query["device_code"] == currentDeviceCode)
+                {
+                    if (authorized.Task.IsCompleted && await authorized.Task == currentUserCode)
+                    {
+                        response = "authorized";
+                    }
+                    else if (cancelled.Task.IsCompleted && await cancelled.Task == currentUserCode)
+                    {
+                        response = "expired";
+                    }
+                    else
+                    {
+                        response = "pending";
+                    }
+                }
+                else
+                {
+                    response = "incorrect_device_code";
+                }
+
+                await route.FulfillAsync(new()
+                {
+                    Status = 200,
+                    Path = JsonResponseFile($"access-token-{response}"),
+                });
+            });
+
             await page.RouteAsync($"{GitHubApi}/user", async (route) =>
             {
                 const string Authorization = "authorization";
@@ -302,6 +414,12 @@ public class DashboardTests(
                     });
                 }
             });
+
+            static string GenerateDeviceCode()
+                => Guid.NewGuid().ToString().Replace("-", string.Empty, StringComparison.Ordinal);
+
+            static string GenerateUserCode()
+                => Guid.NewGuid().ToString().Substring(9, 9);
         }
     }
 }

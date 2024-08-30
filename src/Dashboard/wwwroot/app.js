@@ -13,6 +13,19 @@ window.scrollToActiveChart = () => {
   }
 };
 
+window.configureClipboard = () => {
+  if ('ClipboardJS' in window) {
+    const selector = '.copy-button';
+    const clipboard = window['ClipboardJS'];
+    new clipboard(selector);
+    document.querySelectorAll(selector).forEach((element) => {
+      element.addEventListener('click', (event) => {
+        event.preventDefault();
+      });
+    });
+  }
+};
+
 window.configureToolTips = () => {
   const tooltips = [...document.querySelectorAll('[data-bs-toggle="tooltip"]')];
   tooltips.map((element) => new bootstrap.Tooltip(element));
