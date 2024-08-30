@@ -84,6 +84,11 @@ public static class Icons
     public static string Plus => "fa-solid fa-plus";
 
     /// <summary>
+    /// Gets the <c>rotate-right</c> icon.
+    /// </summary>
+    public static string RotateRight => "fa-solid fa-rotate-right";
+
+    /// <summary>
     /// Gets the <c>right-from-bracket</c> icon.
     /// </summary>
     public static string RightFromBracket => "fa-solid fa-right-from-bracket";

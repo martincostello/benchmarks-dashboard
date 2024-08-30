@@ -18,69 +18,72 @@
             </div>
             <div class="card-body">
                 <p class="card-text">
-                    @if (tokenRequired)
-                    {
-                        <text>
-                            A @(options.GitHubInstance) access token is required to load the data for this dashboard.
-                        </text>
-                    }
-                    else
-                    {
-                        <text>
-                            A @(options.GitHubInstance) access token can be configured to load the data for this dashboard to help avoid rate limiting.
-                        </text>
-                    }
+                    <div class="alert alert-@(tokenRequired ? "primary" : "info")" role="alert">
+                        A @(options.GitHubInstance) access token
+                        @if (tokenRequired)
+                        {
+                            <text>
+                                is required to load the data for this dashboard.
+                            </text>
+                        }
+                        else
+                        {
+                            <text>
+                                can be configured to load the data for this dashboard to help avoid rate limiting.
+                            </text>
+                        }
+                    </div>
                 </p>
                 <p class="card-text">
                     @if (_deviceCode?.UserCode is { Length: > 0 } code)
                     {
-                        <form>
-                            <div class="mb-3">
-                                <div class="input-group input-group-lg">
-                                    <span class="input-group-text" id="inputGroup-sizing-default">Code</span>
-                                    <input class="form-control font-monospace"
-                                           id="user-code"
-                                           label="The @(options.GitHubInstance) verification code"
-                                           readonly
-                                           type="text"
-                                           value="@(code)"
-                                           aria-describedby="user-code-help">
-                                    <button class="btn btn-lg btn-secondary copy-button"
-                                            data-clipboard-target="#user-code"
-                                            title="Copy to clipboard"
-                                            aria-label="Copy verification code to clipboard">
-                                        <span class="far fa-clipboard"></span>
-                                    </button>
-                                </div>
-                                <div class="form-text" id="user-code-help">
-                                    Use this code to allow @(options.BrandName) to generate an access token.
-                                </div>
+                        <div class="mb-3">
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text" id="inputGroup-sizing-default">Code</span>
+                                <input class="form-control font-monospace"
+                                       id="user-code"
+                                       label="The @(options.GitHubInstance) verification code"
+                                       readonly
+                                       type="text"
+                                       value="@(code)"
+                                       aria-describedby="user-code-help">
+                                <button class="btn btn-lg btn-primary copy-button"
+                                        autofocus
+                                        data-clipboard-target="#user-code"
+                                        title="Copy to clipboard"
+                                        aria-label="Copy verification code to clipboard">
+                                    <span class="far fa-clipboard"></span>
+                                </button>
                             </div>
-                            @* TODO Add some sort of "please wait" message *@
+                            <div class="form-text" id="user-code-help">
+                                Copy this code to allow @(options.BrandName) to generate an access token.
+                            </div>
+                        </div>
+                        @if (_authorizing)
+                        {
+                            <div class="d-flex justify-content-center">
+                                <Spinner SpinnerType="@(SpinnerType.Border)" Large="true" LoadingText="@($"Waiting for an access token for your {options.GitHubInstance} account")" />
+                            </div>
+                        }
+                        else if (!_authorizationFailed)
+                        {
                             <div class="mb-3">
                                 <div class="d-grid gap-2">
-                                    <a class="btn btn-lg btn-github @(_authorizing ? "disabled" : string.Empty)"
+                                    <a class="btn btn-lg btn-github"
                                        href="@(_deviceCode?.VerificationUrl ?? "#")"
                                        role="button"
                                        target="_blank"
                                        rel="noopener"
-                                       data-bs-toggle="tooltip"
-                                       data-bs-title="Authorize @(options.BrandName) to access your @(options.GitHubInstance) account"
+                                       title="Authorize @(options.BrandName) to access your {options.GitHubInstance} account"
                                        @onclick="AuthorizeAsync">
                                         Authorize
                                         <Icon Name="@(Icons.Check)" />
                                         <Icon Name="@(Icons.GitHub)" />
                                         <Icon Name="@(Icons.Key)" />
-                                        @if (_authorizing)
-                                        {
-                                            <span class="ps-1">
-                                                <Spinner SpinnerType="@(SpinnerType.Border)" LoadingText="Authorizing..." />
-                                            </span>
-                                        }
                                     </a>
                                 </div>
                             </div>
-                        </form>
+                        }
                     }
                     else
                     {
@@ -89,36 +92,33 @@
                         </div>
                     }
                 </p>
-                @if (_deviceCode is not null && _authorizationFailed)
-                {
-                    @* TODO Make this look better *@
-                    <p class="card-text" id="authorization-failed">
-                        <div class="alert alert-warning" role="alert">
-                            <h5 class="fw-bolder">
-                                <span class="fa-stack">
-                                    <Icon Name="@(Icons.Key)" Stacked="true" />
-                                    <Icon Name="@(Icons.Ban)" Stacked="true" Color="danger" />
-                                </span>
-                                @(options.GitHubInstance) authorization failed
-                            </h5>
-                            <p>
-                                Possible causes:
-                                <ul class="fw-light">
-                                    <li>You did not enter the code above within @(TimeSpan.FromSeconds(_deviceCode.ExpiresInSeconds).Minutes) minutes</li>
-                                    <li>You cancelled the authorization process</li>
-                                </ul>
-                            </p>
-                            <p>
-                                <button class="btn btn-lg btn-primary" title="Refresh the code">
-                                    Try again
-                                    @* TODO Refresh the code and reset the UI *@
-                                </button>
-                            </p>
-                        </div>
-                    </p>
-                }
             </div>
         </div>
+        @if (_deviceCode is not null && _authorizationFailed)
+        {
+            <div class="card mt-3">
+                <div class="card-header bg-danger text-white">
+                    <span class="fa-stack">
+                        <Icon Name="@(Icons.Key)" Stacked="true" />
+                        <Icon Name="@(Icons.Ban)" Stacked="true" Color="warning" />
+                    </span>
+                    @(options.GitHubInstance) authorization failed
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Possible causes:
+                        <ul class="fw-light">
+                            <li>You did not enter the code above within @(TimeSpan.FromSeconds(_deviceCode.ExpiresInSeconds + 1).Minutes) minutes</li>
+                            <li>You cancelled the authorization process</li>
+                        </ul>
+                    </p>
+                    <button autofocus class="btn btn-primary" title="Refresh the code and try again" @onclick="RefreshCodeAsync">
+                        Refresh code
+                        <Icon Name="@(Icons.RotateRight)" />
+                    </button>
+                </div>
+            </div>
+        }
     </div>
 </div>
 
@@ -128,9 +128,7 @@
     private GitHubDeviceCode? _deviceCode;
 
     protected override async Task OnInitializedAsync()
-    {
-        _deviceCode = await TokenService.GetDeviceCodeAsync();
-    }
+        => await GenerateCodeAsync();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -138,6 +136,23 @@
         {
             await JS.InvokeVoidAsync("configureClipboard");
         }
+    }
+
+    private async Task GenerateCodeAsync()
+    {
+        _deviceCode = await TokenService.GetDeviceCodeAsync();
+    }
+
+    private async Task RefreshCodeAsync()
+    {
+        _deviceCode = null;
+
+        await GenerateCodeAsync();
+
+        _authorizing = false;
+        _authorizationFailed = false;
+
+        StateHasChanged();
     }
 
     private async Task AuthorizeAsync()

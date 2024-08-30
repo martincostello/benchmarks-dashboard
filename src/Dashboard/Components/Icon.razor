@@ -16,6 +16,11 @@
         classes.Add($"text-{Color}");
     }
 
+    if (Spin)
+    {
+        classes.Add("fa-spin");
+    }
+
     string classList = string.Join(' ', classes);
 }
 
@@ -39,6 +44,12 @@
     /// </summary>
     [Parameter]
     public bool FixedWidth { get; init; }
+
+    /// <summary>
+    /// Gets whether the icon should spin.
+    /// </summary>
+    [Parameter]
+    public bool Spin { get; init; }
 
     /// <summary>
     /// Gets whether the icon is stacked.

@@ -49,6 +49,10 @@ img.user-profile {
   word-break: unset;
 }
 
+.fa-spin {
+  --fa-animation-duration: 1.5s;
+}
+
 .no-resize {
   resize: none;
 }
@@ -178,6 +182,7 @@ a {
   text-decoration-color: white !important;
 }
 
+.btn-github:focus-visible,
 .btn-github:hover {
   background-color: color-mix(in srgb, black 80%, transparent);
   border-color: color-mix(in srgb, black, transparent);
