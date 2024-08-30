@@ -53,7 +53,7 @@
                                         data-clipboard-target="#user-code"
                                         title="Copy to clipboard"
                                         aria-label="Copy verification code to clipboard">
-                                    <span class="far fa-clipboard"></span>
+                                        <Icon Name="@(Icons.Clipboard)" />
                                 </button>
                             </div>
                             <div class="form-text" id="user-code-help">
@@ -96,7 +96,7 @@
                 </p>
             </div>
         </div>
-        @if (_deviceCode is not null && _authorizationFailed)
+        @if (_deviceCode?.ExpiresInSeconds is { } expiry && _authorizationFailed)
         {
             <div class="card mt-3" id="authorization-failed">
                 <div class="card-header bg-danger text-white">
@@ -110,7 +110,7 @@
                     <p class="card-text">
                         Possible causes:
                         <ul class="fw-light">
-                            <li>You did not enter the code above within @(TimeSpan.FromSeconds(_deviceCode.ExpiresInSeconds + 1).Minutes) minutes</li>
+                            <li>You did not enter the code above within @(TimeSpan.FromSeconds(expiry + 1).Minutes) minutes</li>
                             <li>You cancelled the authorization process</li>
                         </ul>
                     </p>
