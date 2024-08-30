@@ -55,7 +55,7 @@
     @if (_notFound && !ShowLoaders)
     {
         <div class="alert alert-danger m-2" id="no-benchmarks" role="alert">
-            Failed benchmark data for found for branch <span class="font-monospace">@(GitHubService.CurrentBranch)</span>.
+            Benchmark data not found for branch <span class="font-monospace">@(GitHubService.CurrentBranch)</span>.
         </div>
     }
     else if (GitHubService.Benchmarks is not null)
