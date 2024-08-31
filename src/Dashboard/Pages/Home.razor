@@ -50,84 +50,102 @@
             </div>
         </div>
     </form>
-    <hr />
-    @if (_notFound && !ShowLoaders)
-    {
-        <div class="alert alert-danger m-2" id="no-benchmarks" role="alert">
-            Benchmark data not found for branch <span class="font-monospace">@(GitHubService.CurrentBranch)</span>.
-        </div>
-    }
-    else if (GitHubService.Benchmarks is not null)
-    {
-        <div class="header-item">
-            <strong class="header-label">
-                <Icon Name="@(Icons.Clock)" FixedWidth="true" />
-                Last Updated:
-            </strong>
-            @if (GitHubService.Benchmarks.LastUpdated is { } timestamp && !ShowLoaders)
-            {
-                string text = timestamp.ToLocalTime().ToString("G");
-                string title = $"{timestamp:s} ({timestamp.Humanize()})";
-
-                <span title="@(title)">
-                    @(text)
-                </span>
-            }
-            else
-            {
-                <Spinner />
-            }
-        </div>
-        <div class="header-item">
-            <strong class="header-label">
-                <Icon Name="@(Icons.GitHub)" FixedWidth="true" />
-                Repository:
-            </strong>
-            @if (GitHubService.CurrentRepository is null || ShowLoaders)
-            {
-                <Spinner />
-            }
-            else
-            {
-                <a class="header-content" href="@(GitHubService.CurrentRepository.HtmlUrl ?? "#")" rel="noopener" target="_blank">
-                    @(GitHubService.CurrentRepository.FullName)
-                </a>
-            }
-        </div>
-        <div class="header-item">
-            <strong class="header-label">
-                <Icon Name="@(Icons.CodeBranch)" FixedWidth="true" />
-                Branch:
-            </strong>
-            @if (GitHubService.CurrentBranch is null || ShowLoaders)
-            {
-                <Spinner Color="text-dark" />
-            }
-            else
-            {
-                <a class="font-monospace" href="@(GitHubService.BranchUrl())" rel="noopener" target="_blank">
-                    @(GitHubService.CurrentBranch)
-                </a>
-            }
-        </div>
-        <div class="header-item">
-            <strong class="header-label">
-                <Icon Name="@(Icons.CodeCommit)" FixedWidth="true" />
-                Commit:
-            </strong>
-            @if (GitHubService.CurrentCommit is null || ShowLoaders)
-            {
-                <Spinner Color="text-dark" />
-            }
-            else
-            {
-                <a class="font-monospace" href="@(GitHubService.CommitUrl())" rel="noopener" target="_blank">
-                    @(GitHubService.CurrentCommit[..7])
-                </a>
-            }
-        </div>
-    }
 </header>
+<hr />
+@if (_notFound && !ShowLoaders)
+{
+    <div class="alert alert-danger m-2" id="no-benchmarks" role="alert">
+        Benchmark data not found for branch <span class="font-monospace">@(GitHubService.CurrentBranch)</span>.
+    </div>
+}
+else if (GitHubService.Benchmarks is not null)
+{
+    <div class="container-fluid px-0">
+        <table class="table table-borderless table-sm w-auto">
+            <tbody>
+                <tr>
+                    <th class="text-end" scope="row">
+                        <Icon Name="@(Icons.Clock)" FixedWidth="true" />
+                        <strong>
+                            <span class="d-none d-sm-inline">Last </span>Updated:
+                        </strong>
+                    </th>
+                    <td>
+                        @if (GitHubService.Benchmarks.LastUpdated is { } timestamp && !ShowLoaders)
+                        {
+                            string text = timestamp.ToLocalTime().ToString("G");
+                            string title = $"{timestamp:s} ({timestamp.Humanize()})";
+
+                            <span title="@(title)">
+                                @(text)
+                            </span>
+                        }
+                        else
+                        {
+                            <Spinner />
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-end" scope="row">
+                        <Icon Name="@(Icons.GitHub)" FixedWidth="true" />
+                        <strong>
+                            Repo<span class="d-none d-sm-inline">sitory</span>:
+                        </strong>
+                    </th>
+                    <td>
+                        @if (GitHubService.CurrentRepository is null || ShowLoaders)
+                        {
+                            <Spinner />
+                        }
+                        else
+                        {
+                            <a class="header-content" href="@(GitHubService.CurrentRepository.HtmlUrl ?? "#")" rel="noopener" target="_blank">
+                                @(GitHubService.CurrentRepository.FullName)
+                            </a>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-end" scope="row">
+                        <Icon Name="@(Icons.CodeBranch)" FixedWidth="true" />
+                        Branch:
+                    </th>
+                    <td>
+                        @if (GitHubService.CurrentBranch is null || ShowLoaders)
+                        {
+                            <Spinner Color="text-dark" />
+                        }
+                        else
+                        {
+                            <a class="font-monospace" href="@(GitHubService.BranchUrl())" rel="noopener" target="_blank">
+                                @(GitHubService.CurrentBranch)
+                            </a>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-end" scope="row">
+                        <Icon Name="@(Icons.CodeCommit)" FixedWidth="true" />
+                        Commit:
+                    </th>
+                    <td>
+                        @if (GitHubService.CurrentCommit is null || ShowLoaders)
+                        {
+                            <Spinner Color="text-dark" />
+                        }
+                        else
+                        {
+                            <a class="font-monospace" href="@(GitHubService.CommitUrl())" rel="noopener" target="_blank">
+                                @(GitHubService.CurrentCommit[..7])
+                            </a>
+                        }
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+}
 
 @if (ShowLoaders)
 {
