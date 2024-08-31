@@ -85,6 +85,7 @@ img.user-profile {
 
 .benchmark-chart {
   max-height: 500px;
+  min-height: 320px;
   max-width: 1000px;
 }
 

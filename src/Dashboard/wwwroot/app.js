@@ -75,6 +75,7 @@ window.renderChart = (canvasId, configString) => {
   };
 
   const options = {
+    maintainAspectRatio: document.documentElement.clientWidth > 576,
     scales: {
       x: {
         title: {
