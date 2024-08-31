@@ -113,14 +113,16 @@ window.renderChart = (canvasId, configString) => {
             const memory = context.datasetIndex === 1;
             let label;
             if (memory && item && item.result.bytesAllocated !== null) {
-              label = item.result.bytesAllocated.toString();
+              label = item.result.bytesAllocated.toFixed(2).toString();
               label += item.result.memoryUnit ?? ' bytes';
             } else {
-              label = item.result.value.toString();
+              label = item.result.value.toFixed(2).toString();
               const { range, unit } = item.result;
               label += unit;
               if (range) {
-                label += ` (${range})`;
+                const prefix = range.slice(0, 2);
+                const rangeValue = parseFloat(range.slice(2)).toPrecision(3);
+                label += ` (${prefix}${rangeValue})`;
               }
             }
             return label;
