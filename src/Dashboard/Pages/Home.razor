@@ -29,7 +29,7 @@
                 <label class="input-group-text col-auto" for="branch" title="Branch" aria-label="Branch">
                     <Icon Name="@(Icons.CodeBranch)" FixedWidth="true" />
                 </label>
-                <select class="form-select" id="branch" name="branch" disabled="@(DisableBranches)" @onchange="BranchChangedAsync">
+                <select class="form-select" id="branch" name="branch" disabled="@(DisableBranches)" @onchange="@(BranchChangedAsync)">
                     @if (GitHubService.Branches.Count < 1)
                     {
                         <option>Loading...</option>
@@ -43,8 +43,7 @@
 
                         @foreach (var branch in GitHubService.Branches)
                         {
-                            var selected = branch == selectedBranch;
-                            <option value="@(branch)" selected="@(selected)">@(branch)</option>
+                            <option value="@(branch)" selected="@(branch == selectedBranch)">@(branch)</option>
                         }
                     }
                 </select>
@@ -67,8 +66,11 @@
             </strong>
             @if (GitHubService.Benchmarks.LastUpdated is { } timestamp && !ShowLoaders)
             {
-                <span title="@timestamp.ToString("s", CultureInfo.InvariantCulture)">
-                    @(timestamp.ToLocalTime().ToString("G"))
+                string text = timestamp.ToLocalTime().ToString("G");
+                string title = $"{timestamp:s} ({timestamp.Humanize()})";
+
+                <span title="@(title)">
+                    @(text)
                 </span>
             }
             else
