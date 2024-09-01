@@ -114,8 +114,14 @@ window.renderChart = (canvasId, configString) => {
             const memory = context.datasetIndex === 1;
             let label;
             if (memory && item && item.result.bytesAllocated !== null) {
-              label = item.result.bytesAllocated.toFixed(2).toString();
-              label += item.result.memoryUnit ?? ' bytes';
+              const defaultMemoryUnit = ' bytes';
+              const memoryUnit = item.result.memoryUnit ?? defaultMemoryUnit;
+              let places = 2;
+              if (memoryUnit === defaultMemoryUnit) {
+                places = 0;
+              }
+              label = item.result.bytesAllocated.toFixed(places).toString();
+              label += memoryUnit;
             } else {
               label = item.result.value.toFixed(2).toString();
               const { range, unit } = item.result;
