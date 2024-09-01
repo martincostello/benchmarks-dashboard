@@ -126,9 +126,12 @@ public class DashboardTests(
                 Type = ScreenshotType.Jpeg,
             });
 
-            await Verify(new Target("png", new MemoryStream(screenshot)))
-                .UseDirectory("snapshots")
-                .UseTextForParameters($"{browserType}_{browserChannel}_benchmarks-demo");
+            using (var stream = new MemoryStream(screenshot))
+            {
+                await Verify(new Target("png", stream))
+                    .UseDirectory("snapshots")
+                    .UseTextForParameters($"{browserType}_{browserChannel}_benchmarks-demo");
+            }
 
             // Arrange
             var token = await dashboard.SignInAsync();
@@ -226,9 +229,12 @@ public class DashboardTests(
                 Type = ScreenshotType.Jpeg,
             });
 
-            await Verify(new Target("png", new MemoryStream(screenshot)))
-                .UseDirectory("snapshots")
-                .UseTextForParameters($"{browserType}_{browserChannel}_website");
+            using (var stream = new MemoryStream(screenshot))
+            {
+                await Verify(new Target("png", stream))
+                    .UseDirectory("snapshots")
+                    .UseTextForParameters($"{browserType}_{browserChannel}_website");
+            }
 
             // Act
             await dashboard.SignOutAsync();
