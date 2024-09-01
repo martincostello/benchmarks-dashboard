@@ -24,7 +24,7 @@ public class HomePage(IPage page) : AppPage(page)
 
             var names = new List<string>();
 
-            foreach (var benchmark in await suite.QuerySelectorAllAsync("canvas"))
+            foreach (var benchmark in await suite.QuerySelectorAllAsync(".benchmark-chart"))
             {
                 var name = await benchmark.GetAttributeAsync("name");
                 name.ShouldNotBeNullOrWhiteSpace();

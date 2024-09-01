@@ -49,138 +49,218 @@ window.configureDataDownload = (json, fileName) => {
   }
 };
 
-window.renderChart = (canvasId, configString) => {
+window.renderChart = (chartId, configString) => {
   const config = JSON.parse(configString);
+  const { dataset } = config;
+
+  const isDesktop = document.documentElement.clientWidth > 576;
 
   const memoryAxis = 'y2';
   const memoryColor = config.colors.memory;
   const timeAxis = 'y';
   const timeColor = config.colors.time;
 
-  const { dataset } = config;
+  const mode = 'lines+markers';
+  const shape = 'spline';
+  const type = 'scatter';
 
-  const data = {
-    labels: dataset.map(d => d.commit.sha.slice(0, 7)),
-    datasets: [
-      {
-        label: 'Time',
-        data: dataset.map(d => d.result.value),
-        borderColor: timeColor,
-        backgroundColor: `${timeColor}60`,
-        fill: true,
-        tension: 0.4,
-        yAxisID: timeAxis,
-      },
-    ],
-  };
+  const rounding = 2;
+  const precision = rounding + 1;
 
-  const options = {
-    maintainAspectRatio: document.documentElement.clientWidth > 576,
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Commit',
-        },
-      },
-      y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: dataset.length > 0 ? `t (${dataset[0].result.unit})` : '',
-        },
-      },
+  const layout = {
+    font: {
+      size: isDesktop ? 10 : 8,
     },
-    onClick: (_, elements) => {
-      if (elements.length > 0) {
-        const { index } = elements[0];
-        const url = dataset[index].commit.url;
-        window.open(url, '_blank');
-      }
+    legend: {
+      orientation: 'h',
+      y: isDesktop ? -0.15 : -0.1,
     },
-    plugins: {
+    title: {
+      text: config.name,
+    },
+    xaxis: {
+      fixedrange: true,
+      tickangle: -30,
       title: {
-        display: true,
-        text: config.name,
+        text: 'Commit',
       },
-      tooltip: {
-        callbacks: {
-          afterTitle: items => {
-            const data = dataset[items[0].dataIndex];
-            return `\n${data.commit.message}\n\n${data.commit.timestamp} authored by @${data.commit.author.username}\n`;
-          },
-          label: context => {
-            const item = dataset[context.dataIndex];
-            const memory = context.datasetIndex === 1;
-            let label;
-            if (memory && item && item.result.bytesAllocated !== null) {
-              const defaultMemoryUnit = ' bytes';
-              const memoryUnit = item.result.memoryUnit ?? defaultMemoryUnit;
-              let places = 2;
-              if (memoryUnit === defaultMemoryUnit) {
-                places = 0;
-              }
-              label = item.result.bytesAllocated.toFixed(places).toString();
-              label += memoryUnit;
-            } else {
-              label = item.result.value.toFixed(2).toString();
-              const { range, unit } = item.result;
-              label += unit;
-              if (range) {
-                const prefix = range.slice(0, 2);
-                const rangeValue = parseFloat(range.slice(2)).toPrecision(3);
-                label += ` (${prefix}${rangeValue})`;
-              }
-            }
-            return label;
-          },
-          afterLabel: context => {
-            const { extra } = dataset[context.dataIndex].result;
-            return extra ? `\n${extra}` : '';
-          }
-        },
+    },
+    yaxis: {
+      fixedrange: true,
+      hoverformat: '.2f',
+      minallowed: 0,
+      rangemode: 'tozero',
+      separatethousands: true,
+      title: {
+        text: dataset.length > 0 ? `t (${dataset[0].result.unit})` : 't',
       },
     },
   };
 
-  const hasMemory = dataset.some(d => d.result.bytesAllocated !== null);
+  if (!isDesktop) {
+    layout.margin = {
+      l: 30,
+      r: 30,
+      t: 30,
+      b: 10,
+    };
+  }
+
+  const seriesX = dataset.map((p) => p.commit.sha.slice(0, 7));
+
+  const mapTimeText = (item) => {
+    const { range, unit } = item.result;
+    let label = `${item.result.value.toFixed(rounding)}${unit}`;
+    if (range) {
+      const prefix = range.slice(0, 2);
+      const rangeValue = parseFloat(range.slice(2)).toPrecision(precision);
+      label += ` (${prefix}${rangeValue})`;
+    }
+    return label;
+  };
+
+  const newline = `<br>`;
+  const customdata = dataset.map((item) => {
+    const message = item.commit.message
+      .split('\n')
+      .slice(0, 20)
+      .map((p) => p.length > 70 ? p.slice(0, 70) + '...' : p)
+      .join(newline);
+
+    return message +
+      newline +
+      newline +
+      `${item.commit.timestamp} authored by @${item.commit.author.username}` +
+      newline;
+  });
+
+  const hoverlabel = {
+    align: 'left',
+    bordercolor: 'black',
+    font: {
+      color: getComputedStyle(document.documentElement).getPropertyValue('--plot-hover-color'),
+      family: getComputedStyle(document.documentElement).getPropertyValue('--bs-font-sans-serif'),
+    }
+  };
+
+  const hovertemplate =
+    "<b>%{text}</b>" +
+    newline +
+    newline +
+    "%{x}" +
+    newline +
+    newline +
+    "%{customdata}" +
+    "<extra></extra>";
+
+  const time = {
+    connectgaps: true,
+    customdata,
+    error_y: {
+      array: dataset.map((p) => parseFloat(p.result.range.slice(2))),
+      type: 'data',
+    },
+    fill: 'tozeroy',
+    hoverlabel,
+    hovertemplate,
+    line: {
+      color: timeColor,
+      shape,
+    },
+    marker: {
+      color: timeColor,
+    },
+    mode,
+    name: 'Time',
+    text: dataset.map(mapTimeText),
+    type,
+    x: seriesX,
+    y: dataset.map((p) => p.result.value),
+    yaxis: timeAxis,
+  };
+
+  const data = [time];
+
+  const hasMemory = dataset.some((p) => p.result.bytesAllocated !== null);
   if (hasMemory) {
-    const memoryUnit = dataset.find(d => d.result.bytesAllocated !== null)?.result.memoryUnit ?? 'bytes';
-    data.datasets.push({
-      label: 'Memory',
-      data: dataset.map(d => d.result.bytesAllocated),
-      borderColor: memoryColor,
-      backgroundColor: `${memoryColor}60`,
-      fill: false,
-      pointStyle: 'triangle',
-      tension: 0.4,
-      yAxisID: memoryAxis,
-    });
-    options.scales[memoryAxis] = {
-      beginAtZero: true,
-      position: 'right',
+    const defaultMemoryUnit = 'bytes';
+    const memoryUnit = dataset.find((p) => p.result.bytesAllocated !== null)?.result.memoryUnit ?? defaultMemoryUnit;
+    const memoryTextSuffix = memoryUnit === defaultMemoryUnit ? ` ${memoryUnit}` : memoryUnit;
+    const places = memoryUnit === defaultMemoryUnit ? 0 : rounding;
+
+    const mapMemoryText = (item) => {
+      if (item.result.bytesAllocated !== null) {
+        return `${item.result.bytesAllocated.toFixed(places)}${memoryTextSuffix}`;
+      }
+      return undefined;
+    };
+
+    const memory = {
+      connectgaps: true,
+      customdata,
+      hoverlabel,
+      hovertemplate,
+      line: {
+        color: memoryColor,
+        shape,
+      },
+      marker: {
+        color: memoryColor,
+        symbol: 'triangle-up',
+      },
+      mode,
+      name: 'Memory',
+      text: dataset.map(mapMemoryText),
+      type,
+      x: seriesX,
+      y: dataset.map((p) => p.result.bytesAllocated),
+      yaxis: memoryAxis,
+    };
+
+    data.push(memory);
+
+    layout.yaxis2 = {
+      fixedrange: true,
+      minallowed: 0,
+      overlaying: 'y',
+      rangemode: 'tozero',
+      side: 'right',
+      separatethousands: true,
       title: {
-        display: hasMemory,
         text: memoryUnit,
       },
     };
 
-    const allZero = dataset.every(d => d.result.bytesAllocated === 0);
+    const allZero = dataset.every((p) => p.result.bytesAllocated === 0);
     if (allZero) {
-      options.scales[memoryAxis].ticks = {
-        precision: 0,
-      };
+      layout.yaxis2.maxallowed = 1;
+      layout.yaxis2.tickformat = '.0f';
+      layout.yaxis2.tickmode = 'linear';
     }
   }
 
-  const previous = Chart.getChart(canvasId);;
-  if (previous) {
-    previous.destroy();
-  }
+  const plotConfig = {
+    displayModeBar: false,
+    responsive: true,
+    scrollZoom: false,
+  };
 
-  new Chart(document.getElementById(canvasId), {
-    type: 'line',
-    data,
-    options,
+  Plotly.newPlot(chartId, data, layout, plotConfig);
+
+  const chart = document.getElementById(chartId);
+  chart.on('plotly_click', (data) => {
+    const { pointIndex } = data.points[0];
+    const url = dataset[pointIndex].commit.url;
+    window.open(url, '_blank');
+  });
+
+  // Borrowed from .NET Aspire: https://github.com/dotnet/aspire/blob/84bd9f75ab096a1cf9b8ea8e69914445aaf23d8c/src/Aspire.Dashboard/wwwroot/js/app-metrics.js#L89-L118
+  const dragLayer = document.getElementsByClassName('nsewdrag')[0];
+  dragLayer.style.cursor = 'default';
+  chart.on('plotly_hover', () => {
+    dragLayer.style.cursor = 'pointer';
+  });
+  chart.on('plotly_unhover', () => {
+    dragLayer.style.cursor = 'default';
   });
 };

@@ -120,14 +120,18 @@ public class DashboardTests(
                 "DotNetBenchmarks.TodoAppBenchmarks",
                 "DotNetBenchmarks.TodoAppBenchmarks.GetAllTodos");
 
-            await Verify(chart)
-                .LocatorScreenshotOptions(new()
-                {
-                    Quality = 50,
-                    Type = ScreenshotType.Jpeg,
-                })
-                .UseDirectory("snapshots")
-                .UseTextForParameters($"{browserType}_{browserChannel}_benchmarks-demo");
+            var screenshot = await chart.ScreenshotAsync(new()
+            {
+                Quality = 50,
+                Type = ScreenshotType.Jpeg,
+            });
+
+            using (var stream = new MemoryStream(screenshot))
+            {
+                await Verify(new Target("png", stream))
+                    .UseDirectory("snapshots")
+                    .UseTextForParameters($"{browserType}_{browserChannel}_benchmarks-demo");
+            }
 
             // Arrange
             var token = await dashboard.SignInAsync();
@@ -219,14 +223,18 @@ public class DashboardTests(
 
             chart.ShouldNotBeNull();
 
-            await Verify(chart)
-                .LocatorScreenshotOptions(new()
-                {
-                    Quality = 50,
-                    Type = ScreenshotType.Jpeg,
-                })
-                .UseDirectory("snapshots")
-                .UseTextForParameters($"{browserType}_{browserChannel}_website");
+            screenshot = await chart.ScreenshotAsync(new()
+            {
+                Quality = 50,
+                Type = ScreenshotType.Jpeg,
+            });
+
+            using (var stream = new MemoryStream(screenshot))
+            {
+                await Verify(new Target("png", stream))
+                    .UseDirectory("snapshots")
+                    .UseTextForParameters($"{browserType}_{browserChannel}_website");
+            }
 
             // Act
             await dashboard.SignOutAsync();
