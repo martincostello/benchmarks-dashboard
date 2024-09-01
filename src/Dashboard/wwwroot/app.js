@@ -253,4 +253,14 @@ window.renderChart = (chartId, configString) => {
     const url = dataset[pointIndex].commit.url;
     window.open(url, '_blank');
   });
+
+  // Borrowed from .NET Aspire: https://github.com/dotnet/aspire/blob/84bd9f75ab096a1cf9b8ea8e69914445aaf23d8c/src/Aspire.Dashboard/wwwroot/js/app-metrics.js#L89-L118
+  const dragLayer = document.getElementsByClassName('nsewdrag')[0];
+  dragLayer.style.cursor = 'default';
+  chart.on('plotly_hover', () => {
+    dragLayer.style.cursor = 'pointer';
+  });
+  chart.on('plotly_unhover', () => {
+    dragLayer.style.cursor = 'default';
+  });
 };
