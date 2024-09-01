@@ -120,12 +120,13 @@ public class DashboardTests(
                 "DotNetBenchmarks.TodoAppBenchmarks",
                 "DotNetBenchmarks.TodoAppBenchmarks.GetAllTodos");
 
-            await Verify(chart)
-                .LocatorScreenshotOptions(new()
-                {
-                    Quality = 50,
-                    Type = ScreenshotType.Jpeg,
-                })
+            var screenshot = await chart.ScreenshotAsync(new()
+            {
+                Quality = 50,
+                Type = ScreenshotType.Jpeg,
+            });
+
+            await Verify(new Target("png", new MemoryStream(screenshot)))
                 .UseDirectory("snapshots")
                 .UseTextForParameters($"{browserType}_{browserChannel}_benchmarks-demo");
 
@@ -219,12 +220,13 @@ public class DashboardTests(
 
             chart.ShouldNotBeNull();
 
-            await Verify(chart)
-                .LocatorScreenshotOptions(new()
-                {
-                    Quality = 50,
-                    Type = ScreenshotType.Jpeg,
-                })
+            screenshot = await chart.ScreenshotAsync(new()
+            {
+                Quality = 50,
+                Type = ScreenshotType.Jpeg,
+            });
+
+            await Verify(new Target("png", new MemoryStream(screenshot)))
                 .UseDirectory("snapshots")
                 .UseTextForParameters($"{browserType}_{browserChannel}_website");
 
