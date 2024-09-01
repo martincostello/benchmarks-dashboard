@@ -9,6 +9,11 @@
   }
 }
 
+:root {
+  --plot-hover-color: white;
+  --plot-hover-background-color: rgba(0, 0, 0, 0.8);
+}
+
 body {
   padding-top: 6rem;
 }
@@ -53,6 +58,11 @@ img.user-profile {
   --fa-animation-duration: 1.5s;
 }
 
+.hovertext > path {
+  fill: var(--plot-hover-background-color) !important;
+  stroke: var(--plot-hover-background-color) !important;
+}
+
 .no-resize {
   resize: none;
 }
@@ -81,12 +91,6 @@ img.user-profile {
   align-items: center;
   flex-wrap: wrap;
   width: 100%;
-}
-
-.benchmark-chart {
-  max-height: 500px;
-  min-height: 320px;
-  max-width: 1000px;
 }
 
 #blazor-error-ui {

@@ -271,7 +271,7 @@ else if (GitHubService.Benchmarks?.Suites.Count > 0)
     {
         Dictionary<string, SortedList<DateTimeOffset, BenchmarkItem>> sortedGroups = new();
 
-        foreach (var run in runs)
+        foreach (var run in runs.DistinctBy((p) => p.Commit.Sha))
         {
             foreach (var benchmark in run.Benchmarks)
             {

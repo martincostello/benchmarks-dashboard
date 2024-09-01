@@ -1,7 +1,7 @@
 @inject IJSRuntime JS
 
 <div class="benchmark-chart-container col" id="@(Id)">
-    <canvas class="benchmark-chart" id="@(CanvasId)" name="@(Name)" />
+    <div class="benchmark-chart" id="@(ChartId)" name="@(Name)" />
 </div>
 
 @code {
@@ -24,7 +24,7 @@
     public required IList<BenchmarkItem> Items { get; init; }
 
     private string Id => $"{Suite}-{Name}";
-    private string CanvasId => $"{Suite}-{Name}-canvas";
+    private string ChartId => $"{Suite}-{Name}-chart";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -52,7 +52,7 @@
             suiteName = Suite,
         });
 
-        await JS.InvokeVoidAsync("renderChart", [CanvasId, options]);
+        await JS.InvokeVoidAsync("renderChart", [ChartId, options]);
 
         if (firstRender)
         {
