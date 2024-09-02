@@ -87,7 +87,7 @@ internal static class AppLauncher
         {
             if (eventArgs.Data is { Length: > 0 } data)
             {
-                completionSource.TrySetException(new InvalidOperationException(data));
+                _ = completionSource.TrySetException(new InvalidOperationException(data));
                 errorEncountered = true;
             }
         }
