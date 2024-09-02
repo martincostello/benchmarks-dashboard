@@ -14,6 +14,7 @@
     <div class="col-12 col-md-8">
         <div class="card ">
             <div class="card-header">
+                <Icon Name="@(Icons.GitHub)" />
                 @(options.GitHubInstance) Token @(tokenRequired ? "Required" : string.Empty)
             </div>
             <div class="card-body">
@@ -87,7 +88,7 @@
                             </div>
                         }
                     }
-                    else
+                    else if (!_tokenGenerationFailed)
                     {
                         <div class="d-flex justify-content-center">
                             <Spinner SpinnerType="@(SpinnerType.Border)" Large="true" LoadingText="Generating code..." />
@@ -96,7 +97,21 @@
                 </p>
             </div>
         </div>
-        @if (_deviceCode?.ExpiresInSeconds is { } expiry && _authorizationFailed)
+        @if (_tokenGenerationFailed)
+        {
+            <div class="card mt-3">
+                <div class="card-header bg-danger text-white">
+                    <Icon Name="@(Icons.GitHub)" />
+                    @(options.GitHubInstance) authorization failed
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Something went wrong generating a @(options.GitHubInstance) device code.
+                    </p>
+                </div>
+            </div>
+        }
+        else if (_deviceCode?.ExpiresInSeconds is { } expiry && _authorizationFailed)
         {
             <div class="card mt-3" id="authorization-failed">
                 <div class="card-header bg-danger text-white">
@@ -131,6 +146,7 @@
 @code {
     private bool _authorizing;
     private bool _authorizationFailed;
+    private bool _tokenGenerationFailed;
     private GitHubDeviceCode? _deviceCode;
 
     protected override async Task OnInitializedAsync()
@@ -146,7 +162,15 @@
 
     private async Task GenerateCodeAsync()
     {
-        _deviceCode = await TokenService.GetDeviceCodeAsync();
+        try
+        {
+            _deviceCode = await TokenService.GetDeviceCodeAsync();
+            _tokenGenerationFailed = false;
+        }
+        catch (HttpRequestException)
+        {
+            _tokenGenerationFailed = true;
+        }
     }
 
     private async Task RefreshCodeAsync()
