@@ -1,14 +1,8 @@
-@implements IAsyncDisposable
-
-@{
-    var options = Options.Value;
-}
-
 <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-primary">
     <div class="container-fluid">
         <a href="@(Routes.Home)" class="navbar-brand" id="home-link">
-            @(options.BrandName)
-            @foreach (var iconClasses in options.BrandIcons)
+            @(Dashboard.BrandName)
+            @foreach (var iconClasses in Dashboard.BrandIcons)
             {
                 <span class="@(iconClasses) d-lg-inline ms-1" aria-hidden="true"></span>
             }
@@ -39,7 +33,7 @@
                        href="@(_dataRepoUrl)"
                        rel="noopener"
                        target="_blank"
-                       title="Benchmarks data repository in @(options.GitHubInstance)">
+                       title="Benchmarks data repository in @(Dashboard.GitHubInstance)">
                         Benchmarks
                         <Icon Name="@(Icons.Database)" />
                         <Icon Name="@(Icons.GitHub)" />
@@ -52,7 +46,7 @@
                            href="@(GitMetadata.RepositoryUrl)"
                             rel="noopener"
                             target="_blank"
-                            title="Benchmarks dashboard repository in @(options.GitHubInstance)">
+                           title="Benchmarks dashboard repository in @(Dashboard.GitHubInstance)">
                             Dashboard
                             <Icon Name="@(Icons.ChartLine)" />
                             <Icon Name="@(Icons.GitHub)" />
@@ -87,7 +81,7 @@
                     </li>
                 </ul>
             }
-            else if (!options.IsGitHubEnterprise)
+            else if (!Dashboard.IsGitHubEnterprise)
             {
                 <ul class="nav navbar-nav">
                     <li>
@@ -105,43 +99,3 @@
         </div>
     </div>
 </nav>
-
-@code {
-    private string? _dataRepoUrl;
-
-    public ValueTask DisposeAsync()
-    {
-        GitHubService.OnUserChanged -= OnUserChanged;
-        return ValueTask.CompletedTask;
-    }
-
-    protected async override Task OnInitializedAsync()
-    {
-        var options = Options.Value;
-
-        var uriBuilder = new UriBuilder(options.GitHubServerUrl)
-        {
-            Path = $"{options.RepositoryOwner}/{options.RepositoryName}",
-        };
-
-        _dataRepoUrl = uriBuilder.Uri.ToString();
-
-        if (GitHubService.HasToken)
-        {
-            await GitHubService.VerifyTokenAsync();
-        }
-
-        GitHubService.OnUserChanged += OnUserChanged;
-    }
-
-    private void OnUserChanged(object? sender, GitHubUserChangedEventArgs args)
-        => StateHasChanged();
-
-    private async Task SignOutAsync()
-    {
-        await GitHubService.SignOutAsync();
-
-        var uri = Options.Value.IsGitHubEnterprise ? Routes.Token : Routes.Home;
-        Navigation.NavigateTo(uri);
-    }
-}

@@ -1,27 +1,19 @@
 @page "/token"
 
-@inject GitHubDeviceTokenService TokenService
-@inject IJSRuntime JS
-
-@{
-    var options = Options.Value;
-    var tokenRequired = options.IsGitHubEnterprise;
-}
-
-<PageTitle>Configure @(options.GitHubInstance) Token - @(options.BrandName)</PageTitle>
+<PageTitle>Configure @(Dashboard.GitHubInstance) Token - @(Dashboard.BrandName)</PageTitle>
 
 <div class="row m-2 justify-content-center">
     <div class="col-12 col-md-8">
         <div class="card ">
             <div class="card-header">
                 <Icon Name="@(Icons.GitHub)" />
-                @(options.GitHubInstance) Token @(tokenRequired ? "Required" : string.Empty)
+                @(Dashboard.GitHubInstance) Token @(TokenRequired ? "Required" : string.Empty)
             </div>
             <div class="card-body">
                 <p class="card-text">
-                    <div class="alert alert-@(tokenRequired ? "primary" : "info")" role="alert">
-                        A @(options.GitHubInstance) access token
-                        @if (tokenRequired)
+                    <div class="alert alert-@(TokenRequired ? "primary" : "info")" role="alert">
+                        A @(Dashboard.GitHubInstance) access token
+                        @if (TokenRequired)
                         {
                             <text>
                                 is required to load the data for this dashboard.
@@ -43,7 +35,7 @@
                                 <span class="input-group-text">Code</span>
                                 <input class="form-control font-monospace"
                                        id="user-code"
-                                       label="The @(options.GitHubInstance) verification code"
+                                       label="The @(Dashboard.GitHubInstance) verification code"
                                        disabled="@(_authorizationFailed)"
                                        readonly
                                        type="text"
@@ -58,13 +50,13 @@
                                 </button>
                             </div>
                             <div class="form-text" id="user-code-help">
-                                Copy this code to allow @(options.BrandName) to generate an access token.
+                                Copy this code to allow @(Dashboard.BrandName) to generate an access token.
                             </div>
                         </div>
                         @if (_authorizing)
                         {
                             <div class="d-flex justify-content-center">
-                                <Spinner SpinnerType="@(SpinnerType.Border)" Large="true" LoadingText="@($"Waiting for an access token for your {options.GitHubInstance} account")" />
+                                <Spinner SpinnerType="@(SpinnerType.Border)" Large="true" LoadingText="@($"Waiting for an access token for your {Dashboard.GitHubInstance} account")" />
                             </div>
                         }
                         else if (!_authorizationFailed)
@@ -77,7 +69,7 @@
                                        role="button"
                                        target="_blank"
                                        rel="noopener"
-                                       title="Authorize @(options.BrandName) to access your {options.GitHubInstance} account"
+                                       title="Authorize @(Dashboard.BrandName) to access your {options.GitHubInstance} account"
                                        @onclick="AuthorizeAsync">
                                         Authorize
                                         <Icon Name="@(Icons.Check)" />
@@ -102,11 +94,11 @@
             <div class="card mt-3">
                 <div class="card-header bg-danger text-white">
                     <Icon Name="@(Icons.GitHub)" />
-                    @(options.GitHubInstance) authorization failed
+                    @(Dashboard.GitHubInstance) authorization failed
                 </div>
                 <div class="card-body">
                     <p class="card-text">
-                        Something went wrong generating a @(options.GitHubInstance) device code.
+                        Something went wrong generating a @(Dashboard.GitHubInstance) device code.
                     </p>
                 </div>
             </div>
@@ -119,7 +111,7 @@
                         <Icon Name="@(Icons.Key)" Stacked="true" />
                         <Icon Name="@(Icons.Ban)" Stacked="true" Color="warning" />
                     </span>
-                    @(options.GitHubInstance) authorization failed
+                    @(Dashboard.GitHubInstance) authorization failed
                 </div>
                 <div class="card-body">
                     <p class="card-text">
@@ -133,7 +125,7 @@
                             class="btn btn-primary"
                             id="refresh-code"
                             title="Refresh the code and try again"
-                            @onclick="RefreshCodeAsync">
+                            @onclick="@(RefreshCodeAsync)">
                         Refresh code
                         <Icon Name="@(Icons.RotateRight)" />
                     </button>
@@ -142,69 +134,3 @@
         }
     </div>
 </div>
-
-@code {
-    private bool _authorizing;
-    private bool _authorizationFailed;
-    private bool _tokenGenerationFailed;
-    private GitHubDeviceCode? _deviceCode;
-
-    protected override async Task OnInitializedAsync()
-        => await GenerateCodeAsync();
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (_deviceCode is not null)
-        {
-            await JS.InvokeVoidAsync("configureClipboard");
-        }
-    }
-
-    private async Task GenerateCodeAsync()
-    {
-        try
-        {
-            _deviceCode = await TokenService.GetDeviceCodeAsync();
-            _tokenGenerationFailed = false;
-        }
-        catch (HttpRequestException)
-        {
-            _tokenGenerationFailed = true;
-        }
-    }
-
-    private async Task RefreshCodeAsync()
-    {
-        _deviceCode = null;
-
-        await GenerateCodeAsync();
-
-        _authorizing = false;
-        _authorizationFailed = false;
-
-        StateHasChanged();
-    }
-
-    private async Task AuthorizeAsync()
-    {
-        if (_deviceCode is null)
-        {
-            return;
-        }
-
-        _authorizing = true;
-
-        StateHasChanged();
-
-        if (await TokenService.WaitForAccessTokenAsync(_deviceCode) is { Length: > 0 } token &&
-            await GitHubService.SignInAsync(token))
-        {
-            Navigation.NavigateTo(Routes.Home);
-        }
-
-        StateHasChanged();
-
-        _authorizing = false;
-        _authorizationFailed = true;
-    }
-}

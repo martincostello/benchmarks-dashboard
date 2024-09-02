@@ -12,19 +12,3 @@
         }
     </div>
 </div>
-
-@code {
-    /// <summary>
-    /// Gets the benchmark suite name.
-    /// </summary>
-    [Parameter]
-    public required string Name { get; init; }
-
-    /// <summary>
-    /// Gets the benchmarks for the suite.
-    /// </summary>
-    [Parameter]
-    public required Dictionary<string, IList<BenchmarkItem>> Benchmarks { get; init; }
-
-    protected override bool ShouldRender() => true;
-}
