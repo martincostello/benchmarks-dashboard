@@ -69,7 +69,9 @@ else if (GitHubService.Benchmarks is not null)
                         @if (GitHubService.Benchmarks.LastUpdated is { } timestamp && !ShowLoaders)
                         {
                             string text = timestamp.ToLocalTime().ToString("G");
-                            string title = $"{timestamp:s} ({timestamp.Humanize()})";
+                            // HACK Workaround for https://github.com/dotnet/sdk/issues/43033 and https://github.com/dotnet/aspnetcore/issues/57512
+                            //string title = $"{timestamp:s} ({timestamp.Humanize()})";
+                            string title = timestamp.ToString("s");
 
                             <span title="@(title)">
                                 @(text)
