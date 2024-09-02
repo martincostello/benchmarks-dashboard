@@ -1,5 +1,4 @@
 @inherits LayoutComponentBase
-@inject IJSRuntime JS
 
 <Navbar />
 <main class="body-content container-fluid" id="main">
@@ -46,8 +45,3 @@
         </div>
     </div>
 </footer>
-
-@code {
-    protected async override Task OnAfterRenderAsync(bool firstRender)
-        => await JS.InvokeVoidAsync("configureToolTips", []);
-}
