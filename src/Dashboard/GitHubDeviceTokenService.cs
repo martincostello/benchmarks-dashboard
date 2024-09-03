@@ -71,9 +71,10 @@ public sealed partial class GitHubDeviceTokenService(
                 Log.AccessPending(logger, result.Error, deviceCode.RefreshIntervalInSeconds);
             }
 
-            await Task.Delay(delay, cancellationToken);
+            await Task.Delay(delay, timeProvider, cancellationToken);
         }
 
+        Log.TokenExpired(logger);
         return null;
     }
 
