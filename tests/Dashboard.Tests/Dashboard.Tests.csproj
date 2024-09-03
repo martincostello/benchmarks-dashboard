@@ -14,6 +14,7 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="GitHubActionsTestLogger" />
+    <PackageReference Include="JustEat.HttpClientInterception" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Microsoft.Playwright" />
     <PackageReference Include="Shouldly" />
@@ -22,6 +23,7 @@
     <PackageReference Include="Verify.Xunit" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Xunit.Combinatorial" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Shouldly" />
