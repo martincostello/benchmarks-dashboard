@@ -21,6 +21,7 @@ public abstract class DashboardTestContext : TestContext
             GitHubApiUrl = new("https://api.github.local"),
             GitHubApiVersion = "2022-11-28",
             GitHubClientId = "dkd73mfo9ASgjsfnhJD8",
+            GitHubTokenUrl = new("https://github.local"),
             GitHubServerUrl = new("https://github.local"),
             Repositories = ["benchmarks-demo", "website"],
             RepositoryOwner = "martincostello",
@@ -31,9 +32,12 @@ public abstract class DashboardTestContext : TestContext
         Services.AddSingleton((_) => Microsoft.Extensions.Options.Options.Create(Options));
         Services.AddSingleton((_) => Interceptor.CreateHttpClient());
 
+        Services.AddSingleton(TimeProvider.System);
+
         Services.AddSingleton<ILocalStorageService>(LocalStorage);
         Services.AddSingleton<ISyncLocalStorageService>(LocalStorage);
 
+        Services.AddSingleton<GitHubDeviceTokenService>();
         Services.AddSingleton<GitHubClient>();
         Services.AddSingleton<GitHubService>();
         Services.AddSingleton<GitHubTokenStore>();

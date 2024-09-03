@@ -91,7 +91,7 @@
         </div>
         @if (_tokenGenerationFailed)
         {
-            <div class="card mt-3">
+            <div class="card mt-3" id="generation-failed">
                 <div class="card-header bg-danger text-white">
                     <Icon Name="@(Icons.GitHub)" />
                     @(Dashboard.GitHubInstance) authorization failed

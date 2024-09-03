@@ -1,11 +1,14 @@
 ﻿// Copyright (c) Martin Costello, 2024. All rights reserved.
 // Licensed under the Apache 2.0 license. See the LICENSE file in the project root for full license information.
 
+using System.Net;
+using Bunit;
+using JustEat.HttpClientInterception;
 using MartinCostello.Benchmarks.Models;
 
 namespace MartinCostello.Benchmarks.Pages;
 
-public static class HomeTests
+public class HomeTests : DashboardTestContext
 {
     public static TheoryData<double[], double?[], double[], string?, double?[], string?> NormalizationTestCases()
     {
@@ -141,6 +144,36 @@ public static class HomeTests
         values[1].Result.Unit.ShouldBe("µs");
     }
 
+    [Fact]
+    public void Page_Renders()
+    {
+        // Arrange
+        string repository = "benchmarks-demo";
+
+        RegisterResponse("https://api.github.local/user", "user-valid-token");
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{repository}", $"{repository}-repo");
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{repository}/branches", $"{repository}-branches");
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Options.RepositoryName}/contents/{repository}/data.json?ref=main", $"{repository}-main");
+
+        JSInterop.SetupVoid("configureDataDownload", (_) => true);
+        JSInterop.SetupVoid("renderChart", (_) => true);
+
+        // Act
+        var actual = RenderComponent<Home>();
+
+        // Assert
+        actual.WaitForAssertion(
+            () =>
+            {
+                actual.Find("[name='repo']").ShouldNotBeNull();
+                actual.Find("[name='branch']").ShouldNotBeNull();
+                actual.Find("[id='branch']").ShouldNotBeNull();
+                actual.FindAll(".benchmark-set").Count.ShouldBe(4);
+                actual.FindAll(".benchmark-chart").Count.ShouldBe(9);
+            },
+            TimeSpan.FromSeconds(2));
+    }
+
     private static GitCommit CreateCommit(string sha)
     {
         return new GitCommit()
@@ -152,5 +185,15 @@ public static class HomeTests
             Sha = sha,
             Url = $"https://github.local/octocat/repository/commits/{sha}",
         };
+    }
+
+    private void RegisterResponse(string url, string name, HttpStatusCode statusCode = HttpStatusCode.OK)
+    {
+        var builder = new HttpRequestInterceptionBuilder()
+            .ForUrl(url)
+            .WithStatus(statusCode)
+            .WithContentStream(() => File.OpenRead(Path.Combine(".", "Responses", $"{name}.json")));
+
+        builder.RegisterWith(Interceptor);
     }
 }
