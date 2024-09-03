@@ -76,40 +76,40 @@ public static class HomeTests
             new()
             {
                 Timestamp = new DateTimeOffset(2024, 08, 31, 00, 05, 00, TimeSpan.Zero),
-                Commit = new() { Sha = "abc" },
+                Commit = CreateCommit("abc"),
                 Benchmarks =
                 [
-                    new() { Name = "A", Value = 1 },
+                    new() { Name = "A", Value = 1, Range = "± 0.1" },
                 ],
             },
             new()
             {
                 Timestamp = new DateTimeOffset(2024, 09, 01, 00, 05, 00, TimeSpan.Zero),
-                Commit = new() { Sha = "def" },
+                Commit = CreateCommit("def"),
                 Benchmarks =
                 [
                     new() { Name = "A", Value = 2 },
-                    new() { Name = "B", Value = 2678 },
+                    new() { Name = "B", Value = 2678, Range = "± 17" },
                 ],
             },
             new()
             {
                 Timestamp = new DateTimeOffset(2024, 09, 01, 00, 05, 15, TimeSpan.Zero),
-                Commit = new() { Sha = "def" },
+                Commit = CreateCommit("def"),
                 Benchmarks =
                 [
                     new() { Name = "A", Value = 3 },
-                    new() { Name = "B", Value = 2497 },
+                    new() { Name = "B", Value = 2497, Range = "± 14.3" },
                 ],
             },
             new()
             {
                 Timestamp = new DateTimeOffset(2024, 09, 02, 00, 05, 00, TimeSpan.Zero),
-                Commit = new() { Sha = "123" },
+                Commit = CreateCommit("123"),
                 Benchmarks =
                 [
                     new() { Name = "A", Value = 4 },
-                    new() { Name = "B", Value = 2642 },
+                    new() { Name = "B", Value = 2642, Range = "± 26.7" },
                 ],
             },
         };
@@ -139,5 +139,18 @@ public static class HomeTests
         values[0].Result.Unit.ShouldBe("µs");
         values[1].Result.Value.ShouldBe(2.642);
         values[1].Result.Unit.ShouldBe("µs");
+    }
+
+    private static GitCommit CreateCommit(string sha)
+    {
+        return new GitCommit()
+        {
+            Author = new() { UserName = "octocat" },
+            Committer = new() { UserName = "webflow" },
+            LastUpdated = DateTime.UtcNow,
+            Message = "Update code",
+            Sha = sha,
+            Url = $"https://github.local/octocat/repository/commits/{sha}",
+        };
     }
 }

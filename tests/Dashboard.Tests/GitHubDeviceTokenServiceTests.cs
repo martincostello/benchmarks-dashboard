@@ -55,6 +55,29 @@ public class GitHubDeviceTokenServiceTests
     private GitHubDeviceTokenService Target { get; }
 
     [Fact]
+    public async Task Can_Get_Device_Code()
+    {
+        // Arrange
+        var builder = new HttpRequestInterceptionBuilder()
+            .ForPost()
+            .ForUrl("https://github.local/login/device/code?client_id=dkd73mfo9ASgjsfnhJD8&scope=public_repo")
+            .WithJsonContent(DeviceCode);
+
+        builder.RegisterWith(Interceptor);
+
+        // Act
+        var actual = await Target.GetDeviceCodeAsync();
+
+        // Assert
+        actual.ShouldNotBeNull();
+        actual.DeviceCode.ShouldBe("3584d83530557fdd1f46af8289938c8ef79f9dc5");
+        actual.ExpiresInSeconds.ShouldBe(900);
+        actual.RefreshIntervalInSeconds.ShouldBe(5);
+        actual.UserCode.ShouldBe("WDJB-MJHT");
+        actual.VerificationUrl.ShouldBe("https://github.local/login/device");
+    }
+
+    [Fact]
     public async Task Can_Get_Access_Token()
     {
         // Arrange
@@ -69,7 +92,7 @@ public class GitHubDeviceTokenServiceTests
 
         int attempts = 0;
 
-        RegisterResponse(() =>
+        RegisterAccessTokenResponse(() =>
         {
             var response = responses[attempts++];
             return JsonSerializer.SerializeToUtf8Bytes(response);
@@ -103,7 +126,7 @@ public class GitHubDeviceTokenServiceTests
 
         int attempts = 0;
 
-        RegisterResponse(() =>
+        RegisterAccessTokenResponse(() =>
         {
             var response = responses[attempts++];
             return JsonSerializer.SerializeToUtf8Bytes(response);
@@ -137,7 +160,7 @@ public class GitHubDeviceTokenServiceTests
 
         int attempts = 0;
 
-        RegisterResponse(() =>
+        RegisterAccessTokenResponse(() =>
         {
             var response = responses[attempts++];
             return JsonSerializer.SerializeToUtf8Bytes(response);
@@ -201,9 +224,9 @@ public class GitHubDeviceTokenServiceTests
     private static object Error(string code) => new { error = code };
 
     private void RegisterResponse(object json)
-        => RegisterResponse(() => JsonSerializer.SerializeToUtf8Bytes(json));
+        => RegisterAccessTokenResponse(() => JsonSerializer.SerializeToUtf8Bytes(json));
 
-    private void RegisterResponse(Func<byte[]> contentFactory)
+    private void RegisterAccessTokenResponse(Func<byte[]> contentFactory)
     {
         var builder = new HttpRequestInterceptionBuilder()
             .ForPost()

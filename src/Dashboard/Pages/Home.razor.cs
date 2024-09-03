@@ -127,10 +127,11 @@ public partial class Home
 
                 if (item.Result.Range is { Length: > 0 } range)
                 {
+                    var prefix = range[0..2];
                     var rangeValue = double.Parse(range[2..], CultureInfo.InvariantCulture);
                     rangeValue *= Factor;
 
-                    item.Result.Range = $"± {rangeValue}";
+                    item.Result.Range = prefix + rangeValue;
                 }
             }
         }
