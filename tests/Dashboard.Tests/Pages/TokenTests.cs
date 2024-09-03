@@ -23,12 +23,7 @@ public class TokenTests : DashboardTestContext
             VerificationUrl = "https://github.local/login/device",
         };
 
-        var builder = new HttpRequestInterceptionBuilder()
-            .ForPost()
-            .ForUrl("https://github.local/login/device/code?client_id=dkd73mfo9ASgjsfnhJD8&scope=public_repo")
-            .WithJsonContent(deviceCode);
-
-        builder.RegisterWith(Interceptor);
+        WithDeviceCode(deviceCode);
 
         JSInterop.SetupVoid("configureClipboard", (_) => true);
 
@@ -43,7 +38,7 @@ public class TokenTests : DashboardTestContext
 
                 var input = userCode as IHtmlInputElement;
                 input.ShouldNotBeNull();
-                input.Value.ShouldBe("WDJB-MJHT");
+                input.Value.ShouldBe(deviceCode.UserCode);
 
                 actual.Find("[id='authorize']").TextContent.ShouldContain("Authorize");
             },

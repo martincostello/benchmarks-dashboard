@@ -1,9 +1,7 @@
 ﻿// Copyright (c) Martin Costello, 2024. All rights reserved.
 // Licensed under the Apache 2.0 license. See the LICENSE file in the project root for full license information.
 
-using System.Net;
 using Bunit;
-using JustEat.HttpClientInterception;
 using MartinCostello.Benchmarks.Models;
 
 namespace MartinCostello.Benchmarks.Pages;
@@ -145,15 +143,14 @@ public class HomeTests : DashboardTestContext
     }
 
     [Fact]
-    public void Page_Renders()
+    public async Task Page_Renders()
     {
         // Arrange
         string repository = "benchmarks-demo";
 
-        RegisterResponse("https://api.github.local/user", "user-valid-token");
-        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{repository}", $"{repository}-repo");
-        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{repository}/branches", $"{repository}-branches");
-        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Options.RepositoryName}/contents/{repository}/data.json?ref=main", $"{repository}-main");
+        await WithValidAccessToken();
+
+        WithBenchmarks(repository, "main");
 
         JSInterop.SetupVoid("configureDataDownload", (_) => true);
         JSInterop.SetupVoid("renderChart", (_) => true);
@@ -185,15 +182,5 @@ public class HomeTests : DashboardTestContext
             Sha = sha,
             Url = $"https://github.local/octocat/repository/commits/{sha}",
         };
-    }
-
-    private void RegisterResponse(string url, string name, HttpStatusCode statusCode = HttpStatusCode.OK)
-    {
-        var builder = new HttpRequestInterceptionBuilder()
-            .ForUrl(url)
-            .WithStatus(statusCode)
-            .WithContentStream(() => File.OpenRead(Path.Combine(".", "Responses", $"{name}.json")));
-
-        builder.RegisterWith(Interceptor);
     }
 }
