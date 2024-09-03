@@ -38,10 +38,7 @@ public class BenchmarkSuiteTests : DashboardTestContext
         var charts = actual.FindAll(".benchmark-chart");
         charts.Count.ShouldBe(2);
 
-        charts[0].HasAttribute("name");
-        charts[0].Attributes["name"]!.Value.ShouldBe("Benchmark1");
-
-        charts[1].HasAttribute("name");
-        charts[1].Attributes["name"]!.Value.ShouldBe("Benchmark2");
+        charts[0].GetAttribute("name").ShouldBe("Benchmark1");
+        charts[1].GetAttribute("name").ShouldBe("Benchmark2");
     }
 }

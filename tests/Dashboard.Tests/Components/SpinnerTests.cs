@@ -39,13 +39,9 @@ public class SpinnerTests : DashboardTestContext
         // Assert
         var element = actual.Find($"[id={id}]");
 
-        element.HasAttribute("class");
-        element.HasAttribute("role");
-        element.HasAttribute("title");
-
-        element.Attributes["class"]!.Value.ShouldBe(expectedClasses);
-        element.Attributes["role"]!.Value.ShouldBe("status");
-        element.Attributes["title"]!.Value.ShouldBe(expectedTitle);
+        element.GetAttribute("class").ShouldBe(expectedClasses);
+        element.GetAttribute("role").ShouldBe("status");
+        element.GetAttribute("title").ShouldBe(expectedTitle);
         element.TextContent.ShouldBe(expectedTitle);
     }
 }
