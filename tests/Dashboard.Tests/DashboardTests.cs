@@ -120,18 +120,7 @@ public class DashboardTests(
                 "DotNetBenchmarks.TodoAppBenchmarks",
                 "DotNetBenchmarks.TodoAppBenchmarks.GetAllTodos");
 
-            var screenshot = await chart.ScreenshotAsync(new()
-            {
-                Quality = 50,
-                Type = ScreenshotType.Jpeg,
-            });
-
-            using (var stream = new MemoryStream(screenshot))
-            {
-                await Verify(new Target("png", stream))
-                    .UseDirectory("snapshots")
-                    .UseTextForParameters($"{browserType}_{browserChannel}_benchmarks-demo");
-            }
+            await VerifyScreenshot(chart, $"{browserType}_{browserChannel}_benchmarks-demo");
 
             // Arrange
             var token = await dashboard.SignInAsync();
@@ -223,18 +212,7 @@ public class DashboardTests(
 
             chart.ShouldNotBeNull();
 
-            screenshot = await chart.ScreenshotAsync(new()
-            {
-                Quality = 50,
-                Type = ScreenshotType.Jpeg,
-            });
-
-            using (var stream = new MemoryStream(screenshot))
-            {
-                await Verify(new Target("png", stream))
-                    .UseDirectory("snapshots")
-                    .UseTextForParameters($"{browserType}_{browserChannel}_website");
-            }
+            await VerifyScreenshot(chart, $"{browserType}_{browserChannel}_website");
 
             // Act
             await dashboard.SignOutAsync();
@@ -263,6 +241,20 @@ public class DashboardTests(
         {
             throw new InvalidOperationException($"Playwright exited with code {exitCode}");
         }
+    }
+
+    private static async Task VerifyScreenshot(IElementHandle element, string parametersText)
+    {
+        var screenshot = await element.ScreenshotAsync(new()
+        {
+            Quality = 50,
+            Type = ScreenshotType.Jpeg,
+        });
+
+        using var stream = new MemoryStream(screenshot);
+        await Verify(new Target("png", stream))
+            .UseDirectory("snapshots")
+            .UseTextForParameters(parametersText);
     }
 
     private static async Task ConfigureMocksAsync(
