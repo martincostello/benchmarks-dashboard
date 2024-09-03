@@ -51,7 +51,7 @@ public sealed class GitHubService(
     /// <summary>
     /// Gets a value indicating whether has a GitHub token configured.
     /// </summary>
-    public bool HasToken => !string.IsNullOrEmpty(tokenStore.GetToken());
+    public bool HasToken => !string.IsNullOrWhiteSpace(tokenStore.GetToken());
 
     /// <summary>
     /// Gets a value indicating whether the token is invalid.
@@ -152,6 +152,8 @@ public sealed class GitHubService(
         }
 
         CurrentBranch = branch;
+        CurrentCommit = null;
+
         Benchmarks = await client.GetBenchmarksAsync(CurrentRepository.Name, CurrentBranch, CurrentRepository.IsPublic);
 
         if (Benchmarks is null)
@@ -241,8 +243,13 @@ public sealed class GitHubService(
     {
         await tokenStore.StoreTokenAsync(string.Empty, cancellationToken);
 
+        var previous = CurrentUser;
         CurrentUser = null;
-        OnUserChanged?.Invoke(this, new(null));
+
+        if (previous != CurrentUser)
+        {
+            OnUserChanged?.Invoke(this, new(null));
+        }
     }
 
     /// <summary>
