@@ -6,7 +6,7 @@ using Microsoft.JSInterop;
 
 namespace MartinCostello.Benchmarks.Layout;
 
-public partial class MainLayout : LayoutComponentBase
+public partial class MainLayout
 {
     /// <summary>
     /// Gets the <see cref="IJSRuntime"/> to use.

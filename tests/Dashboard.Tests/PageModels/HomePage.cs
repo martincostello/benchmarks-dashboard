@@ -3,7 +3,7 @@
 
 using Microsoft.Playwright;
 
-namespace MartinCostello.Benchmarks.Pages;
+namespace MartinCostello.Benchmarks.PageModels;
 
 public class HomePage(IPage page) : AppPage(page)
 {

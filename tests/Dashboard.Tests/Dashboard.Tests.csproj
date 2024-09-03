@@ -13,19 +13,33 @@
   </ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="bunit" />
+    <PackageReference Include="coverlet.msbuild" />
     <PackageReference Include="GitHubActionsTestLogger" />
+    <PackageReference Include="JustEat.HttpClientInterception" />
+    <PackageReference Include="MartinCostello.Logging.XUnit" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Microsoft.Playwright" />
+    <PackageReference Include="ReportGenerator" />
     <PackageReference Include="Shouldly" />
     <PackageReference Include="Verify.ImageMagick" />
     <PackageReference Include="Verify.Playwright" />
     <PackageReference Include="Verify.Xunit" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Xunit.Combinatorial" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Shouldly" />
     <Using Include="Xunit" />
     <Using Include="Xunit.Abstractions" />
   </ItemGroup>
+  <PropertyGroup Condition=" '$(BuildingInsideVisualStudio)' != 'true' ">
+    <CollectCoverage>true</CollectCoverage>
+    <CoverletOutputFormat>cobertura,json</CoverletOutputFormat>
+    <Exclude>[*.Test*]*,[xunit.*]*</Exclude>
+    <ExcludeByAttribute>GeneratedCodeAttribute</ExcludeByAttribute>
+    <Threshold>70</Threshold>
+  </PropertyGroup>
 </Project>

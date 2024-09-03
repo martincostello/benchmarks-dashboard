@@ -24,9 +24,7 @@ public sealed partial class GitHubDeviceTokenService(
     /// A <see cref="Task"/> representing the asynchronous operation to get a device code.
     /// </returns>
     public async Task<GitHubDeviceCode> GetDeviceCodeAsync(CancellationToken cancellationToken = default)
-    {
-        return await client.GetDeviceCodeAsync(cancellationToken);
-    }
+        => await client.GetDeviceCodeAsync(cancellationToken);
 
     /// <summary>
     /// Waits for a GitHub access token as an asynchronous operation.
@@ -73,9 +71,10 @@ public sealed partial class GitHubDeviceTokenService(
                 Log.AccessPending(logger, result.Error, deviceCode.RefreshIntervalInSeconds);
             }
 
-            await Task.Delay(delay, cancellationToken);
+            await Task.Delay(delay, timeProvider, cancellationToken);
         }
 
+        Log.TokenExpired(logger);
         return null;
     }
 

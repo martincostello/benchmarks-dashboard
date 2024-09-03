@@ -1,6 +1,7 @@
 # Benchmarks Dashboard
 
 [![Deployment status][build-badge]][build-status]
+[![codecov][coverage-badge]][coverage-report]
 
 ## Introduction
 
@@ -40,6 +41,8 @@ This project is licensed under the [Apache 2.0][license] license.
 [blazor]: https://learn.microsoft.com/aspnet/core/blazor "ASP.NET Core Blazor"
 [build-badge]: https://github.com/martincostello/benchmarks-dashboard/actions/workflows/build.yml/badge.svg?branch=main&event=push
 [build-status]: https://github.com/martincostello/benchmarks-dashboard/actions?query=workflow%3Abuild+branch%3Amain+event%3Apush "Continuous Integration for this project"
+[coverage-badge]: https://codecov.io/gh/martincostello/benchmarks-dashboard/branch/main/graph/badge.svg
+[coverage-report]: https://codecov.io/gh/martincostello/benchmarks-dashboard "Code coverage report for this project"
 [dotnet-sdk]: https://dotnet.microsoft.com/download "Download the .NET SDK"
 [issues]: https://github.com/martincostello/benchmarks-dashboard/issues "Issues for this project on GitHub.com"
 [license]: https://www.apache.org/licenses/LICENSE-2.0.txt "The Apache 2.0 license"

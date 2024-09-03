@@ -1121,6 +1121,51 @@
             "bytesAllocated": 59275
           }
         ]
+      },
+      {
+        "commit": {
+          "author": {
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "username": "web-flow"
+          },
+          "sha": "323cbb3a8f1ee38ee935d876297f9e281e8b2c0f",
+          "message": "Bump the typescript-eslint group in /src/Website with 2 updates (#2200)\n\nBumps the typescript-eslint group in /src/Website with 2 updates: [@typescript-eslint/eslint-plugin](https://github.com/typescript-eslint/typescript-eslint/tree/HEAD/packages/eslint-plugin) and [@typescript-eslint/parser](https://github.com/typescript-eslint/typescript-eslint/tree/HEAD/packages/parser).\n\n\nUpdates `@typescript-eslint/eslint-plugin` from 8.3.0 to 8.4.0\n- [Release notes](https://github.com/typescript-eslint/typescript-eslint/releases)\n- [Changelog](https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/CHANGELOG.md)\n- [Commits](https://github.com/typescript-eslint/typescript-eslint/commits/v8.4.0/packages/eslint-plugin)\n\nUpdates `@typescript-eslint/parser` from 8.3.0 to 8.4.0\n- [Release notes](https://github.com/typescript-eslint/typescript-eslint/releases)\n- [Changelog](https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/parser/CHANGELOG.md)\n- [Commits](https://github.com/typescript-eslint/typescript-eslint/commits/v8.4.0/packages/parser)\n\n---\nupdated-dependencies:\n- dependency-name: \"@typescript-eslint/eslint-plugin\"\n  dependency-type: direct:development\n  update-type: version-update:semver-minor\n  dependency-group: typescript-eslint\n- dependency-name: \"@typescript-eslint/parser\"\n  dependency-type: direct:development\n  update-type: version-update:semver-minor\n  dependency-group: typescript-eslint\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2024-09-03T04:58:04Z",
+          "url": "https://github.com/martincostello/website/commit/323cbb3a8f1ee38ee935d876297f9e281e8b2c0f"
+        },
+        "date": 1725339706915,
+        "benches": [
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Root",
+            "value": 362616.41822916665,
+            "unit": "ns",
+            "range": "± 1231.408125705579",
+            "bytesAllocated": 48387
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.About",
+            "value": 368072.05345052085,
+            "unit": "ns",
+            "range": "± 3498.528803888654",
+            "bytesAllocated": 51332
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Projects",
+            "value": 428421.533203125,
+            "unit": "ns",
+            "range": "± 5894.043999510876",
+            "bytesAllocated": 65218
+          },
+          {
+            "name": "MartinCostello.Website.Benchmarks.WebsiteBenchmarks.Tools",
+            "value": 402068.78357872594,
+            "unit": "ns",
+            "range": "± 4054.4578693451845",
+            "bytesAllocated": 59268
+          }
+        ]
       }
     ]
   }
