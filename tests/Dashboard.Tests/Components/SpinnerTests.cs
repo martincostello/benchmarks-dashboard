@@ -38,7 +38,10 @@ public class SpinnerTests : DashboardTestContext
 
         // Assert
         var element = actual.Find($"[id={id}]");
-        element.ShouldNotBeNull();
+
+        element.HasAttribute("class");
+        element.HasAttribute("role");
+        element.HasAttribute("title");
 
         element.Attributes["class"]!.Value.ShouldBe(expectedClasses);
         element.Attributes["role"]!.Value.ShouldBe("status");
