@@ -108,6 +108,7 @@ public sealed class GitHubClient(
         if (useApi)
         {
             await SetHeadersAsync(message.Headers, cancellationToken);
+            message.Headers.Accept.Clear();
             message.Headers.Add("Accept", "application/vnd.github.v3.raw");
         }
 
