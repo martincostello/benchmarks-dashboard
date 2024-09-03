@@ -43,8 +43,6 @@ public class SpinnerTests : DashboardTestContext
         element.Attributes["class"]!.Value.ShouldBe(expectedClasses);
         element.Attributes["role"]!.Value.ShouldBe("status");
         element.Attributes["title"]!.Value.ShouldBe(expectedTitle);
-
-        var span = actual.Find("span");
         element.TextContent.ShouldBe(expectedTitle);
     }
 }
