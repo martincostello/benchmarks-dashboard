@@ -40,13 +40,15 @@ public partial class Benchmark
     /// <inheritdoc/>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!Options.Value.DataSetColors.TryGetValue("Memory", out var memoryColor) ||
+        var current = Options.Value;
+
+        if (!current.DataSetColors.TryGetValue("Memory", out var memoryColor) ||
             memoryColor is not { Length: > 0 })
         {
             memoryColor = "#e34c26";
         }
 
-        if (!Options.Value.DataSetColors.TryGetValue("Time", out var timeColor) ||
+        if (!current.DataSetColors.TryGetValue("Time", out var timeColor) ||
             timeColor is not { Length: > 0 })
         {
             timeColor = "#178600";
@@ -60,6 +62,7 @@ public partial class Benchmark
                 time = timeColor,
             },
             dataset = Items,
+            errorBars = current.ErrorBars,
             name = Name,
             suiteName = Suite,
         });

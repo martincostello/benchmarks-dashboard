@@ -29,6 +29,11 @@ public sealed class DashboardOptions
     public IDictionary<string, string> DataSetColors { get; set; } = new Dictionary<string, string>();
 
     /// <summary>
+    /// Gets or sets a value indicating whether to show error bars.
+    /// </summary>
+    public bool ErrorBars { get; set; } = true;
+
+    /// <summary>
     /// Gets or sets the URI to use for the GitHub API.
     /// </summary>
     public Uri GitHubApiUrl { get; set; } = new("https://api.github.com");

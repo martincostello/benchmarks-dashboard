@@ -156,10 +156,6 @@ window.renderChart = (chartId, configString) => {
   const time = {
     connectgaps: true,
     customdata,
-    error_y: {
-      array: dataset.map((p) => parseFloat(p.result.range.slice(2))),
-      type: 'data',
-    },
     fill: 'tozeroy',
     hoverlabel,
     hovertemplate,
@@ -178,6 +174,13 @@ window.renderChart = (chartId, configString) => {
     y: dataset.map((p) => p.result.value),
     yaxis: timeAxis,
   };
+
+  if (config.errorBars === true) {
+    time.error_y = {
+      array: dataset.map((p) => parseFloat(p.result.range.slice(2))),
+      type: 'data',
+    };
+  }
 
   const data = [time];
 
