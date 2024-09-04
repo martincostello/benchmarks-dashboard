@@ -36,7 +36,7 @@ public class TokenTests : DashboardTestContext
             {
                 var userCode = actual.Find("[id='user-code']");
 
-                var input = userCode as IHtmlInputElement;
+                var input = userCode.ShouldBeAssignableTo<IHtmlInputElement>();
                 input.ShouldNotBeNull();
                 input.Value.ShouldBe(deviceCode.UserCode);
 
