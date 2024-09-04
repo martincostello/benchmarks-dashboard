@@ -2,14 +2,6 @@
 <html lang="en-gb">
 <head prefix="og:http://ogp.me/ns#">
   <base href="/" />
-  <!--
-  <script>
-    if (window.location.pathname.length > 1) {
-      const base = document.querySelector('base');
-      base.href = window.location.pathname;
-    }
-  </script>
-  -->
   <title>Benchmarks - .NET Benchmarks</title>
   <meta http-equiv="cache-control" content="no-cache, no-store" />
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
@@ -86,7 +78,19 @@
   </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.3/flatly/bootstrap.min.css" integrity="sha512-qoT4KwnRpAQ9uczPsw7GunsNmhRnYwSlE2KRCUPRQHSkDuLulCtDXuC2P/P6oqr3M5hoGagUG9pgHDPkD2zCDA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="stylesheet" href="app.css" />
+  <script type="text/javascript">
+    if (window.location.pathname.length > 1) {
+      const base = document.querySelector('base');
+      base.href = window.location.pathname;
+    }
+    const links = ['app.css'];
+    for (const href of links) {
+      const link = document.createElement('link');
+      link.setAttribute('href', href);
+      link.setAttribute('rel', 'stylesheet');
+      document.head.appendChild(link);
+    }
+  </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js" integrity="sha512-7Pi/otdlbbCR+LnW+F7PwFcSDJOuUJB3OxtEHbg4vSMvzvJjde4Po1v4BR9Gdc9aXNUNFVUY+SK51wWT8WF0Gg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body id="app">
