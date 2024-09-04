@@ -6,7 +6,7 @@
 </main>
 <hr />
 @{
-    string author = "Martin Costello";
+    string author = GitMetadata.Author;
     string repository = GitMetadata.RepositoryUrl;
     string branch = repository + "/tree/" + GitMetadata.Branch;
     string build = repository + "/actions/runs/" + GitMetadata.BuildId;

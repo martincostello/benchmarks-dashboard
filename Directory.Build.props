@@ -8,6 +8,7 @@
   </ItemGroup>
   <PropertyGroup>
     <AnalysisMode>All</AnalysisMode>
+    <Author>Martin Costello</Author>
     <Authors>martin_costello</Authors>
     <ChecksumAlgorithm>SHA256</ChecksumAlgorithm>
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)Dashboard.ruleset</CodeAnalysisRuleSet>

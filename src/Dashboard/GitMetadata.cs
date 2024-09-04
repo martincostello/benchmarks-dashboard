@@ -11,6 +11,11 @@ namespace MartinCostello.Benchmarks;
 public static class GitMetadata
 {
     /// <summary>
+    /// Gets the author of the application.
+    /// </summary>
+    public static string Author { get; } = GetMetadataValue("Author", "Martin Costello");
+
+    /// <summary>
     /// Gets the ID of the build of the application.
     /// </summary>
     public static string BuildId { get; } = GetMetadataValue("BuildId", string.Empty);
