@@ -2,6 +2,7 @@
 // Licensed under the Apache 2.0 license. See the LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
+using System.Reflection;
 
 namespace MartinCostello.Benchmarks;
 
@@ -23,23 +24,13 @@ public sealed class DashboardFixture : IDisposable
 
     private static string GetApplicationDirectory()
     {
-        string contentRoot = string.Empty;
-        var directoryInfo = new DirectoryInfo(Path.GetDirectoryName(typeof(DashboardFixture).Assembly.Location)!);
+        var solutionPath = typeof(DashboardFixture).Assembly
+            .GetCustomAttributes<AssemblyMetadataAttribute>()
+            .Where((p) => p.Key == "SolutionPath")
+            .Select((p) => p.Value)
+            .Single();
 
-        do
-        {
-            string? solutionPath = Directory.EnumerateFiles(directoryInfo.FullName, "Dashboard.sln").FirstOrDefault();
-
-            if (solutionPath is not null)
-            {
-                return Path.GetFullPath(Path.Combine(directoryInfo.FullName, "src", "Dashboard"));
-            }
-
-            directoryInfo = directoryInfo.Parent;
-        }
-        while (directoryInfo is not null);
-
-        return contentRoot;
+        return Path.GetFullPath(Path.Combine(solutionPath!, "src", "Dashboard"));
     }
 
     private void Dispose(bool disposing)

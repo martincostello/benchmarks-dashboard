@@ -6,6 +6,7 @@
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <AssemblyMetadata Include="SolutionPath" Value="$([System.IO.Path]::GetFullPath(`$(MSBuildThisFileDirectory)\..\..`))" />
     <Content Include="Responses\**\*.json;xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
