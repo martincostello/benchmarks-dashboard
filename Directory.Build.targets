@@ -17,6 +17,7 @@
       <Output TaskParameter="ConsoleOutput" PropertyName="CommitBranch" />
     </Exec>
     <ItemGroup>
+      <AssemblyMetadata Include="Author" Value="$(Author)" Condition=" $(Author) != ''" />
       <AssemblyMetadata Include="BuildId" Value="$(BuildId)" Condition=" $(BuildId) != ''" />
       <AssemblyMetadata Include="BuildTimestamp" Value="$([System.DateTime]::UtcNow.ToString(`yyyy-MM-ddTHH:mm:ssK`))" />
       <AssemblyMetadata Include="CommitHash" Value="$(CommitHash)" Condition=" $(CommitHash) != '' " />

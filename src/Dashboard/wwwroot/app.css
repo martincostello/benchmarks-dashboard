@@ -10,6 +10,7 @@
 }
 
 :root {
+  --copyright: '© Martin Costello 2024';
   --plot-hover-color: white;
   --plot-hover-background-color: rgba(0, 0, 0, 0.8);
 }
@@ -27,6 +28,10 @@ footer,
 header {
   margin-left: 1em;
   margin-right: 1em;
+}
+
+.copyright::after {
+  content: var(--copyright);
 }
 
 @media (min-width: 576px) {
