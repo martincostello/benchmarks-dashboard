@@ -148,8 +148,9 @@ img.user-profile {
 }
 
 /* Custom CSS different from just vanilla Bootstrap 5 */
-a {
-  color: #0f7661;
+:root {
+  --bs-link-color: #0f7661;
+  --bs-link-color-rgb: 15, 118, 97;
 }
 
 .btn-github {
