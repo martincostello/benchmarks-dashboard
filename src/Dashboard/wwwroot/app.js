@@ -270,12 +270,17 @@ window.renderChart = (chartId, configString) => {
   const saveButton = document.getElementById(`${chartId}-download`);
   saveButton.addEventListener('click', async () => {
     const format = config.imageFormat;
+    let fileName = config.name;
+    for (const replace in [' ', ':', '/', '\\']) {
+      fileName = fileName.replace(replace, '_');
+    }
+    fileName = `${fileName}.${format}`;
     const dataUrl = await Plotly.toImage(chart, {
       format,
     });
     const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = `${config.name.replace(' ', '_')}.${format}`;
+    link.download = fileName;
     link.click();
   });
 };
