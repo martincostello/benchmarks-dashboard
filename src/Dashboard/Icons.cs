@@ -59,11 +59,6 @@ public static class Icons
     public static string FileArrowDown => "fa-solid fa-file-arrow-down";
 
     /// <summary>
-    /// Gets the <c>floppy-disk</c> icon.
-    /// </summary>
-    public static string FloppyDisk => "fa-solid fa-floppy-disk";
-
-    /// <summary>
     /// Gets the <c>github</c> icon.
     /// </summary>
     public static string GitHub => "fa-brands fa-github";
@@ -77,11 +72,6 @@ public static class Icons
     /// Gets the <c>link</c> icon.
     /// </summary>
     public static string Link => "fa-solid fa-link";
-
-    /// <summary>
-    /// Gets the <c>plus</c> icon.
-    /// </summary>
-    public static string Plus => "fa-solid fa-plus";
 
     /// <summary>
     /// Gets the <c>rotate-right</c> icon.
