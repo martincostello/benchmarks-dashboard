@@ -271,7 +271,7 @@ window.renderChart = (chartId, configString) => {
   saveButton.addEventListener('click', async () => {
     const format = config.imageFormat;
     let fileName = config.name;
-    for (const replace in [' ', '#', ':', ';', '/', '\\']) {
+    for (const replace of [' ', '#', ':', ';', '/', '\\']) {
       fileName = fileName.replace(replace, '_');
     }
     fileName = `${fileName}.${format}`;
