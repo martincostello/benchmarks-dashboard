@@ -1,3 +1,9 @@
 <div class="benchmark-chart-container col" id="@(Id)">
     <div class="benchmark-chart" id="@(ChartId)" name="@(Name)" />
+    <button class="btn btn-dark btn-small float-end download-chart"
+            id="@(ChartId)-download"
+            title="Download this chart as a @(Options.Value.ImageFormat) file">
+        <Icon Name="@(Icons.ChartLine)" FixedWidth="true" />
+        <Icon Name="@(Icons.FileArrowDown)" FixedWidth="true" />
+    </button>
 </div>

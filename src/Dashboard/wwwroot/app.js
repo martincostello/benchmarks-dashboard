@@ -266,4 +266,21 @@ window.renderChart = (chartId, configString) => {
   chart.on('plotly_unhover', () => {
     dragLayer.style.cursor = 'default';
   });
+
+  const saveButton = document.getElementById(`${chartId}-download`);
+  saveButton.addEventListener('click', async () => {
+    const format = config.imageFormat;
+    let fileName = config.name;
+    for (const toReplace of [' ', '#', ':', ';', '/', '\\']) {
+      fileName = fileName.replace(toReplace, '_');
+    }
+    fileName = `${fileName}.${format}`;
+    const dataUrl = await Plotly.toImage(chart, {
+      format,
+    });
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = fileName;
+    link.click();
+  });
 };

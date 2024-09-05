@@ -45,6 +45,8 @@ public class BenchmarkSuiteTests : DashboardTestContext
 
         charts[0].GetAttribute("name").ShouldBe("Benchmark1");
         charts[1].GetAttribute("name").ShouldBe("Benchmark2");
+
+        actual.FindAll(".download-chart").Count.ShouldBe(2);
     }
 
     private static bool RenderArgumentsAreValid(string expectedChartId, IReadOnlyList<object?> arguments)
@@ -64,6 +66,7 @@ public class BenchmarkSuiteTests : DashboardTestContext
         config["colors"].ShouldNotBeNull().GetValueKind().ShouldBe(JsonValueKind.Object);
         config["dataset"].ShouldNotBeNull().GetValueKind().ShouldBe(JsonValueKind.Array);
         config["errorBars"].ShouldNotBeNull().GetValue<bool>().ShouldBeTrue();
+        config["imageFormat"].ShouldNotBeNull().GetValue<string>().ShouldBe("png");
         config["name"].ShouldNotBeNull().GetValue<string>().ShouldNotBeNullOrWhiteSpace();
         config["suiteName"].ShouldNotBeNull().GetValue<string>().ShouldNotBeNullOrWhiteSpace();
 

@@ -64,6 +64,11 @@ public sealed class DashboardOptions
     public Uri GitHubTokenUrl { get; set; } = new("https://api.martincostello.com/github/");
 
     /// <summary>
+    /// Gets or sets the format to save chart images as.
+    /// </summary>
+    public string ImageFormat { get; set; } = "png";
+
+    /// <summary>
     /// Gets or sets the owner of the dashboard repository.
     /// </summary>
     public string RepositoryOwner { get; set; } = string.Empty;
