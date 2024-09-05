@@ -63,6 +63,7 @@ public partial class Benchmark
             },
             dataset = Items,
             errorBars = current.ErrorBars,
+            imageFormat = current.ImageFormat,
             name = Name,
             suiteName = Suite,
         });
