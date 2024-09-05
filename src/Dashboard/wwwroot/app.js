@@ -271,8 +271,8 @@ window.renderChart = (chartId, configString) => {
   saveButton.addEventListener('click', async () => {
     const format = config.imageFormat;
     let fileName = config.name;
-    for (const replace of [' ', '#', ':', ';', '/', '\\']) {
-      fileName = fileName.replace(replace, '_');
+    for (const toReplace of [' ', '#', ':', ';', '/', '\\']) {
+      fileName = fileName.replace(toReplace, '_');
     }
     fileName = `${fileName}.${format}`;
     const dataUrl = await Plotly.toImage(chart, {
