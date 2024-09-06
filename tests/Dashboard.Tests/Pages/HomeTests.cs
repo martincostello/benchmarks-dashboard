@@ -153,6 +153,7 @@ public class HomeTests : DashboardTestContext
         WithBenchmarks(repository, "main");
 
         JSInterop.SetupVoid("configureDataDownload", (_) => true);
+        JSInterop.SetupVoid("configureDeepLinks", (_) => true);
         JSInterop.SetupVoid("renderChart", (_) => true);
 
         // Act
