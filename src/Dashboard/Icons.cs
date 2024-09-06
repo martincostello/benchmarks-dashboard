@@ -69,11 +69,6 @@ public static class Icons
     public static string Key => "fa-solid fa-key";
 
     /// <summary>
-    /// Gets the <c>link</c> icon.
-    /// </summary>
-    public static string Link => "fa-solid fa-link";
-
-    /// <summary>
     /// Gets the <c>rotate-right</c> icon.
     /// </summary>
     public static string RotateRight => "fa-solid fa-rotate-right";

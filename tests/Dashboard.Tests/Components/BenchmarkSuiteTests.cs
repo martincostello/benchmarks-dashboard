@@ -3,6 +3,7 @@
 
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using AngleSharp.Dom;
 using Bunit;
 using MartinCostello.Benchmarks.Models;
 
@@ -38,7 +39,7 @@ public class BenchmarkSuiteTests : DashboardTestContext
         var element = actual.Find($"[id='{suite}']");
         element.ShouldNotBeNull();
 
-        actual.Find("h2").TextContent.Trim().ShouldBe(suite);
+        actual.Find("h2").GetInnerText().ShouldBe($"{suite} #");
 
         var charts = actual.FindAll(".benchmark-chart");
         charts.Count.ShouldBe(2);

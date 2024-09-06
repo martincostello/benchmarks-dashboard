@@ -14,6 +14,12 @@ public partial class Icon
     public required string Name { get; init; }
 
     /// <summary>
+    /// Gets or sets any additional classes to add to the icon.
+    /// </summary>
+    [Parameter]
+    public IList<string> Classes { get; set; } = [];
+
+    /// <summary>
     /// Gets the optional color to use.
     /// </summary>
     [Parameter]
@@ -62,6 +68,11 @@ public partial class Icon
         if (Spin)
         {
             classes.Add("fa-spin");
+        }
+
+        if (Classes.Count > 0)
+        {
+            classes.AddRange(Classes);
         }
 
         return string.Join(' ', classes);
