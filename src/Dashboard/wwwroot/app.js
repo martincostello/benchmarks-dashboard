@@ -26,6 +26,39 @@ window.configureClipboard = () => {
   }
 };
 
+const copyDeepLink = (element) => {
+  const repo = document.getElementById('repository').value;
+  const branch = document.getElementById('branch').value;
+
+  if (!branch || !repo) {
+    return;
+  }
+
+  const url = new URL(element.target.href);
+
+  url.searchParams.append('repo', repo);
+  url.searchParams.append('branch', branch);
+
+  navigator.clipboard.writeText(url.href);
+
+  const icon = element.target.querySelector('.fade');
+  if (icon) {
+    icon.title = 'URL copied to clipboard';
+    icon.classList.add('show');
+    setTimeout(() => {
+      icon.classList.remove('show');
+    }, 3000);
+  }
+};
+
+window.configureDeepLinks = () => {
+  const anchors = [...document.querySelectorAll('.benchmark-set-anchor')];
+  for (const anchor of anchors) {
+    anchor.removeEventListener('click', copyDeepLink);
+    anchor.addEventListener('click', copyDeepLink);
+  }
+};
+
 window.configureToolTips = () => {
   const tooltips = [...document.querySelectorAll('[data-bs-toggle="tooltip"]')];
   tooltips.map((element) => new bootstrap.Tooltip(element));

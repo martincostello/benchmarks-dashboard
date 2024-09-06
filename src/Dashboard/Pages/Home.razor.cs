@@ -215,6 +215,7 @@ public partial class Home
         {
             var json = System.Text.Json.JsonSerializer.Serialize(data, AppJsonSerializerContext.Default.BenchmarkResults);
             await JS.InvokeVoidAsync("configureDataDownload", [json, Options.Value.BenchmarkFileName]);
+            await JS.InvokeVoidAsync("configureDeepLinks", []);
         }
     }
 
