@@ -26,7 +26,7 @@ window.configureClipboard = () => {
   }
 };
 
-const copyDeepLink = (element) => {
+const copyDeepLink = (event) => {
   const repo = document.getElementById('repository').value;
   const branch = document.getElementById('branch').value;
 
@@ -34,25 +34,41 @@ const copyDeepLink = (element) => {
     return;
   }
 
-  const url = new URL(element.target.href);
+  let href = event.target.href;
+  if (typeof href !== 'string') {
+    const currentUrl = new URL(window.location.origin);
+    currentUrl.pathname = window.location.pathname;
+    currentUrl.hash = event.target.getAttribute('xlink:href');
+    href = currentUrl.href;
+  }
 
+  const url = new URL(href);
   url.searchParams.append('repo', repo);
   url.searchParams.append('branch', branch);
 
-  navigator.clipboard.writeText(url.href);
+  try {
+    navigator.clipboard.writeText(url.href);
 
-  const icon = element.target.querySelector('.fade');
-  if (icon) {
-    icon.title = 'URL copied to clipboard';
-    icon.classList.add('show');
-    setTimeout(() => {
-      icon.classList.remove('show');
-    }, 3000);
+    const icon = event.target.querySelector('.fade');
+    if (icon) {
+      icon.title = 'URL copied to clipboard';
+      icon.classList.add('show');
+      setTimeout(() => {
+        icon.classList.remove('show');
+      }, 3000);
+    }
+  } catch {
+    // Ignore
   }
+
+  return false;
 };
 
 window.configureDeepLinks = () => {
-  const anchors = [...document.querySelectorAll('.benchmark-set-anchor')];
+  const anchors = [
+    ...document.querySelectorAll('.benchmark-anchor'),
+    ...document.querySelectorAll('text.gtitle > a'),
+  ];
   for (const anchor of anchors) {
     anchor.removeEventListener('click', copyDeepLink);
     anchor.addEventListener('click', copyDeepLink);
@@ -100,6 +116,11 @@ window.renderChart = (chartId, configString) => {
   const rounding = 2;
   const precision = rounding + 1;
 
+  const chart = document.getElementById(chartId);
+  const parent = chart.parentElement;
+
+  const chartTitle = `${config.name} <a class="benchmark-anchor text-secondary" href="#${parent.id}" target="_self">#</a>`;
+
   const layout = {
     font: {
       size: isDesktop ? 10 : 8,
@@ -109,7 +130,7 @@ window.renderChart = (chartId, configString) => {
       y: isDesktop ? -0.15 : -0.1,
     },
     title: {
-      text: config.name,
+      text: chartTitle,
     },
     xaxis: {
       fixedrange: true,
@@ -283,7 +304,6 @@ window.renderChart = (chartId, configString) => {
 
   Plotly.newPlot(chartId, data, layout, plotConfig);
 
-  const chart = document.getElementById(chartId);
   chart.on('plotly_click', (data) => {
     const { pointIndex } = data.points[0];
     const url = dataset[pointIndex].commit.url;
