@@ -320,20 +320,37 @@ window.renderChart = (chartId, configString) => {
     dragLayer.style.cursor = 'default';
   });
 
+  const format = config.imageFormat;
+
+  const copyButton = document.getElementById(`${chartId}-copy`);
+  if ('ClipboardItem' in window && ClipboardItem.supports(`image/${format}`)) {
+    copyButton.addEventListener('click', async () => {
+      const dataUrl = await Plotly.toImage(chart, {
+        format,
+      });
+      const data = await fetch(dataUrl);
+      const blob = await data.blob();
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          [blob.type]: blob
+        })
+      ]);
+    });
+  } else {
+    copyButton.classList.add('disable');
+    copyButton.disabled = true;
+  }
+
   const saveButton = document.getElementById(`${chartId}-download`);
-  saveButton.addEventListener('click', async () => {
-    const format = config.imageFormat;
-    let fileName = config.name;
+  saveButton.addEventListener('click', () => {
+    let filename = config.name;
     for (const toReplace of [' ', '#', ':', ';', '/', '\\']) {
-      fileName = fileName.replace(toReplace, '_');
+      filename = filename.replace(toReplace, '_');
     }
-    fileName = `${fileName}.${format}`;
-    const dataUrl = await Plotly.toImage(chart, {
+    filename = `${filename}.${format}`;
+    Plotly.downloadImage(chart, {
+      filename,
       format,
     });
-    const link = document.createElement('a');
-    link.href = dataUrl;
-    link.download = fileName;
-    link.click();
   });
 };
