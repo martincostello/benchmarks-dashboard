@@ -50,6 +50,7 @@ public class DashboardTests(
         [
             "benchmarks-demo",
             "adventofcode",
+            "alexa-london-travel",
             "alexa-london-travel-site",
             "api",
             "aspnetcore-openapi",
