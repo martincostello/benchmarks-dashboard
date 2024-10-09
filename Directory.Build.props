@@ -10,6 +10,7 @@
     <AnalysisMode>All</AnalysisMode>
     <Author>Martin Costello</Author>
     <Authors>martin_costello</Authors>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
     <ChecksumAlgorithm>SHA256</ChecksumAlgorithm>
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)Dashboard.ruleset</CodeAnalysisRuleSet>
     <Company>https://github.com/martincostello/benchmarks-dashboard</Company>
