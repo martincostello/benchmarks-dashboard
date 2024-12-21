@@ -3,14 +3,13 @@
 
 using System.Net;
 using Blazored.LocalStorage;
-using Bunit;
 using JustEat.HttpClientInterception;
 using MartinCostello.Benchmarks.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MartinCostello.Benchmarks;
 
-public abstract class DashboardTestContext : TestContext
+public abstract class DashboardTestContext : Bunit.TestContext
 {
     protected DashboardTestContext()
         : base()

@@ -225,13 +225,17 @@ public class DashboardTests(
         });
     }
 
-    public Task InitializeAsync()
+    public ValueTask InitializeAsync()
     {
         InstallPlaywright();
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync()
+    {
+        GC.SuppressFinalize(this);
+        return ValueTask.CompletedTask;
+    }
 
     private static string JsonResponseFile(string name)
         => Path.Combine(".", "Responses", $"{name}.json");

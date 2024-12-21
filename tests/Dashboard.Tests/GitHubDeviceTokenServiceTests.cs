@@ -66,7 +66,7 @@ public class GitHubDeviceTokenServiceTests
         builder.RegisterWith(Interceptor);
 
         // Act
-        var actual = await Target.GetDeviceCodeAsync();
+        var actual = await Target.GetDeviceCodeAsync(TestContext.Current.CancellationToken);
 
         // Assert
         actual.ShouldNotBeNull();
@@ -99,7 +99,7 @@ public class GitHubDeviceTokenServiceTests
         });
 
         // Act
-        var task = Target.WaitForAccessTokenAsync(DeviceCode);
+        var task = Target.WaitForAccessTokenAsync(DeviceCode, TestContext.Current.CancellationToken);
 
         while (!task.IsCompleted)
         {
@@ -133,7 +133,7 @@ public class GitHubDeviceTokenServiceTests
         });
 
         // Act
-        var task = Target.WaitForAccessTokenAsync(DeviceCode);
+        var task = Target.WaitForAccessTokenAsync(DeviceCode, TestContext.Current.CancellationToken);
 
         while (!task.IsCompleted)
         {
@@ -167,7 +167,7 @@ public class GitHubDeviceTokenServiceTests
         });
 
         // Act
-        var task = Target.WaitForAccessTokenAsync(DeviceCode);
+        var task = Target.WaitForAccessTokenAsync(DeviceCode, TestContext.Current.CancellationToken);
 
         while (!task.IsCompleted)
         {
@@ -187,7 +187,7 @@ public class GitHubDeviceTokenServiceTests
         RegisterResponse(Error("authorization_pending"));
 
         // Act
-        var task = Target.WaitForAccessTokenAsync(DeviceCode);
+        var task = Target.WaitForAccessTokenAsync(DeviceCode, TestContext.Current.CancellationToken);
 
         while (!task.IsCompleted)
         {
@@ -207,7 +207,7 @@ public class GitHubDeviceTokenServiceTests
         RegisterResponse(Error("device_flow_disabled"));
 
         // Act
-        var actual = await Target.WaitForAccessTokenAsync(DeviceCode);
+        var actual = await Target.WaitForAccessTokenAsync(DeviceCode, TestContext.Current.CancellationToken);
 
         // Assert
         actual.ShouldBeNull();

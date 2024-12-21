@@ -24,29 +24,29 @@ public static class GitHubTokenStoreTests
         actual.ShouldBeNull();
 
         // Act
-        actual = await target.GetTokenAsync();
+        actual = await target.GetTokenAsync(TestContext.Current.CancellationToken);
 
         // Assert
         actual.ShouldBeNull();
 
         // Arrange
-        await target.StoreTokenAsync("foo");
+        await target.StoreTokenAsync("foo", TestContext.Current.CancellationToken);
 
         // Assert
         actual = target.GetToken();
         actual.ShouldBe("foo");
 
-        actual = await target.GetTokenAsync();
+        actual = await target.GetTokenAsync(TestContext.Current.CancellationToken);
         actual.ShouldBe("foo");
 
         // Arrange
-        await target.StoreTokenAsync(string.Empty);
+        await target.StoreTokenAsync(string.Empty, TestContext.Current.CancellationToken);
 
         // Assert
         actual = target.GetToken();
         actual.ShouldBeEmpty();
 
-        actual = await target.GetTokenAsync();
+        actual = await target.GetTokenAsync(TestContext.Current.CancellationToken);
         actual.ShouldBeEmpty();
     }
 }
