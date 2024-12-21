@@ -60,7 +60,7 @@ public class GitHubServiceTests
     public async Task HasToken_Is_Correct_With_Token(string token, bool expected)
     {
         // Arrange
-        await TokenStore.StoreTokenAsync(token);
+        await TokenStore.StoreTokenAsync(token, TestContext.Current.CancellationToken);
 
         // Act and Assert
         Target.HasToken.ShouldBe(expected);
@@ -204,7 +204,7 @@ public class GitHubServiceTests
         Target.OnUserChanged += AssertSignedIn;
 
         // Act
-        await Target.SignInAsync("foo");
+        await Target.SignInAsync("foo", TestContext.Current.CancellationToken);
 
         // Assert
         signedIn.ShouldBeTrue();
@@ -216,7 +216,7 @@ public class GitHubServiceTests
         Target.InvalidToken.ShouldBeFalse();
         Target.ConnectionUrl().ShouldBe("https://github.local/settings/connections/applications/dkd73mfo9ASgjsfnhJD8");
 
-        (await TokenStore.GetTokenAsync()).ShouldBe("foo");
+        (await TokenStore.GetTokenAsync(TestContext.Current.CancellationToken)).ShouldBe("foo");
 
         // Arrange
         bool signedOut = false;
@@ -233,7 +233,7 @@ public class GitHubServiceTests
         Target.OnUserChanged += AssertSignedOut;
 
         // Act
-        await Target.SignOutAsync();
+        await Target.SignOutAsync(TestContext.Current.CancellationToken);
 
         // Assert
         signedOut.ShouldBeTrue();
@@ -264,7 +264,7 @@ public class GitHubServiceTests
         Target.OnUserChanged += AssertSignedIn;
 
         // Act
-        await Target.SignInAsync("foo");
+        await Target.SignInAsync("foo", TestContext.Current.CancellationToken);
 
         // Assert
         signedIn.ShouldBeFalse();

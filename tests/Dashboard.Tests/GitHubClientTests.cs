@@ -64,7 +64,7 @@ public class GitHubClientTests
         builder.RegisterWith(Interceptor);
 
         // Act
-        var actual = await Target.GetDeviceCodeAsync();
+        var actual = await Target.GetDeviceCodeAsync(TestContext.Current.CancellationToken);
 
         // Assert
         actual.ShouldNotBeNull();
@@ -93,7 +93,7 @@ public class GitHubClientTests
         builder.RegisterWith(Interceptor);
 
         // Act
-        var actual = await Target.GetAccessTokenAsync("3584d83530557fdd1f46af8289938c8ef79f9dc5");
+        var actual = await Target.GetAccessTokenAsync("3584d83530557fdd1f46af8289938c8ef79f9dc5", TestContext.Current.CancellationToken);
 
         // Assert
         actual.ShouldNotBeNull();
@@ -126,7 +126,7 @@ public class GitHubClientTests
         bool isPublic = true;
 
         // Act
-        var actual = await Target.GetBenchmarksAsync(repository, branch, isPublic);
+        var actual = await Target.GetBenchmarksAsync(repository, branch, isPublic, TestContext.Current.CancellationToken);
 
         // Assert
         actual.ShouldNotBeNull();
@@ -138,7 +138,7 @@ public class GitHubClientTests
     public async Task Can_Get_Benchmarks_Private_GitHub_Repository()
     {
         // Arrange
-        await TokenStore.StoreTokenAsync("foo");
+        await TokenStore.StoreTokenAsync("foo", TestContext.Current.CancellationToken);
 
         Options.GitHubApiUrl = new("https://api.github.com");
 
@@ -162,7 +162,7 @@ public class GitHubClientTests
         bool isPublic = false;
 
         // Act
-        var actual = await Target.GetBenchmarksAsync(repository, branch, isPublic);
+        var actual = await Target.GetBenchmarksAsync(repository, branch, isPublic, TestContext.Current.CancellationToken);
 
         // Assert
         actual.ShouldNotBeNull();
@@ -171,11 +171,12 @@ public class GitHubClientTests
     }
 
     [Theory]
-    [CombinatorialData]
+    [InlineData(false)]
+    [InlineData(true)]
     public async Task Can_Get_Benchmarks_GitHub_Enterprise_Repository(bool isPublic)
     {
         // Arrange
-        await TokenStore.StoreTokenAsync("foo");
+        await TokenStore.StoreTokenAsync("foo", TestContext.Current.CancellationToken);
 
         var builder = new HttpRequestInterceptionBuilder()
             .ForGet()
@@ -196,7 +197,7 @@ public class GitHubClientTests
         string branch = "my-branch";
 
         // Act
-        var actual = await Target.GetBenchmarksAsync(repository, branch, isPublic);
+        var actual = await Target.GetBenchmarksAsync(repository, branch, isPublic, TestContext.Current.CancellationToken);
 
         // Assert
         actual.ShouldNotBeNull();
@@ -220,7 +221,7 @@ public class GitHubClientTests
         bool isPublic = true;
 
         // Act
-        var actual = await Target.GetBenchmarksAsync(repository, branch, isPublic);
+        var actual = await Target.GetBenchmarksAsync(repository, branch, isPublic, TestContext.Current.CancellationToken);
 
         // Assert
         actual.ShouldBeNull();
@@ -233,7 +234,7 @@ public class GitHubClientTests
     public async Task Can_Get_Repository(string visibility, bool expectedIsPublic)
     {
         // Arrange
-        await TokenStore.StoreTokenAsync("foo");
+        await TokenStore.StoreTokenAsync("foo", TestContext.Current.CancellationToken);
 
         var builder = new HttpRequestInterceptionBuilder()
             .ForGet()
@@ -260,7 +261,7 @@ public class GitHubClientTests
         string repository = "my-repository";
 
         // Act
-        var actual = await Target.GetRepositoryAsync(owner, repository);
+        var actual = await Target.GetRepositoryAsync(owner, repository, TestContext.Current.CancellationToken);
 
         // Assert
         actual.ShouldNotBeNull();
@@ -278,7 +279,7 @@ public class GitHubClientTests
     public async Task Can_Get_Branches()
     {
         // Arrange
-        await TokenStore.StoreTokenAsync("foo");
+        await TokenStore.StoreTokenAsync("foo", TestContext.Current.CancellationToken);
 
         var builder = new HttpRequestInterceptionBuilder()
             .ForGet()
@@ -298,7 +299,7 @@ public class GitHubClientTests
         string repository = "my-repository";
 
         // Act
-        var actual = await Target.GetRepositoryBranchesAsync(owner, repository);
+        var actual = await Target.GetRepositoryBranchesAsync(owner, repository, TestContext.Current.CancellationToken);
 
         // Assert
         actual.ShouldNotBeNull();
@@ -313,7 +314,7 @@ public class GitHubClientTests
         // Arrange
         Options.GitHubApiUrl = new("https://github.local/api/v3/");
 
-        await TokenStore.StoreTokenAsync("foo");
+        await TokenStore.StoreTokenAsync("foo", TestContext.Current.CancellationToken);
 
         var builder = new HttpRequestInterceptionBuilder()
             .ForGet()
@@ -331,7 +332,7 @@ public class GitHubClientTests
         builder.RegisterWith(Interceptor);
 
         // Act
-        var actual = await Target.GetUserAsync();
+        var actual = await Target.GetUserAsync(TestContext.Current.CancellationToken);
 
         // Assert
         actual.ShouldNotBeNull();

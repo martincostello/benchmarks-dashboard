@@ -20,13 +20,17 @@ public abstract class UITest(ITestOutputHelper outputHelper) : IAsyncLifetime, I
         GC.SuppressFinalize(this);
     }
 
-    public Task InitializeAsync()
+    public ValueTask InitializeAsync()
     {
         InstallPlaywright();
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync()
+    {
+        GC.SuppressFinalize(this);
+        return ValueTask.CompletedTask;
+    }
 
     protected virtual void Dispose(bool disposing)
     {
