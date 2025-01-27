@@ -27,7 +27,7 @@ env:
 jobs:
   build:
     name: ${{ matrix.os-name }}
-    runs-on: ${{ matrix.runnner }}
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 20
 
     permissions:
@@ -40,11 +40,11 @@ jobs:
       matrix:
         include:
           - os-name: macos
-            runnner: macos-latest
+            runner: macos-latest
           - os-name: linux
-            runnner: ubuntu-latest
+            runner: ubuntu-latest
           - os-name: windows
-            runnner: windows-latest
+            runner: windows-latest
 
     steps:
 
