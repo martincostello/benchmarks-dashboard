@@ -1,46 +1,21 @@
 <Project>
   <ItemGroup>
-    <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json" />
     <AssemblyAttribute Include="System.CLSCompliant">
       <_Parameter1>false</_Parameter1>
       <_Parameter1_IsLiteral>true</_Parameter1_IsLiteral>
     </AssemblyAttribute>
+    <AssemblyMetadata Include="Author" Value="$(Author)" Condition=" $(Author) != '' " />
   </ItemGroup>
   <PropertyGroup>
-    <AnalysisMode>All</AnalysisMode>
     <Author>Martin Costello</Author>
     <Authors>martin_costello</Authors>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
-    <ChecksumAlgorithm>SHA256</ChecksumAlgorithm>
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)Dashboard.ruleset</CodeAnalysisRuleSet>
     <Company>https://github.com/martincostello/benchmarks-dashboard</Company>
-    <ContinuousIntegrationBuild Condition=" '$(CI)' != '' ">true</ContinuousIntegrationBuild>
     <Copyright>Martin Costello (c) $([System.DateTime]::Now.ToString(yyyy))</Copyright>
-    <Deterministic Condition=" '$(IsTestProject)' == '' ">true</Deterministic>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <EnableNETAnalyzers>true</EnableNETAnalyzers>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
-    <GenerateGitMetadata Condition=" '$(CI)' != '' and '$(GenerateGitMetadata)' == '' ">true</GenerateGitMetadata>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <LangVersion>latest</LangVersion>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <NeutralLanguage>en-US</NeutralLanguage>
-    <NoWarn Condition=" '$(GenerateDocumentationFile)' != 'true' ">$(NoWarn);SA0001</NoWarn>
-    <Nullable>enable</Nullable>
-    <PackageIcon></PackageIcon>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/martincostello/benchmarks-dashboard.git</RepositoryUrl>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <UseArtifactsOutput>true</UseArtifactsOutput>
     <VersionPrefix>1.0.0</VersionPrefix>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(GITHUB_ACTIONS)' != '' AND '$(DEPENDABOT_JOB_ID)' == '' ">
-    <VersionSuffix Condition=" '$(VersionSuffix)' == '' AND '$(GITHUB_HEAD_REF)' == '' ">beta.$(GITHUB_RUN_NUMBER)</VersionSuffix>
-    <VersionSuffix Condition=" '$(VersionSuffix)' == '' AND '$(GITHUB_HEAD_REF)' != '' ">pr.$(GITHUB_REF_NAME.Replace('/merge', '')).$(GITHUB_RUN_NUMBER)</VersionSuffix>
-    <VersionPrefix Condition=" $(GITHUB_REF.StartsWith(`refs/tags/v`)) ">$(GITHUB_REF.Replace('refs/tags/v', ''))</VersionPrefix>
-    <VersionSuffix Condition=" $(GITHUB_REF.StartsWith(`refs/tags/v`)) "></VersionSuffix>
-    <FileVersion Condition=" '$(GITHUB_RUN_NUMBER)' != '' ">$(VersionPrefix).$(GITHUB_RUN_NUMBER)</FileVersion>
   </PropertyGroup>
 </Project>

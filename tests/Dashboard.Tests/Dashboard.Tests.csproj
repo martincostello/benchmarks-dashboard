@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <IsTestProject>true</IsTestProject>
-    <NoWarn>$(NoWarn);CA1308;CA1711;CA2000;CA2007;SA1600</NoWarn>
+    <NoWarn>$(NoWarn);CA2000</NoWarn>
     <OutputType>Exe</OutputType>
     <RootNamespace>MartinCostello.Benchmarks</RootNamespace>
     <TargetFramework>net9.0</TargetFramework>
@@ -31,15 +30,8 @@
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="xunit.v3" />
   </ItemGroup>
-  <ItemGroup>
-    <Using Include="Shouldly" />
-    <Using Include="Xunit" />
-  </ItemGroup>
-  <PropertyGroup Condition=" '$(BuildingInsideVisualStudio)' != 'true' ">
+  <PropertyGroup>
     <CollectCoverage>true</CollectCoverage>
-    <CoverletOutputFormat>cobertura,json</CoverletOutputFormat>
-    <Exclude>[*.Test*]*,[xunit.*]*</Exclude>
-    <ExcludeByAttribute>GeneratedCodeAttribute</ExcludeByAttribute>
     <Threshold>75</Threshold>
   </PropertyGroup>
 </Project>
