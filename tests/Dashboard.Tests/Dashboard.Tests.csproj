@@ -3,7 +3,7 @@
     <NoWarn>$(NoWarn);CA2000</NoWarn>
     <OutputType>Exe</OutputType>
     <RootNamespace>MartinCostello.Benchmarks</RootNamespace>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <AssemblyMetadata Include="SolutionPath" Value="$([System.IO.Path]::GetFullPath(`$(MSBuildThisFileDirectory)\..\..`))" />
