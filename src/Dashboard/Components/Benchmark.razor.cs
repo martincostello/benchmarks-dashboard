@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Martin Costello, 2024. All rights reserved.
 // Licensed under the Apache 2.0 license. See the LICENSE file in the project root for full license information.
 
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using MartinCostello.Benchmarks.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -9,6 +11,12 @@ namespace MartinCostello.Benchmarks.Components;
 
 public partial class Benchmark
 {
+    private static readonly JsonSerializerOptions SerializationOptions = new(JsonSerializerDefaults.Web)
+    {
+        NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals | JsonNumberHandling.AllowReadingFromString,
+        PropertyNameCaseInsensitive = false,
+    };
+
     /// <summary>
     /// Gets the benchmark name.
     /// </summary>
@@ -54,19 +62,21 @@ public partial class Benchmark
             timeColor = "#178600";
         }
 
-        var options = System.Text.Json.JsonSerializer.Serialize(new
-        {
-            colors = new
+        var options = System.Text.Json.JsonSerializer.Serialize(
+            new
             {
-                memory = memoryColor,
-                time = timeColor,
+                colors = new
+                {
+                    memory = memoryColor,
+                    time = timeColor,
+                },
+                dataset = Items,
+                errorBars = current.ErrorBars,
+                imageFormat = current.ImageFormat,
+                name = Name,
+                suiteName = Suite,
             },
-            dataset = Items,
-            errorBars = current.ErrorBars,
-            imageFormat = current.ImageFormat,
-            name = Name,
-            suiteName = Suite,
-        });
+            SerializationOptions);
 
         await JS.InvokeVoidAsync("renderChart", [ChartId, options]);
 
