@@ -164,7 +164,7 @@ window.renderChart = (chartId, configString) => {
 
   const mapTimeText = (item) => {
     const { range, unit } = item.result;
-    let label = `${item.result.value.toFixed(rounding)}${unit}`;
+    let label = item.result.value === 'NaN' ? NaN : `${item.result.value.toFixed(rounding)}${unit}`;
     if (range) {
       const prefix = range.slice(0, 2);
       const rangeValue = parseFloat(range.slice(2)).toPrecision(precision);
@@ -231,7 +231,7 @@ window.renderChart = (chartId, configString) => {
 
   if (config.errorBars === true) {
     time.error_y = {
-      array: dataset.map((p) => parseFloat(p.result.range.slice(2))),
+      array: dataset.map((p) => parseFloat(p.result.range?.slice(2) ?? 'NaN')),
       type: 'data',
     };
   }
