@@ -20,7 +20,6 @@
     <PackageVersion Include="ReportGenerator" Version="5.4.5" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="System.Text.Encodings.Web" Version="9.0.0" />
-    <PackageVersion Include="System.Text.Json" Version="9.0.0" />
     <PackageVersion Include="Verify.ImageMagick" Version="3.6.0" />
     <PackageVersion Include="Verify.Playwright" Version="3.0.0" />
     <PackageVersion Include="Verify.XunitV3" Version="29.1.0" />
