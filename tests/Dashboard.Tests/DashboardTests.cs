@@ -11,13 +11,9 @@ namespace MartinCostello.Benchmarks;
 [Collection(DashboardCollection.Name)]
 public class DashboardTests(
     DashboardFixture fixture,
-    ITestOutputHelper outputHelper) : IAsyncLifetime
+    ITestOutputHelper outputHelper) : UITest(outputHelper)
 {
     private const string ValidFakeToken = "VALID_GITHUB_ACCESS_TOKEN";
-
-    private DashboardFixture Fixture { get; } = fixture;
-
-    private ITestOutputHelper OutputHelper { get; } = outputHelper;
 
     public static TheoryData<string, string?> Browsers()
     {
@@ -67,10 +63,10 @@ public class DashboardTests(
             BrowserChannel = browserChannel,
         };
 
-        var browser = new BrowserFixture(options, OutputHelper);
+        var browser = new BrowserFixture(options, Output);
         await browser.WithPageAsync(async page =>
         {
-            await page.GotoAsync(Fixture.ServerAddress);
+            await page.GotoAsync(fixture.ServerAddress);
             await page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
             var cancelled = new TaskCompletionSource<string>();
@@ -225,30 +221,8 @@ public class DashboardTests(
         });
     }
 
-    public ValueTask InitializeAsync()
-    {
-        InstallPlaywright();
-        return ValueTask.CompletedTask;
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        GC.SuppressFinalize(this);
-        return ValueTask.CompletedTask;
-    }
-
     private static string JsonResponseFile(string name)
         => Path.Combine(".", "Responses", $"{name}.json");
-
-    private static void InstallPlaywright()
-    {
-        int exitCode = Microsoft.Playwright.Program.Main(["install"]);
-
-        if (exitCode != 0)
-        {
-            throw new InvalidOperationException($"Playwright exited with code {exitCode}");
-        }
-    }
 
     private static async Task VerifyScreenshot(IElementHandle element, string parametersText)
     {
