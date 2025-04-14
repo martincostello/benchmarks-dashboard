@@ -3,14 +3,10 @@
 
 namespace MartinCostello.Benchmarks;
 
+[Category("UI")]
 public abstract class UITest(ITestOutputHelper outputHelper) : IAsyncLifetime, IDisposable
 {
-    ~UITest()
-    {
-        Dispose(false);
-    }
-
-    protected abstract Uri ServerAddress { get; }
+    ~UITest() => Dispose(false);
 
     protected ITestOutputHelper Output { get; } = outputHelper;
 
