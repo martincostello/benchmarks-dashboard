@@ -70,7 +70,7 @@ if ($installDotNetSdk) {
 }
 
 function DotNetTest {
-    param([string]$Project)
+    param()
 
     $additionalArgs = @()
 
@@ -79,7 +79,7 @@ function DotNetTest {
         $additionalArgs += "--logger:junit;LogFilePath=junit.xml"
     }
 
-    & $dotnet test $Project --configuration "Release" $additionalArgs
+    & $dotnet test --configuration "Release" $additionalArgs
 
     if ($LASTEXITCODE -ne 0) {
         throw "dotnet test failed with exit code $LASTEXITCODE"
@@ -100,18 +100,12 @@ $publishProjects = @(
     (Join-Path $solutionPath "src" "Dashboard" "Dashboard.csproj")
 )
 
-$testProjects = @(
-    (Join-Path $solutionPath "tests" "Dashboard.Tests" "Dashboard.Tests.csproj")
-)
-
 Write-Information "Publishing solution..."
 ForEach ($project in $publishProjects) {
     DotNetPublish $project $Configuration
 }
 
 if (-Not $SkipTests) {
-    Write-Information "Testing $($testProjects.Count) project(s)..."
-    ForEach ($project in $testProjects) {
-        DotNetTest $project
-    }
+    Write-Information "Testing solution..."
+    DotNetTest
 }
