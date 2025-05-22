@@ -69,8 +69,8 @@ public class DashboardTests(
             await page.GotoAsync(fixture.ServerAddress);
             await page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
-            var cancelled = new TaskCompletionSource<string>();
-            var authorized = new TaskCompletionSource<string>();
+            var cancelled = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var authorized = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             await ConfigureMocksAsync(page, cancelled, authorized);
 
