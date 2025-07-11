@@ -14,5 +14,6 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <UseArtifactsOutput>true</UseArtifactsOutput>
     <VersionPrefix>1.0.0</VersionPrefix>
+    <VersionSuffix Condition=" '$(GitHubBranchName)' == 'main' "></VersionSuffix>
   </PropertyGroup>
 </Project>
