@@ -15,7 +15,7 @@
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.8" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.8" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.8" />
-    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="9.7.0" />
+    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="9.8.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.54.0" />
     <PackageVersion Include="ReportGenerator" Version="5.4.12" />
