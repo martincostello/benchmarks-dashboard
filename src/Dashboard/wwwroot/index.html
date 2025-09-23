@@ -80,8 +80,10 @@
   <script type="text/javascript">
     (function () {
       // theme setter with optional persistence (default true)
-      window._setBenchmarkTheme = function(theme, persist) {
-        if (persist === undefined) persist = true;
+      window._setBenchmarkTheme = function (theme, persist) {
+        if (persist === undefined) {
+            persist = true;
+        }
         if (persist) {
           localStorage.setItem('theme', theme);
         }
@@ -98,12 +100,14 @@
         // Helper to update the toggle icon
         const updateIcon = () => {
           const toUpdate = document.querySelector('#toggle-theme span');
+          const darkIcon = 'fa-moon';
+          const lightIcon = 'fa-sun';
           if (toUpdate) {
-            toUpdate.classList.remove('fa-moon');
-            toUpdate.classList.remove('fa-sun');
-            toUpdate.classList.add(theme === 'dark' ? 'fa-sun' : 'fa-moon');
+            toUpdate.classList.remove(darkIcon);
+            toUpdate.classList.remove(lightIcon);
+            toUpdate.classList.add(theme === 'dark' ? lightIcon : darkIcon);
           } else {
-            // during page load, the icon may not be present yet
+            // During page load, the icon may not be present yet
             requestAnimationFrame(updateIcon);
           }
         }

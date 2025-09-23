@@ -9,10 +9,10 @@ window.toggleTheme = () => {
     const newBodyColor = getComputedStyle(document.body).backgroundColor;
     // Only refresh charts if the body color actually changed
     if (oldBodyColor !== newBodyColor) {
-      window.refreshChartThemes()
+      window.refreshChartThemes();
     }
     else {
-      requestAnimationFrame(waitForThemeChange)
+      requestAnimationFrame(waitForThemeChange);
     }
   }
 
@@ -411,9 +411,9 @@ window.refreshChartThemes = () => {
   }
 
   const { fontColor, bgColor } = getThemeStyles();
-  document.querySelectorAll('.js-plotly-plot').forEach((el) => {
+  document.querySelectorAll('.js-plotly-plot').forEach((element) => {
     try {
-      Plotly.relayout(el, {
+      Plotly.relayout(element, {
         'paper_bgcolor': bgColor,
         'plot_bgcolor': bgColor,
         'font.color': fontColor,
@@ -423,7 +423,7 @@ window.refreshChartThemes = () => {
         'title.font.color': fontColor,
       });
     } catch (err) {
-      console.error('Failed to relayout chart for theme refresh:', err);
+      console.error('Failed to relayout chart for theme refresh.', err);
     }
   });
 };

@@ -70,10 +70,12 @@ public static class Icons
 
     /// <summary>
     /// Gets a generic icon for light and dark theme toggle.
+    /// </summary>
+    /// <remarks>
     /// This is intentionally not set to a specific icon so that it can be
     /// set dynamically via JavaScript depending on the current theme, read
     /// from <c>localStorage</c> or the system preference.
-    /// </summary>
+    /// </remarks>
     public static string ThemeToggle => "fa-solid";
 
     /// <summary>
