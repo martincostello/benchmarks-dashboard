@@ -121,10 +121,10 @@ function getThemeStyles() {
   const root = document.documentElement;
   const styles = getComputedStyle(root);
   const theme = root.getAttribute('data-bs-theme');
-  const fontColor = styles.getPropertyValue('--bs-body-color')?.trim();
-  const hoverColor = styles.getPropertyValue('--plot-hover-color')?.trim();
-  const hoverBg = styles.getPropertyValue('--plot-hover-background-color')?.trim();
-  const bgColor = styles.getPropertyValue('--bs-body-bg')?.trim();
+  const fontColor = styles.getPropertyValue('--bs-body-color').trim();
+  const hoverColor = styles.getPropertyValue('--plot-hover-color').trim();
+  const hoverBg = styles.getPropertyValue('--plot-hover-background-color').trim();
+  const bgColor = styles.getPropertyValue('--bs-body-bg').trim();
 
   return { fontColor, bgColor, hoverColor, hoverBg };
 }
