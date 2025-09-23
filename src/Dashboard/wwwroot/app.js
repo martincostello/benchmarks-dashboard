@@ -121,10 +121,10 @@ function getThemeStyles() {
   const root = document.documentElement;
   const styles = getComputedStyle(root);
   const theme = root.getAttribute('data-bs-theme');
-  const fontColor = styles.getPropertyValue('--bs-body-color')?.trim() || (theme === 'dark' ? '#f8f9fa' : '#212529');
-  const hoverColor = styles.getPropertyValue('--plot-hover-color')?.trim() || (theme === 'dark' ? '#fff' : '#000');
-  const hoverBg = styles.getPropertyValue('--plot-hover-background-color')?.trim() || (theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.8)');
-  const bgColor = styles.getPropertyValue('--bs-body-bg')?.trim() || (theme === 'dark' ? '#212529' : '#fff');
+  const fontColor = styles.getPropertyValue('--bs-body-color')?.trim();
+  const hoverColor = styles.getPropertyValue('--plot-hover-color')?.trim();
+  const hoverBg = styles.getPropertyValue('--plot-hover-background-color')?.trim();
+  const bgColor = styles.getPropertyValue('--bs-body-bg')?.trim();
 
   return { fontColor, bgColor, hoverColor, hoverBg };
 }
@@ -332,10 +332,8 @@ window.renderChart = (chartId, configString) => {
       title: {
         text: memoryUnit,
       },
+      color: layout.font.color,
     };
-
-    // Theme color for secondary axis
-    layout.yaxis2.color = layout.font.color;
 
     const allZero = dataset.every((p) => p.result.bytesAllocated === 0);
     if (allZero) {
