@@ -1,11 +1,20 @@
 ﻿// Copyright (c) Martin Costello, 2024. All rights reserved.
 // Licensed under the Apache 2.0 license. See the LICENSE file in the project root for full license information.
 
+using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
+
 namespace MartinCostello.Benchmarks.Layout;
 
 public sealed partial class Navbar : IAsyncDisposable
 {
     private string? _dataRepoUrl;
+
+    /// <summary>
+    /// Gets the <see cref="IJSRuntime"/> to use.
+    /// </summary>
+    [Inject]
+    public required IJSRuntime JS { get; init; }
 
     /// <summary>
     /// Gets the dashboard options.
@@ -49,4 +58,7 @@ public sealed partial class Navbar : IAsyncDisposable
         var uri = Options.Value.IsGitHubEnterprise ? Routes.Token : Routes.Home;
         Navigation.NavigateTo(uri);
     }
+
+    private async Task ToggleThemeAsync()
+        => await JS.InvokeVoidAsync("toggleTheme");
 }

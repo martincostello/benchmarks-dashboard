@@ -26,6 +26,9 @@ public abstract class AppPage(IPage page)
     public async Task SignOutAsync()
         => await Page.ClickAsync(Selectors.SignOut);
 
+    public async Task ToggleThemeAsync()
+        => await Page.ClickAsync(Selectors.ToggleTheme);
+
     public async Task<string> UserNameAsync()
         => (await Page.InnerTextAsync(Selectors.UserName)).Trim();
 
@@ -48,6 +51,7 @@ public abstract class AppPage(IPage page)
         internal const string HomeLink = "id=home-link";
         internal const string SignIn = "id=sign-in";
         internal const string SignOut = "id=sign-out";
+        internal const string ToggleTheme = "id=toggle-theme";
         internal const string UserName = "id=user-name";
     }
 }

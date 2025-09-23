@@ -44,8 +44,8 @@
                     <li class="nav-item">
                         <a class="nav-link"
                            href="@(GitMetadata.RepositoryUrl)"
-                            rel="noopener"
-                            target="_blank"
+                           rel="noopener"
+                           target="_blank"
                            title="Benchmarks dashboard repository in @(Dashboard.GitHubInstance)">
                             Dashboard
                             <Icon Name="@(Icons.ChartLine)" />
@@ -53,6 +53,17 @@
                         </a>
                     </li>
                 }
+            </ul>
+            <ul class="nav navbar-nav">
+                <li>
+                    <button class="btn btn-link navbar-btn nav-link"
+                            id="toggle-theme"
+                            title="Toggle theme"
+                            type="button"
+                            @onclick="ToggleThemeAsync">
+                        <Icon Name="@(Icons.Moon)" />
+                    </button>
+                </li>
             </ul>
             @if (GitHubService.CurrentUser is { } user)
             {

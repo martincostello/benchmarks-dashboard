@@ -119,6 +119,16 @@ public class DashboardTests(
                 "DotNetBenchmarks.TodoAppBenchmarks",
                 "DotNetBenchmarks.TodoAppBenchmarks.GetAllTodos");
 
+            // Act
+            await dashboard.ToggleThemeAsync();
+
+            // Assert - Dark theme works
+            await VerifyScreenshot(chart, $"{browserType}_{browserChannel}_benchmarks-demo_dark");
+
+            // Act
+            await dashboard.ToggleThemeAsync();
+
+            // Assert - Back to light theme
             await VerifyScreenshot(chart, $"{browserType}_{browserChannel}_benchmarks-demo");
 
             // Arrange

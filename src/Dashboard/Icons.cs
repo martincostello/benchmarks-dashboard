@@ -69,6 +69,11 @@ public static class Icons
     public static string Key => "fa-solid fa-key";
 
     /// <summary>
+    /// Gets the <c>moon</c> icon.
+    /// </summary>
+    public static string Moon => "fa-solid fa-moon";
+
+    /// <summary>
     /// Gets the <c>rotate-right</c> icon.
     /// </summary>
     public static string RotateRight => "fa-solid fa-rotate-right";
@@ -82,4 +87,9 @@ public static class Icons
     /// Gets the <c>right-to-bracket</c> icon.
     /// </summary>
     public static string RightToBracket => "fa-solid fa-right-to-bracket";
+
+    /// <summary>
+    /// Gets the <c>sun</c> icon.
+    /// </summary>
+    public static string Sun => "fa-solid fa-sun";
 }

@@ -76,7 +76,21 @@
       top.location = self.location;
     }
   </script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.8/flatly/bootstrap.min.css" integrity="sha512-6cPfXE7P+s3gLoNVw8XfKNI3nc0kKcDIhZzlFp81ZLRcueIq2ayKiHcT9YT7Z+q0+61MKhvVaSaV5PmG7jEsKA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.8/flatly/bootstrap.min.css" integrity="sha512-6cPfXE7P+s3gLoNVw8XfKNI3nc0kKcDIhZzlFp81ZLRcueIq2ayKiHcT9YT7Z+q0+61MKhvVaSaV5PmG7jEsKA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script type="text/javascript">
+    (function () {
+      const theme = localStorage.getItem('theme') || 'light';
+      const themeLink = document.getElementById('theme');
+      if (theme === 'dark') {
+        themeLink.setAttribute('integrity', 'sha512-+uC0Ar9AG4/j/iF0Ug22TO9D17MAbD94K7J8h17EzXzN3D5kcOpYQdF4OuiLraHSibCVhz4DIcqwsDboRMVStg==');
+        themeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.8/darkly/bootstrap.min.css';
+      } else {
+        themeLink.setAttribute('integrity', 'sha512-6cPfXE7P+s3gLoNVw8XfKNI3nc0kKcDIhZzlFp81ZLRcueIq2ayKiHcT9YT7Z+q0+61MKhvVaSaV5PmG7jEsKA==');
+        themeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.8/flatly/bootstrap.min.css';
+      }
+      document.documentElement.setAttribute('data-bs-theme', theme);
+    })();
+  </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script type="text/javascript">
     if (window.location.pathname.length > 1) {
