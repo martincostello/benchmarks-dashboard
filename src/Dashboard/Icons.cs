@@ -69,9 +69,12 @@ public static class Icons
     public static string Key => "fa-solid fa-key";
 
     /// <summary>
-    /// Gets the <c>moon</c> icon.
+    /// Gets a generic icon for light and dark theme toggle.
+    /// This is intentionally not set to a specific icon so that it can be
+    /// set dynamically via JavaScript depending on the current theme, read
+    /// from <c>localStorage</c> or the system preference.
     /// </summary>
-    public static string Moon => "fa-solid fa-moon";
+    public static string ThemeToggle => "fa-solid";
 
     /// <summary>
     /// Gets the <c>rotate-right</c> icon.
@@ -87,9 +90,4 @@ public static class Icons
     /// Gets the <c>right-to-bracket</c> icon.
     /// </summary>
     public static string RightToBracket => "fa-solid fa-right-to-bracket";
-
-    /// <summary>
-    /// Gets the <c>sun</c> icon.
-    /// </summary>
-    public static string Sun => "fa-solid fa-sun";
 }

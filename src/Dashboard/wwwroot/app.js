@@ -1,12 +1,22 @@
 'use strict';
 
 window.toggleTheme = () => {
-  const theme = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
-  window._setBenchmarkTheme(theme);
-  // Optimistically refresh immediately
-  window.refreshChartThemes();
-  // Allow CSS to apply then refresh charts
-  setTimeout(() => window.refreshChartThemes(), 50);
+  const newTheme = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+  const oldBodyColor = getComputedStyle(document.body).backgroundColor;
+  window._setBenchmarkTheme(newTheme);
+
+  const waitForThemeChange = () => {
+    const newBodyColor = getComputedStyle(document.body).backgroundColor;
+    // Only refresh charts if the body color actually changed
+    if (oldBodyColor !== newBodyColor) {
+      window.refreshChartThemes()
+    }
+    else {
+      requestAnimationFrame(waitForThemeChange)
+    }
+  }
+
+  waitForThemeChange();
 };
 
 window.scrollToActiveChart = () => {
