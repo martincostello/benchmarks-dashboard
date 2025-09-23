@@ -1,7 +1,7 @@
 'use strict';
 
 window.toggleTheme = () => {
-  const theme = localStorage.getItem('theme') === 'dark' ? 'light' : 'dark';
+  const theme = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
   window._setBenchmarkTheme(theme);
   // Optimistically refresh immediately
   window.refreshChartThemes();

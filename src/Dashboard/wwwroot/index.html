@@ -79,6 +79,19 @@
   <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.8/flatly/bootstrap.min.css" integrity="sha512-6cPfXE7P+s3gLoNVw8XfKNI3nc0kKcDIhZzlFp81ZLRcueIq2ayKiHcT9YT7Z+q0+61MKhvVaSaV5PmG7jEsKA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script type="text/javascript">
     (function () {
+      // Helper to update the toggle icon
+      const updateIcon = (theme) => {
+        const toUpdate = document.querySelector('#toggle-theme span');
+        if (toUpdate) {
+          toUpdate.classList.remove('fa-moon');
+          toUpdate.classList.remove('fa-sun');
+          toUpdate.classList.add(theme === 'dark' ? 'fa-sun' : 'fa-moon');
+        } else {
+          // during page load, the icon may not be present yet
+          setTimeout(() => updateIcon(theme), 100);
+        }
+      }
+
       // theme setter with optional persistence (default true)
       window._setBenchmarkTheme = function(theme, persist) {
         if (persist === undefined) persist = true;
@@ -95,12 +108,7 @@
         }
         document.documentElement.setAttribute('data-bs-theme', theme);
 
-        const icon = document.querySelector('#toggle-theme span');
-        if (icon) {
-          icon.classList.remove('fa-moon');
-          icon.classList.remove('fa-sun');
-          icon.classList.add(theme === 'dark' ? 'fa-sun' : 'fa-moon');
-        }
+        updateIcon(theme);
       };
 
       // Use stored preference if present, otherwise follow the system preference
