@@ -76,53 +76,25 @@
       top.location = self.location;
     }
   </script>
-  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.8/flatly/bootstrap.min.css" integrity="sha512-6cPfXE7P+s3gLoNVw8XfKNI3nc0kKcDIhZzlFp81ZLRcueIq2ayKiHcT9YT7Z+q0+61MKhvVaSaV5PmG7jEsKA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <script type="text/javascript">
-    (function () {
-      // theme setter with optional persistence (default true)
-      window._setBenchmarkTheme = function (theme, persist) {
-        if (persist === undefined) {
-            persist = true;
-        }
-        if (persist) {
-          localStorage.setItem('theme', theme);
-        }
-        const themeLink = document.getElementById('theme');
-        if (theme === 'dark') {
-          themeLink.setAttribute('integrity', 'sha512-+uC0Ar9AG4/j/iF0Ug22TO9D17MAbD94K7J8h17EzXzN3D5kcOpYQdF4OuiLraHSibCVhz4DIcqwsDboRMVStg==');
-          themeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.8/darkly/bootstrap.min.css';
-        } else {
-          themeLink.setAttribute('integrity', 'sha512-6cPfXE7P+s3gLoNVw8XfKNI3nc0kKcDIhZzlFp81ZLRcueIq2ayKiHcT9YT7Z+q0+61MKhvVaSaV5PmG7jEsKA==');
-          themeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.8/flatly/bootstrap.min.css';
-        }
-        document.documentElement.setAttribute('data-bs-theme', theme);
-
-        // Helper to update the toggle icon
-        const updateIcon = () => {
-          const toUpdate = document.querySelector('#toggle-theme span');
-          const darkIcon = 'fa-moon';
-          const lightIcon = 'fa-sun';
-          if (toUpdate) {
-            toUpdate.classList.remove(darkIcon);
-            toUpdate.classList.remove(lightIcon);
-            toUpdate.classList.add(theme === 'dark' ? lightIcon : darkIcon);
-          } else {
-            // During page load, the icon may not be present yet
-            requestAnimationFrame(updateIcon);
-          }
-        }
-
-        updateIcon();
-      };
-
-      // Use stored preference if present, otherwise follow the system preference
-      const storedTheme = localStorage.getItem('theme');
-      const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const initialTheme = storedTheme || (systemPrefersDark ? 'dark' : 'light');
-      // Don't persist when following system preference by default
-      window._setBenchmarkTheme(initialTheme, !!storedTheme);
-    })();
-  </script>
+  <link
+    id="theme-light"
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.8/flatly/bootstrap.min.css"
+    integrity="sha512-6cPfXE7P+s3gLoNVw8XfKNI3nc0kKcDIhZzlFp81ZLRcueIq2ayKiHcT9YT7Z+q0+61MKhvVaSaV5PmG7jEsKA=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+    media="(prefers-color-scheme: light)"
+  />
+  <link
+    id="theme-dark"
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.8/darkly/bootstrap.min.css"
+    integrity="sha512-+uC0Ar9AG4/j/iF0Ug22TO9D17MAbD94K7J8h17EzXzN3D5kcOpYQdF4OuiLraHSibCVhz4DIcqwsDboRMVStg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+    media="(prefers-color-scheme: dark)"
+  />
+  <script src="theme-switch.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script type="text/javascript">
     if (window.location.pathname.length > 1) {
