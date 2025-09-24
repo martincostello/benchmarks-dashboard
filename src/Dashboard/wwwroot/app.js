@@ -1,5 +1,24 @@
 'use strict';
 
+window.toggleTheme = () => {
+  const newTheme = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+  const oldBodyColor = getComputedStyle(document.body).backgroundColor;
+  window._setBenchmarkTheme(newTheme);
+
+  const waitForThemeChange = () => {
+    const newBodyColor = getComputedStyle(document.body).backgroundColor;
+    // Only refresh charts if the body color actually changed
+    if (oldBodyColor !== newBodyColor) {
+      window.refreshChartThemes();
+    }
+    else {
+      requestAnimationFrame(waitForThemeChange);
+    }
+  }
+
+  waitForThemeChange();
+};
+
 window.scrollToActiveChart = () => {
   if (window.location.hash) {
     const focus = window.location.hash.substring(1);
@@ -98,6 +117,29 @@ window.configureDataDownload = (json, fileName) => {
   }
 };
 
+function getThemeStyles() {
+  const root = document.documentElement;
+  const styles = getComputedStyle(root);
+  const theme = root.getAttribute('data-bs-theme');
+  const fontColor = styles.getPropertyValue('--bs-body-color').trim();
+  const hoverColor = styles.getPropertyValue('--plot-hover-color').trim();
+  const hoverBg = styles.getPropertyValue('--plot-hover-background-color').trim();
+  const bgColor = styles.getPropertyValue('--bs-body-bg').trim();
+
+  return { fontColor, bgColor, hoverColor, hoverBg };
+}
+
+function applyThemeToLayout(layout) {
+  const { fontColor, bgColor } = getThemeStyles();
+  layout.paper_bgcolor = bgColor;
+  layout.plot_bgcolor = bgColor;
+  layout.font.color = fontColor;
+  layout.xaxis.color = fontColor;
+  layout.yaxis.color = fontColor;
+  layout.title.font = (layout.title.font || {});
+  layout.title.font.color = fontColor;
+}
+
 window.renderChart = (chartId, configString) => {
   const config = JSON.parse(configString);
   const { dataset } = config;
@@ -151,6 +193,9 @@ window.renderChart = (chartId, configString) => {
     },
   };
 
+  // Apply theme-aware styling
+  applyThemeToLayout(layout);
+
   if (!isDesktop) {
     layout.margin = {
       l: 30,
@@ -188,11 +233,12 @@ window.renderChart = (chartId, configString) => {
       newline;
   });
 
+  const { hoverColor } = getThemeStyles();
   const hoverlabel = {
     align: 'left',
     bordercolor: 'black',
     font: {
-      color: getComputedStyle(document.documentElement).getPropertyValue('--plot-hover-color'),
+      color: hoverColor,
       family: getComputedStyle(document.documentElement).getPropertyValue('--bs-font-sans-serif'),
     }
   };
@@ -286,6 +332,7 @@ window.renderChart = (chartId, configString) => {
       title: {
         text: memoryUnit,
       },
+      color: layout.font.color,
     };
 
     const allZero = dataset.every((p) => p.result.bytesAllocated === 0);
@@ -352,5 +399,29 @@ window.renderChart = (chartId, configString) => {
       filename,
       format,
     });
+  });
+};
+
+// Refresh theme for existing charts
+window.refreshChartThemes = () => {
+  if (!('Plotly' in window)) {
+    return;
+  }
+
+  const { fontColor, bgColor } = getThemeStyles();
+  document.querySelectorAll('.js-plotly-plot').forEach((element) => {
+    try {
+      Plotly.relayout(element, {
+        'paper_bgcolor': bgColor,
+        'plot_bgcolor': bgColor,
+        'font.color': fontColor,
+        'xaxis.color': fontColor,
+        'yaxis.color': fontColor,
+        'yaxis2.color': fontColor,
+        'title.font.color': fontColor,
+      });
+    } catch (err) {
+      console.error('Failed to relayout chart for theme refresh.', err);
+    }
   });
 };

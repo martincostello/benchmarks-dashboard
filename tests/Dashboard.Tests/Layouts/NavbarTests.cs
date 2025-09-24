@@ -37,4 +37,19 @@ public class NavbarTests : DashboardTestContext
             () => actual.Find("[id='sign-in']").TextContent.ShouldContain("Sign in"),
             TimeSpan.FromSeconds(2));
     }
+
+    [Fact]
+    public void Theme_Can_Be_Toggled()
+    {
+        // Arrange
+        JSInterop.SetupVoid("toggleTheme", _ => true);
+
+        var actual = RenderComponent<Navbar>();
+
+        // Act
+        actual.Find("[id='toggle-theme']").Click();
+
+        // Assert
+        JSInterop.VerifyInvoke("toggleTheme");
+    }
 }
