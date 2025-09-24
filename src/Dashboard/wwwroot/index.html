@@ -65,7 +65,6 @@
   </script>
   <link id="theme-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.8/flatly/bootstrap.min.css" integrity="sha512-6cPfXE7P+s3gLoNVw8XfKNI3nc0kKcDIhZzlFp81ZLRcueIq2ayKiHcT9YT7Z+q0+61MKhvVaSaV5PmG7jEsKA==" crossorigin="anonymous" referrerpolicy="no-referrer" media="(prefers-color-scheme: light)" />
   <link id="theme-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.8/darkly/bootstrap.min.css" integrity="sha512-+uC0Ar9AG4/j/iF0Ug22TO9D17MAbD94K7J8h17EzXzN3D5kcOpYQdF4OuiLraHSibCVhz4DIcqwsDboRMVStg==" crossorigin="anonymous" referrerpolicy="no-referrer" media="(prefers-color-scheme: dark)" />
-  <script src="theme-switch.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script type="text/javascript">
     if (window.location.pathname.length > 1) {
@@ -78,6 +77,14 @@
       link.setAttribute('href', href);
       link.setAttribute('rel', 'stylesheet');
       document.head.appendChild(link);
+    }
+  </script>
+  <script type="text/javascript">
+    const headScripts = ['theme-switch.js'];
+    for (const src of headScripts) {
+      const script = document.createElement('script');
+      script.setAttribute('src', src);
+      document.head.appendChild(script);
     }
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/js/bootstrap.bundle.min.js" integrity="sha512-HvOjJrdwNpDbkGJIG2ZNqDlVqMo77qbs4Me4cah0HoDrfhrbA+8SBlZn1KrvAQw7cILLPFJvdwIgphzQmMm+Pw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -111,8 +118,8 @@
     <p><span class="copyright"></span></p>
   </footer>
   <script type="text/javascript">
-    const scripts = ['app.js', '_framework/blazor.webassembly.js'];
-    for (const src of scripts) {
+    const bodyScripts = ['app.js', '_framework/blazor.webassembly.js'];
+    for (const src of bodyScripts) {
       const script = document.createElement('script');
       script.setAttribute('src', src);
       document.body.appendChild(script);
