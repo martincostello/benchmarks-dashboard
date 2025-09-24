@@ -6,7 +6,7 @@ window.toggleTheme = () => {
   window._setBenchmarkTheme(newTheme);
 
   let depth = 0;
-  const maxDepth = 32;
+  const maxDepth = 128;
 
   const waitForThemeChange = () => {
     const newBodyColor = getComputedStyle(document.body).backgroundColor;
