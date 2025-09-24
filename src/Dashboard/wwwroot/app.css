@@ -200,13 +200,15 @@ text.gtitle > a {
   color: white;
 }
 
+:root[data-bs-theme='dark'] .form-control,
 :root[data-bs-theme='dark'] .form-select {
   background-color: var(--bs-secondary-bg) !important;
-  color: var(--bs-secondary-color) !important;
   border-color: var(--bs-border-color) !important;
+  color: var(--bs-secondary-color) !important;
 }
 
-:root[data-bs-theme='dark'] .form-select:focus {
+:root[data-bs-theme='dark'] .form-control:focus,
+:root[data-bs-theme='dark'] .form-select:focus{
   background-color: var(--bs-body-bg) !important;
   color: var(--bs-body-color) !important;
 }
