@@ -10,6 +10,9 @@ A dashboard for visualising [benchmark results][benchmarks-data] from my reposit
 
 The dashboard is a [Blazor WASM][blazor] static application deployed to [a GitHub Pages site][site].
 
+> [!TIP]
+> If you would like to deploy your own copy of the dashboard, check out the [martincostello/deploy-benchmarks-dashboard][deployment] repository for further details.
+
 ## Building and Testing
 
 Compiling the application yourself requires Git and the [.NET SDK][dotnet-sdk] to be installed.
@@ -43,6 +46,7 @@ This project is licensed under the [Apache 2.0][license] license.
 [build-status]: https://github.com/martincostello/benchmarks-dashboard/actions?query=workflow%3Abuild+branch%3Amain+event%3Apush "Continuous Integration for this project"
 [coverage-badge]: https://codecov.io/gh/martincostello/benchmarks-dashboard/branch/main/graph/badge.svg
 [coverage-report]: https://codecov.io/gh/martincostello/benchmarks-dashboard "Code coverage report for this project"
+[deployment]: https://github.com/martincostello/deploy-benchmarks-dashboard "The martincostello/deploy-benchmarks-dashboard repository on GitHub.com"
 [dotnet-sdk]: https://dotnet.microsoft.com/download "Download the .NET SDK"
 [issues]: https://github.com/martincostello/benchmarks-dashboard/issues "Issues for this project on GitHub.com"
 [license]: https://www.apache.org/licenses/LICENSE-2.0.txt "The Apache 2.0 license"
