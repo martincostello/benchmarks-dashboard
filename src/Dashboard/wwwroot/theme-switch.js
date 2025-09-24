@@ -26,7 +26,7 @@
 
     // Helper to update the toggle icon
     let depth = 0;
-    const maxDepth = 32;
+    const maxDepth = 128;
 
     const updateIcon = () => {
       const toUpdate = document.querySelector('#toggle-theme span');
