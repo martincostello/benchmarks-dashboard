@@ -69,47 +69,43 @@ public partial class Home
         {
             foreach (var benchmark in run.Benchmarks)
             {
-                TryAdd(benchmark.Name);
-                continue;
+                var key = benchmark.Name;
 
-                void TryAdd(string key)
+                // Loop until we find a unique key for this key + timestamp.
+                while (true)
                 {
-                    // Loop until we find a unique key for this key + timestamp.
-                    while (true)
+                    if (!sortedGroups.TryGetValue(key, out var results))
                     {
-                        if (!sortedGroups.TryGetValue(key, out var results))
-                        {
-                            sortedGroups[key] = results = [];
-                        }
+                        sortedGroups[key] = results = [];
+                    }
 
-                        if (!results.ContainsKey(run.Timestamp))
-                        {
-                            results.Add(run.Timestamp, new(run.Commit, benchmark));
-                            return;
-                        }
+                    if (!results.ContainsKey(run.Timestamp))
+                    {
+                        results.Add(run.Timestamp, new(run.Commit, benchmark));
+                        break;
+                    }
 
-                        // We have multiple runs for the same commit, they may be different jobs.
-                        // By default the names are not unique, so lets append a suffix to make them so.
-                        // This assumes that they will be in the same order each time.
-                        // check if the key already ends with '[0-9]'
-                        var match = JobSuffixRegex().Match(key);
-                        if (match.Success)
-                        {
-                            var baseKey = match.Groups[1].Value;
+                    // We have multiple runs for the same commit, they may be different jobs.
+                    // By default the names are not unique, so lets append a suffix to make them so.
+                    // This assumes that they will be in the same order each time.
+                    // check if the key already ends with '[0-9]'
+                    var match = JobSuffixRegex().Match(key);
+                    if (match.Success)
+                    {
+                        var baseKey = match.Groups[1].Value;
 
-                            // We found a job, if the job was a number we want to increment it.
-                            // otherwise we just want to append [1]
-                            var number = match.Groups[3].Success switch
-                            {
-                                true => int.Parse(match.Groups[3].Value, NumberFormatInfo.InvariantInfo) + 1,
-                                false => 1,
-                            };
-                            key = $"{baseKey}[{number}]";
-                        }
-                        else
+                        // We found a job, if the job was a number we want to increment it.
+                        // otherwise we just want to append [1]
+                        var number = match.Groups[3].Success switch
                         {
-                            key = $"{key}[1]";
-                        }
+                            true => int.Parse(match.Groups[3].Value, NumberFormatInfo.InvariantInfo) + 1,
+                            false => 1,
+                        };
+                        key = $"{baseKey}[{number}]";
+                    }
+                    else
+                    {
+                        key = $"{key}[1]";
                     }
                 }
             }
@@ -268,6 +264,25 @@ public partial class Home
     [GeneratedRegex(@"^(.*?)(\[(\d+)\])?$", RegexOptions.CultureInvariant)]
     private static partial Regex JobSuffixRegex();
 
+    private static double NormalizeTimeValue(double value, string? unit) => unit switch
+    {
+        null or "ns" => value,
+        "µs" => value * 1e3,
+        "ms" => value * 1e6,
+        "s" => value * 1e9,
+        _ => throw new ArgumentOutOfRangeException(nameof(unit), unit, "Unknown time unit."),
+    };
+
+    private static double NormalizeMemoryValue(double value, string? unit) => unit switch
+    {
+        null or "B" => value,
+        "KB" => value * 1e3,
+        "MB" => value * 1e6,
+        "GB" => value * 1e9,
+        "TB" => value * 1e12,
+        _ => throw new ArgumentOutOfRangeException(nameof(unit), unit, "Unknown memory unit."),
+    };
+
     private static void NormalizeBenchmarkInput(
         BenchmarkItem item,
         bool hasAllocations)
@@ -276,14 +291,7 @@ public partial class Home
         const string RangePrefix = "± ";
 
         // normalize to nanoseconds
-        item.Result.Value = item.Result.Unit switch
-        {
-            null or "ns" => item.Result.Value,
-            "µs" => item.Result.Value * 1e3,
-            "ms" => item.Result.Value * 1e6,
-            "s" => item.Result.Value * 1e9,
-            _ => throw new ArgumentOutOfRangeException(nameof(item), item.Result.Unit, "Unknown time unit."),
-        };
+        item.Result.Value = NormalizeTimeValue(item.Result.Value, item.Result.Unit);
 
         // normalize error range
         if (!string.IsNullOrEmpty(item.Result.Range)
@@ -297,15 +305,7 @@ public partial class Home
 
             if (parsed)
             {
-                var updated = item.Result.Unit switch
-                {
-                    null or "ns" => rangeDouble,
-                    "µs" => rangeDouble * 1e3,
-                    "ms" => rangeDouble * 1e6,
-                    "s" => rangeDouble * 1e9,
-                    _ => throw new ArgumentOutOfRangeException(nameof(item), item.Result.Unit, "Unknown time unit."),
-                };
-
+                var updated = NormalizeTimeValue(rangeDouble, item.Result.Unit);
                 item.Result.Range = $"{RangePrefix}{updated:F}";
             }
         }
@@ -315,17 +315,7 @@ public partial class Home
 
         if (item.Result.BytesAllocated is not null)
         {
-            // normalize to bytes
-            item.Result.BytesAllocated = item.Result.MemoryUnit switch
-            {
-                // When it's bytes it's sometimes not provided.
-                null or "B" => item.Result.BytesAllocated,
-                "KB" => item.Result.BytesAllocated * 1e3,
-                "MB" => item.Result.BytesAllocated * 1e6,
-                "GB" => item.Result.BytesAllocated * 1e9,
-                "TB" => item.Result.BytesAllocated * 1e12,
-                _ => throw new ArgumentOutOfRangeException(nameof(item), item.Result.MemoryUnit, "Unknown memory unit."),
-            };
+            item.Result.BytesAllocated = NormalizeMemoryValue(item.Result.BytesAllocated.Value, item.Result.MemoryUnit);
         }
 
         // I'm not sure how real this will be, but there was an edge case

@@ -20,11 +20,22 @@ public class HomeTests : DashboardTestContext
             { [100, 1_000, 1_000], [200, 300, 1_000], [100, 1_000, 1_000], "ns", [200, 300, 1_000], "B" },
             { [1_234, 2_345, 3_456], [null, null, null], [1.234, 2.345, 3.456], "µs", [null, null, null], null },
             { [1_234, 2_345, 3_456], [6_789, 7_900, 8_901], [1.234, 2.345, 3.456], "µs", [6.789, 7.900, 8.901], "KB" },
-            { [1_234, 2_345, 3_456], [6_789_000, 7_900_000, 8_901_000], [1.234, 2.345, 3.456], "µs", [6.789, 7.900, 8.901], "MB" },
+            {
+                [1_234, 2_345, 3_456], [6_789_000, 7_900_000, 8_901_000], [1.234, 2.345, 3.456], "µs",
+                [6.789, 7.900, 8.901], "MB"
+            },
             { [1_234, 2_345, 34_560], [null, null, null], [1.234, 2.345, 34.560], "µs", [null, null, null], null },
-            { [123_400, 234_500, 3_456_000], [null, null, null], [123.4, 234.5, 3_456], "µs", [null, null, null], null },
-            { [1_234_000, 2_345_000, 3_456_000], [null, null, null], [1.234, 2.345, 3.456], "ms", [null, null, null], null },
-            { [1_234_000_000, 2_345_000_000, 3_456_000_000], [null, null, null], [1.234, 2.345, 3.456], "s", [null, null, null], null },
+            {
+                [123_400, 234_500, 3_456_000], [null, null, null], [123.4, 234.5, 3_456], "µs", [null, null, null], null
+            },
+            {
+                [1_234_000, 2_345_000, 3_456_000], [null, null, null], [1.234, 2.345, 3.456], "ms", [null, null, null],
+                null
+            },
+            {
+                [1_234_000_000, 2_345_000_000, 3_456_000_000], [null, null, null], [1.234, 2.345, 3.456], "s",
+                [null, null, null], null
+            },
         };
 
         return testCases;
@@ -45,11 +56,7 @@ public class HomeTests : DashboardTestContext
 
         for (int i = 0; i < durationValues.Length; i++)
         {
-            var result = new BenchmarkResult()
-            {
-                BytesAllocated = memoryValues[i],
-                Value = durationValues[i],
-            };
+            var result = new BenchmarkResult() { BytesAllocated = memoryValues[i], Value = durationValues[i], };
 
             items.Add(new(new(), result));
         }
@@ -235,9 +242,13 @@ public class HomeTests : DashboardTestContext
             Commit = CreateCommit("dup"),
             Benchmarks =
             [
+                new() { Name = "Unique", Value = 1 },
                 new() { Name = "Dup", Value = 10 },
                 new() { Name = "Dup", Value = 20 },
                 new() { Name = "Dup", Value = 30 },
+                new() { Name = "Dup[Job]", Value = 40 },
+                new() { Name = "Dup[Job]", Value = 50 },
+                new() { Name = "Dup[Job]", Value = 60 },
             ],
         };
 
@@ -245,10 +256,14 @@ public class HomeTests : DashboardTestContext
         var grouped = Home.GroupBenchmarks([run]);
 
         // Assert: expect keys Dup, Dup[1], Dup[2]
-        grouped.Keys.ShouldBe(["Dup", "Dup[1]", "Dup[2]"]);
+        grouped.Keys.ShouldBe(["Unique", "Dup", "Dup[1]", "Dup[2]", "Dup[Job]", "Dup[Job][1]", "Dup[Job][2]"]);
+        grouped["Unique"].Single().Result.Value.ShouldBe(1);
         grouped["Dup"].Single().Result.Value.ShouldBe(10);
         grouped["Dup[1]"].Single().Result.Value.ShouldBe(20);
         grouped["Dup[2]"].Single().Result.Value.ShouldBe(30);
+        grouped["Dup[Job]"].Single().Result.Value.ShouldBe(40);
+        grouped["Dup[Job][1]"].Single().Result.Value.ShouldBe(50);
+        grouped["Dup[Job][2]"].Single().Result.Value.ShouldBe(60);
     }
 
     [Fact]
@@ -291,6 +306,83 @@ public class HomeTests : DashboardTestContext
         items[1].Result.MemoryUnit.ShouldBe("GB");
         items[0].Result.BytesAllocated.ShouldBe(1);
         items[1].Result.BytesAllocated.ShouldBe(1_000);
+    }
+
+    [Fact]
+    public void NormalizeUnits_Throws_On_Unknown_Time_Unit()
+    {
+        // Arrange
+        var items = new List<BenchmarkItem> { new(new(), new BenchmarkResult { Value = 1, Unit = "years" }), };
+
+        // Act & Assert
+        Should.Throw<ArgumentException>(() => Home.NormalizeUnits(items))
+            .Message.ShouldContain("years");
+    }
+
+    [Fact]
+    public void NormalizeUnits_Throws_On_Unknown_Memory_Unit()
+    {
+        // Arrange
+        var items = new List<BenchmarkItem>
+        {
+            new(new(), new BenchmarkResult { Value = 1, Unit = "ns", BytesAllocated = 1, MemoryUnit = "PB" }),
+        };
+
+        // Act & Assert
+        Should.Throw<ArgumentException>(() => Home.NormalizeUnits(items))
+            .Message.ShouldContain("PB");
+    }
+
+    [Fact]
+    public void NormalizeUnits_Handles_All_Memory_Units()
+    {
+        // Arrange
+        string[] units = ["B", "KB", "MB", "GB", "TB"];
+        var items = new List<BenchmarkItem>();
+
+        foreach (var unit in units)
+        {
+            items.Add(new BenchmarkItem(
+                new(),
+                new BenchmarkResult { Value = 1, Unit = "ns", BytesAllocated = 1, MemoryUnit = unit }));
+        }
+
+        // Act
+        Home.NormalizeUnits(items);
+
+        // Assert: all scale to B (min is 1 B)
+        double value = 1;
+        foreach (var item in items)
+        {
+            item.Result.MemoryUnit.ShouldBe("B");
+            item.Result.BytesAllocated.ShouldBe(value);
+            value *= 1_000;
+        }
+    }
+
+    [Fact]
+    public void NormalizeUnits_Handles_All_Time_Units()
+    {
+        // Arrange
+        string[] units = ["ns", "µs", "ms", "s"];
+        var items = new List<BenchmarkItem>();
+
+        foreach (var unit in units)
+        {
+            items.Add(new BenchmarkItem(new(), new BenchmarkResult { Value = 1, Unit = unit }));
+        }
+
+        // Act
+        Home.NormalizeUnits(items);
+
+        // Assert: all scale to ns (min is 1 ns)
+        double value = 1;
+        foreach (var item in items)
+        {
+            item.Result.Unit.ShouldBe("ns");
+            item.Result.Value.ShouldBe(value);
+            value *= 1_000;
+        }
     }
 
     private static GitCommit CreateCommit(string sha)
