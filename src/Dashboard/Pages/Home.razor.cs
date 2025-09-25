@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Martin Costello, 2024. All rights reserved.
 // Licensed under the Apache 2.0 license. See the LICENSE file in the project root for full license information.
-
+using System.Text.RegularExpressions;
 using MartinCostello.Benchmarks.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -69,12 +69,46 @@ public partial class Home
         {
             foreach (var benchmark in run.Benchmarks)
             {
-                if (!sortedGroups.TryGetValue(benchmark.Name, out var results))
-                {
-                    sortedGroups[benchmark.Name] = results = [];
-                }
+                TryAdd(benchmark.Name);
+                continue;
 
-                results.Add(run.Timestamp, new(run.Commit, benchmark));
+                void TryAdd(string key)
+                {
+                    if (!sortedGroups.TryGetValue(key, out var results))
+                    {
+                        sortedGroups[key] = results = [];
+                    }
+
+                    // We have multiple runs for the same commit, they may be different jobs.
+                    // By default the names are not unique, so lets append a suffix to make them so.
+                    // This assumes that they will be in the same order each time.
+                    if (results.ContainsKey(run.Timestamp))
+                    {
+                        // check if the key already ends with '[0-9]'
+                        var match = SuffixRegex().Match(key);
+                        if (match.Success)
+                        {
+                            // if it does, increment the number
+                            var baseKey = match.Groups[1].Value;
+                            var number = match.Groups[3].Success switch
+                            {
+                                true => int.Parse(match.Groups[3].Value, NumberFormatInfo.InvariantInfo) + 1,
+                                false => 1,
+                            };
+                            key = $"{baseKey}[{number}]";
+                        }
+                        else
+                        {
+                            key = $"{key}[1]";
+                        }
+
+                        TryAdd(key);
+                    }
+                    else
+                    {
+                        results.Add(run.Timestamp, new(run.Commit, benchmark));
+                    }
+                }
             }
         }
 
@@ -104,12 +138,70 @@ public partial class Home
         }
 
         const double Factor = 1e-3;
-        const double Limit = 1_000;
+
+        // This preserves values < 700 in the current unit.
+        // Allows 0.7+ values to scale up to the next unit.
+        const double Limit = 700;
+
+        var hasAllocations = items.Any((p) => p.Result.BytesAllocated is not null);
+
+        // Normalize input allocations
+        foreach (var item in items)
+        {
+            // normalize to nanoseconds
+            item.Result.Value = item.Result.Unit switch
+            {
+                null or "ns" => item.Result.Value,
+                "µs" => item.Result.Value * 1e3,
+                "ms" => item.Result.Value * 1e6,
+                "s" => item.Result.Value * 1e9,
+                _ => throw new ArgumentOutOfRangeException(nameof(items), item.Result.Unit, "Unknown time unit."),
+            };
+
+            if (double.TryParse(item.Result.Range?[2..], NumberStyles.Float, CultureInfo.InvariantCulture, out var rangeDouble))
+            {
+                var prefix = item.Result.Range[0..2];
+                var updated = item.Result.Unit switch
+                {
+                    null or "ns" => rangeDouble,
+                    "µs" => rangeDouble * 1e3,
+                    "ms" => rangeDouble * 1e6,
+                    "s" => rangeDouble * 1e9,
+                    _ => throw new ArgumentOutOfRangeException(nameof(items), item.Result.Unit, "Unknown time unit."),
+                };
+
+                item.Result.Range = prefix + updated;
+            }
+
+            item.Result.Unit = "ns";
+
+            if (item.Result.BytesAllocated is not null)
+            {
+                // normalize to bytes
+                item.Result.BytesAllocated = item.Result.MemoryUnit switch
+                {
+                    // When it's bytes it's sometimes not provided.
+                    null or "B" => item.Result.BytesAllocated,
+                    "KB" => item.Result.BytesAllocated * 1e3,
+                    "MB" => item.Result.BytesAllocated * 1e6,
+                    "GB" => item.Result.BytesAllocated * 1e9,
+                    "TB" => item.Result.BytesAllocated * 1e12,
+                    _ => throw new ArgumentOutOfRangeException(nameof(items), item.Result.MemoryUnit, "Unknown memory unit."),
+                };
+            }
+
+            // I'm not sure how real this will be, but there was an edge case
+            // in the tests where 1 entry was missing allocations.
+            if (hasAllocations)
+            {
+                item.Result.MemoryUnit = "B";
+            }
+        }
 
         var minimumTime = items.Min((p) => p.Result.Value);
         string[] timeUnits = ["µs", "ms", "s"];
 
-        for (int i = 0; i < timeUnits.Length; i++)
+        foreach (var unit in timeUnits)
         {
             if (minimumTime < Limit)
             {
@@ -118,12 +210,10 @@ public partial class Home
 
             minimumTime *= Factor;
 
-            for (int j = 0; j < items.Count; j++)
+            foreach (var item in items)
             {
-                var item = items[j];
-
                 item.Result.Value *= Factor;
-                item.Result.Unit = timeUnits[i];
+                item.Result.Unit = unit;
 
                 if (item.Result.Range is { Length: > 0 } range)
                 {
@@ -136,27 +226,27 @@ public partial class Home
             }
         }
 
-        if (items.Where((p) => p is not null).Min((p) => p.Result!.BytesAllocated) is { } minimumBytes)
+        if (items.Where((p) => p is not null).Min((p) => p.Result!.BytesAllocated) is { } minimumMem)
         {
-            string[] memoryUnits = ["KB", "MB"];
+            string[] memoryUnits = ["KB", "MB", "GB", "TB"];
 
-            for (int i = 0; i < memoryUnits.Length; i++)
+            foreach (var unit in memoryUnits)
             {
-                if (minimumBytes < Limit)
+                // If the minimum is already less than the limit,
+                // we don't need to scale up further.
+                if (minimumMem < Limit)
                 {
                     break;
                 }
 
-                minimumBytes *= Factor;
+                minimumMem *= Factor;
 
-                for (int j = 0; j < items.Count; j++)
+                foreach (var item in items)
                 {
-                    var item = items[j];
-
                     if (item.Result.BytesAllocated is not null)
                     {
                         item.Result.BytesAllocated *= Factor;
-                        item.Result.MemoryUnit = memoryUnits[i];
+                        item.Result.MemoryUnit = unit;
                     }
                 }
             }
@@ -218,6 +308,9 @@ public partial class Home
             await JS.InvokeVoidAsync("configureDeepLinks", []);
         }
     }
+
+    [GeneratedRegex(@"^(.*?)(\[(\d+)\])?$", RegexOptions.CultureInvariant)]
+    private static partial Regex SuffixRegex();
 
     private async Task RepositoryChangedAsync(ChangeEventArgs args)
     {
