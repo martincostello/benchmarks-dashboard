@@ -74,22 +74,31 @@ public partial class Home
 
                 void TryAdd(string key)
                 {
-                    if (!sortedGroups.TryGetValue(key, out var results))
+                    // Loop until we find a unique key for this key + timestamp.
+                    while (true)
                     {
-                        sortedGroups[key] = results = [];
-                    }
+                        if (!sortedGroups.TryGetValue(key, out var results))
+                        {
+                            sortedGroups[key] = results = [];
+                        }
 
-                    // We have multiple runs for the same commit, they may be different jobs.
-                    // By default the names are not unique, so lets append a suffix to make them so.
-                    // This assumes that they will be in the same order each time.
-                    if (results.ContainsKey(run.Timestamp))
-                    {
+                        if (!results.ContainsKey(run.Timestamp))
+                        {
+                            results.Add(run.Timestamp, new(run.Commit, benchmark));
+                            return;
+                        }
+
+                        // We have multiple runs for the same commit, they may be different jobs.
+                        // By default the names are not unique, so lets append a suffix to make them so.
+                        // This assumes that they will be in the same order each time.
                         // check if the key already ends with '[0-9]'
-                        var match = SuffixRegex().Match(key);
+                        var match = JobSuffixRegex().Match(key);
                         if (match.Success)
                         {
-                            // if it does, increment the number
                             var baseKey = match.Groups[1].Value;
+
+                            // We found a job, if the job was a number we want to increment it.
+                            // otherwise we just want to append [1]
                             var number = match.Groups[3].Success switch
                             {
                                 true => int.Parse(match.Groups[3].Value, NumberFormatInfo.InvariantInfo) + 1,
@@ -101,12 +110,6 @@ public partial class Home
                         {
                             key = $"{key}[1]";
                         }
-
-                        TryAdd(key);
-                    }
-                    else
-                    {
-                        results.Add(run.Timestamp, new(run.Commit, benchmark));
                     }
                 }
             }
@@ -143,59 +146,12 @@ public partial class Home
         // Allows 0.7+ values to scale up to the next unit.
         const double Limit = 700;
 
-        var hasAllocations = items.Any((p) => p.Result.BytesAllocated is not null);
+        var hasAllocations = items.Any(p => p.Result.BytesAllocated is not null);
 
         // Normalize input allocations
         foreach (var item in items)
         {
-            // normalize to nanoseconds
-            item.Result.Value = item.Result.Unit switch
-            {
-                null or "ns" => item.Result.Value,
-                "µs" => item.Result.Value * 1e3,
-                "ms" => item.Result.Value * 1e6,
-                "s" => item.Result.Value * 1e9,
-                _ => throw new ArgumentOutOfRangeException(nameof(items), item.Result.Unit, "Unknown time unit."),
-            };
-
-            if (double.TryParse(item.Result.Range?[2..], NumberStyles.Float, CultureInfo.InvariantCulture, out var rangeDouble))
-            {
-                var prefix = item.Result.Range[0..2];
-                var updated = item.Result.Unit switch
-                {
-                    null or "ns" => rangeDouble,
-                    "µs" => rangeDouble * 1e3,
-                    "ms" => rangeDouble * 1e6,
-                    "s" => rangeDouble * 1e9,
-                    _ => throw new ArgumentOutOfRangeException(nameof(items), item.Result.Unit, "Unknown time unit."),
-                };
-
-                item.Result.Range = prefix + updated;
-            }
-
-            item.Result.Unit = "ns";
-
-            if (item.Result.BytesAllocated is not null)
-            {
-                // normalize to bytes
-                item.Result.BytesAllocated = item.Result.MemoryUnit switch
-                {
-                    // When it's bytes it's sometimes not provided.
-                    null or "B" => item.Result.BytesAllocated,
-                    "KB" => item.Result.BytesAllocated * 1e3,
-                    "MB" => item.Result.BytesAllocated * 1e6,
-                    "GB" => item.Result.BytesAllocated * 1e9,
-                    "TB" => item.Result.BytesAllocated * 1e12,
-                    _ => throw new ArgumentOutOfRangeException(nameof(items), item.Result.MemoryUnit, "Unknown memory unit."),
-                };
-            }
-
-            // I'm not sure how real this will be, but there was an edge case
-            // in the tests where 1 entry was missing allocations.
-            if (hasAllocations)
-            {
-                item.Result.MemoryUnit = "B";
-            }
+            NormalizeBenchmarkInput(item, hasAllocations);
         }
 
         var minimumTime = items.Min((p) => p.Result.Value);
@@ -310,7 +266,75 @@ public partial class Home
     }
 
     [GeneratedRegex(@"^(.*?)(\[(\d+)\])?$", RegexOptions.CultureInvariant)]
-    private static partial Regex SuffixRegex();
+    private static partial Regex JobSuffixRegex();
+
+    private static void NormalizeBenchmarkInput(
+        BenchmarkItem item,
+        bool hasAllocations)
+    {
+        // This is the expected prefix injection from benchmarkdotnet-results-publisher
+        const string RangePrefix = "± ";
+
+        // normalize to nanoseconds
+        item.Result.Value = item.Result.Unit switch
+        {
+            null or "ns" => item.Result.Value,
+            "µs" => item.Result.Value * 1e3,
+            "ms" => item.Result.Value * 1e6,
+            "s" => item.Result.Value * 1e9,
+            _ => throw new ArgumentOutOfRangeException(nameof(item), item.Result.Unit, "Unknown time unit."),
+        };
+
+        // normalize error range
+        if (!string.IsNullOrEmpty(item.Result.Range)
+            && item.Result.Range.StartsWith(RangePrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            var parsed = double.TryParse(
+                item.Result.Range[2..],
+                NumberStyles.Float,
+                CultureInfo.InvariantCulture,
+                out var rangeDouble);
+
+            if (parsed)
+            {
+                var updated = item.Result.Unit switch
+                {
+                    null or "ns" => rangeDouble,
+                    "µs" => rangeDouble * 1e3,
+                    "ms" => rangeDouble * 1e6,
+                    "s" => rangeDouble * 1e9,
+                    _ => throw new ArgumentOutOfRangeException(nameof(item), item.Result.Unit, "Unknown time unit."),
+                };
+
+                item.Result.Range = $"{RangePrefix}{updated:F}";
+            }
+        }
+
+        // set the unit to nanoseconds
+        item.Result.Unit = "ns";
+
+        if (item.Result.BytesAllocated is not null)
+        {
+            // normalize to bytes
+            item.Result.BytesAllocated = item.Result.MemoryUnit switch
+            {
+                // When it's bytes it's sometimes not provided.
+                null or "B" => item.Result.BytesAllocated,
+                "KB" => item.Result.BytesAllocated * 1e3,
+                "MB" => item.Result.BytesAllocated * 1e6,
+                "GB" => item.Result.BytesAllocated * 1e9,
+                "TB" => item.Result.BytesAllocated * 1e12,
+                _ => throw new ArgumentOutOfRangeException(nameof(item), item.Result.MemoryUnit, "Unknown memory unit."),
+            };
+        }
+
+        // I'm not sure how real this will be, but there was an edge case
+        // in the tests where 1 entry was missing allocations.
+        if (hasAllocations)
+        {
+            item.Result.MemoryUnit = "B";
+        }
+    }
 
     private async Task RepositoryChangedAsync(ChangeEventArgs args)
     {

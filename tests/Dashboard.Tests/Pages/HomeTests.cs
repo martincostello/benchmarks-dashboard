@@ -193,7 +193,7 @@ public class HomeTests : DashboardTestContext
         items[1].Result.BytesAllocated.ShouldBe(1_000);
         items[1].Result.MemoryUnit.ShouldBe("KB");
 
-        // Null remains null, but MemoryUnit is set to B during normalization
+        // Null remains null, but MemoryUnit is set to the base unit "B" (bytes) during normalization
         items[2].Result.BytesAllocated.ShouldBeNull();
         items[2].Result.MemoryUnit.ShouldBe("B");
 
