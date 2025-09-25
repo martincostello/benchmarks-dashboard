@@ -85,26 +85,18 @@ public partial class Home
                         break;
                     }
 
-                    // We have multiple runs for the same commit, they may be different jobs.
-                    // By default the names are not unique, so lets append a suffix to make them so.
-                    // This assumes that they will be in the same order each time.
-                    // check if the key already ends with '[0-9]'
-                    var match = JobSuffixRegex().Match(key);
-                    if (match.Success)
+                    // We have duplicate keys for the same commit, they may be different jobs.
+                    // Check if we have already seen this job for this commit.
+                    var match = DuplicateJobSuffixRegex().Match(key);
+                    if (match.Success && match.Groups[3].Success)
                     {
                         var baseKey = match.Groups[1].Value;
-
-                        // We found a job, if the job was a number we want to increment it.
-                        // otherwise we just want to append [1]
-                        var number = match.Groups[3].Success switch
-                        {
-                            true => int.Parse(match.Groups[3].Value, NumberFormatInfo.InvariantInfo) + 1,
-                            false => 1,
-                        };
-                        key = $"{baseKey}[{number}]";
+                        var duplicate = int.Parse(match.Groups[3].Value, NumberFormatInfo.InvariantInfo) + 1;
+                        key = $"{baseKey}[{duplicate}]";
                     }
                     else
                     {
+                        // First duplicate, add a [1] suffix.
                         key = $"{key}[1]";
                     }
                 }
@@ -261,8 +253,8 @@ public partial class Home
         }
     }
 
-    [GeneratedRegex(@"^(.*?)(\[(\d+)\])?$", RegexOptions.CultureInvariant)]
-    private static partial Regex JobSuffixRegex();
+    [GeneratedRegex(@"^(.*?)(\[(\d+)\])+$", RegexOptions.CultureInvariant)]
+    private static partial Regex DuplicateJobSuffixRegex();
 
     private static double NormalizeTimeValue(double value, string? unit) => unit switch
     {
