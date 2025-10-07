@@ -17,6 +17,7 @@
     <PackageReference Include="bunit" />
     <PackageReference Include="coverlet.msbuild" />
     <PackageReference Include="GitHubActionsTestLogger" />
+    <PackageReference Include="JunitXml.TestLogger" />
     <PackageReference Include="JustEat.HttpClientInterception" />
     <PackageReference Include="MartinCostello.Logging.XUnit.v3" />
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
@@ -29,9 +30,6 @@
     <PackageReference Include="Verify.XunitV3" />
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="xunit.v3" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(BuildingInsideVisualStudio)' != '' ">
-    <PackageReference Include="JunitXml.TestLogger" />
   </ItemGroup>
   <PropertyGroup>
     <CollectCoverage>true</CollectCoverage>
