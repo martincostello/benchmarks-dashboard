@@ -145,7 +145,12 @@ public partial class Home
             NormalizeBenchmarkInput(item, hasAllocations);
         }
 
-        var minimumTime = items.Where((p) => !double.IsNaN(p.Result.Value)).Min((p) => p.Result.Value);
+        var minimumTime = items
+            .Where((p) => !double.IsNaN(p.Result.Value))
+            .Select((p) => p.Result.Value)
+            .DefaultIfEmpty(0)
+            .Min();
+
         string[] timeUnits = ["µs", "ms", "s"];
 
         foreach (var unit in timeUnits)
