@@ -8,16 +8,15 @@ namespace MartinCostello.Benchmarks.Pages;
 
 public class HomeTests : DashboardTestContext
 {
-    public static TheoryData<double[], double?[], double[], string?, double?[], string?> NormalizationTestCases()
-    {
-        var testCases = new TheoryData<double[], double?[], double[], string?, double?[], string?>()
+    public static TheoryData<double[], double?[], double[], string?, double?[], string?> NormalizationTestCases() =>
+        new()
         {
             { [], [], [], null, [], null },
             { [1, 2, 3], [null, null, null], [1, 2, 3], "ns", [null, null, null], null },
-            { [1, 2, 3], [1, 2, 3], [1, 2, 3], "ns", [1, 2, 3], "B" },
-            { [1, 2, 3], [1, null, 3], [1, 2, 3], "ns", [1, null, 3], "B" },
+            { [1, 2, 3], [1, 2, 3], [1, 2, 3], "ns", [1, 2, 3], "bytes" },
+            { [1, 2, 3], [1, null, 3], [1, 2, 3], "ns", [1, null, 3], "bytes" },
             { [100, 1_000, 1_000], [null, null, null], [100, 1_000, 1_000], "ns", [null, null, null], null },
-            { [100, 1_000, 1_000], [200, 300, 1_000], [100, 1_000, 1_000], "ns", [200, 300, 1_000], "B" },
+            { [100, 1_000, 1_000], [200, 300, 1_000], [100, 1_000, 1_000], "ns", [200, 300, 1_000], "bytes" },
             { [1_234, 2_345, 3_456], [null, null, null], [1.234, 2.345, 3.456], "µs", [null, null, null], null },
             { [1_234, 2_345, 3_456], [6_789, 7_900, 8_901], [1.234, 2.345, 3.456], "µs", [6.789, 7.900, 8.901], "KB" },
             { [1_234, 2_345, 3_456], [6_789_000, 7_900_000, 8_901_000], [1.234, 2.345, 3.456], "µs", [6.789, 7.900, 8.901], "MB" },
@@ -26,9 +25,6 @@ public class HomeTests : DashboardTestContext
             { [1_234_000, 2_345_000, 3_456_000], [4e9, 8e9, 16e9], [1.234, 2.345, 3.456], "ms", [4, 8, 16], "GB" },
             { [1_234_000_000, 2_345_000_000, 3_456_000_000], [1.5e12, 2.5e12, 5e12], [1.234, 2.345, 3.456], "s", [1.5, 2.5, 5], "TB" },
         };
-
-        return testCases;
-    }
 
     [Theory]
     [MemberData(nameof(NormalizationTestCases))]
@@ -45,7 +41,11 @@ public class HomeTests : DashboardTestContext
 
         for (int i = 0; i < durationValues.Length; i++)
         {
-            var result = new BenchmarkResult() { BytesAllocated = memoryValues[i], Value = durationValues[i], };
+            var result = new BenchmarkResult()
+            {
+                BytesAllocated = memoryValues[i],
+                Value = durationValues[i],
+            };
 
             items.Add(new(new(), result));
         }
@@ -169,7 +169,7 @@ public class HomeTests : DashboardTestContext
     }
 
     [Fact]
-    public void NormalizeUnits_Handles_Mixed_KB_and_MB()
+    public void NormalizeUnits_Handles_Mixed_Memory_Units()
     {
         // Arrange: three items, memory in KB, MB, and null
         var items = new List<BenchmarkItem>
@@ -182,7 +182,7 @@ public class HomeTests : DashboardTestContext
         // Act
         Home.NormalizeUnits(items);
 
-        // Assert: everything scales to KB because min is 300 KB
+        // Assert: everything scales to KB because minimum is 300 KB
         items[0].Result.BytesAllocated.ShouldBe(300);
         items[0].Result.MemoryUnit.ShouldBe("KB");
 
@@ -191,9 +191,9 @@ public class HomeTests : DashboardTestContext
 
         // Null remains null, but MemoryUnit is set to the base unit "B" (bytes) during normalization
         items[2].Result.BytesAllocated.ShouldBeNull();
-        items[2].Result.MemoryUnit.ShouldBe("B");
+        items[2].Result.MemoryUnit.ShouldBe("bytes");
 
-        // Time stays as ns as inputs were tiny
+        // Time stays as ns as inputs were small
         items.ForEach(i => i.Result.Unit.ShouldBe("ns"));
     }
 
@@ -210,53 +210,66 @@ public class HomeTests : DashboardTestContext
         // Act
         Home.NormalizeUnits(items);
 
-        // Assert: final unit is ms (min 0.8ms -> stays in ms) and range preserved numerically
-        items[0].Result.Unit.ShouldBe("ms");
-        items[1].Result.Unit.ShouldBe("ms");
+        // Assert
+        var first = items[0].Result;
+        var second = items[1].Result;
 
-        items[0].Result.Value.ShouldBe(1.5);
-        items[1].Result.Value.ShouldBe(0.8);
+        first.Value.ShouldBe(1.5);
+        first.Unit.ShouldBe("ms");
+        first.Range.ShouldBe("± 0.1");
 
-        items[0].Result.Range.ShouldBe("± 0.1");
+        second.Value.ShouldBe(0.8);
+        second.Unit.ShouldBe("ms");
+        second.Range.ShouldBeNull();
     }
 
     [Fact]
     public void GroupBenchmarks_Appends_Suffix_For_Duplicate_Timestamps()
     {
-        // Arrange: single run with three benchmarks with same name and timestamp
-        var ts = new DateTimeOffset(2024, 09, 03, 12, 00, 00, TimeSpan.Zero);
+        // Arrange
+        var timestamp = new DateTimeOffset(2024, 09, 03, 12, 00, 00, TimeSpan.Zero);
         var run = new BenchmarkRun
         {
-            Timestamp = ts,
-            Commit = CreateCommit("dup"),
+            Timestamp = timestamp,
+            Commit = CreateCommit("duplicate"),
             Benchmarks =
             [
                 new() { Name = "Unique", Value = 1 },
-                new() { Name = "Dup", Value = 10 },
-                new() { Name = "Dup", Value = 20 },
-                new() { Name = "Dup", Value = 30 },
-                new() { Name = "Dup[Job]", Value = 40 },
-                new() { Name = "Dup[Job]", Value = 50 },
-                new() { Name = "Dup[Job]", Value = 60 },
+                new() { Name = "Duplicate", Value = 10 },
+                new() { Name = "Duplicate", Value = 20 },
+                new() { Name = "Duplicate", Value = 30 },
+                new() { Name = "Duplicate[Job]", Value = 40 },
+                new() { Name = "Duplicate[Job]", Value = 50 },
+                new() { Name = "Duplicate[Job]", Value = 60 },
             ],
         };
 
         // Act
         var grouped = Home.GroupBenchmarks([run]);
 
-        // Assert: expect keys Dup, Dup[1], Dup[2]
-        grouped.Keys.ShouldBe(["Unique", "Dup", "Dup[1]", "Dup[2]", "Dup[Job]", "Dup[Job][1]", "Dup[Job][2]"]);
+        // Assert
+        grouped.Keys.ShouldBe(
+        [
+            "Unique",
+            "Duplicate",
+            "Duplicate[1]",
+            "Duplicate[2]",
+            "Duplicate[Job]",
+            "Duplicate[Job][1]",
+            "Duplicate[Job][2]",
+        ]);
+
         grouped["Unique"].Single().Result.Value.ShouldBe(1);
-        grouped["Dup"].Single().Result.Value.ShouldBe(10);
-        grouped["Dup[1]"].Single().Result.Value.ShouldBe(20);
-        grouped["Dup[2]"].Single().Result.Value.ShouldBe(30);
-        grouped["Dup[Job]"].Single().Result.Value.ShouldBe(40);
-        grouped["Dup[Job][1]"].Single().Result.Value.ShouldBe(50);
-        grouped["Dup[Job][2]"].Single().Result.Value.ShouldBe(60);
+        grouped["Duplicate"].Single().Result.Value.ShouldBe(10);
+        grouped["Duplicate[1]"].Single().Result.Value.ShouldBe(20);
+        grouped["Duplicate[2]"].Single().Result.Value.ShouldBe(30);
+        grouped["Duplicate[Job]"].Single().Result.Value.ShouldBe(40);
+        grouped["Duplicate[Job][1]"].Single().Result.Value.ShouldBe(50);
+        grouped["Duplicate[Job][2]"].Single().Result.Value.ShouldBe(60);
     }
 
     [Fact]
-    public void NormalizeUnits_Scales_From_Ns_To_Us_And_Updates_Range()
+    public void NormalizeUnits_Scales_From_Nanoseconds_To_Microseconds_And_Updates_Range()
     {
         // Arrange
         var items = new List<BenchmarkItem>
@@ -269,18 +282,22 @@ public class HomeTests : DashboardTestContext
         Home.NormalizeUnits(items);
 
         // Assert
-        items[0].Result.Unit.ShouldBe("µs");
-        items[1].Result.Unit.ShouldBe("µs");
-        items[0].Result.Value.ShouldBe(0.8);
-        items[1].Result.Value.ShouldBe(0.9);
-        items[0].Result.Range.ShouldBe("± 0.0001");
-        items[1].Result.Range.ShouldBe("± 0.0002");
+        var first = items[0].Result;
+        var second = items[1].Result;
+
+        first.Value.ShouldBe(0.8);
+        first.Unit.ShouldBe("µs");
+        first.Range.ShouldBe("± 0.0001");
+
+        second.Value.ShouldBe(0.9);
+        second.Unit.ShouldBe("µs");
+        second.Range.ShouldBe("± 0.0002");
     }
 
     [Fact]
-    public void NormalizeUnits_Scales_Large_Memory_Units_To_GB()
+    public void NormalizeUnits_Scales_Large_Memory_Units_To_Gigabytes()
     {
-        // Arrange: 1 GB and 1 TB; expect final unit GB (min == 1 GB)
+        // Arrange
         var items = new List<BenchmarkItem>
         {
             new(new(), new BenchmarkResult { Value = 1, Unit = "ns", BytesAllocated = 1, MemoryUnit = "GB" }),
@@ -291,10 +308,14 @@ public class HomeTests : DashboardTestContext
         Home.NormalizeUnits(items);
 
         // Assert
-        items[0].Result.MemoryUnit.ShouldBe("GB");
-        items[1].Result.MemoryUnit.ShouldBe("GB");
-        items[0].Result.BytesAllocated.ShouldBe(1);
-        items[1].Result.BytesAllocated.ShouldBe(1_000);
+        var first = items[0].Result;
+        var second = items[1].Result;
+
+        first.BytesAllocated.ShouldBe(1);
+        first.MemoryUnit.ShouldBe("GB");
+
+        second.BytesAllocated.ShouldBe(1_000);
+        second.MemoryUnit.ShouldBe("GB");
     }
 
     [Fact]
@@ -303,9 +324,9 @@ public class HomeTests : DashboardTestContext
         // Arrange
         var items = new List<BenchmarkItem> { new(new(), new BenchmarkResult { Value = 1, Unit = "years" }), };
 
-        // Act & Assert
-        Should.Throw<ArgumentException>(() => Home.NormalizeUnits(items))
-            .Message.ShouldContain("years");
+        // Act and Assert
+        var exception = Should.Throw<ArgumentOutOfRangeException>(() => Home.NormalizeUnits(items));
+        exception.ActualValue.ShouldBe("years");
     }
 
     [Fact]
@@ -317,34 +338,34 @@ public class HomeTests : DashboardTestContext
             new(new(), new BenchmarkResult { Value = 1, Unit = "ns", BytesAllocated = 1, MemoryUnit = "PB" }),
         };
 
-        // Act & Assert
-        Should.Throw<ArgumentException>(() => Home.NormalizeUnits(items))
-            .Message.ShouldContain("PB");
+        // Act and Assert
+        var exception = Should.Throw<ArgumentOutOfRangeException>(() => Home.NormalizeUnits(items));
+        exception.ActualValue.ShouldBe("PB");
     }
 
     [Fact]
     public void NormalizeUnits_Handles_All_Memory_Units()
     {
         // Arrange
-        string[] units = ["B", "KB", "MB", "GB", "TB"];
-        var items = new List<BenchmarkItem>();
+        string[] units = ["bytes", "KB", "MB", "GB", "TB"];
+        List<BenchmarkItem> items = [];
 
         foreach (var unit in units)
         {
-            items.Add(new BenchmarkItem(
-                new(),
-                new BenchmarkResult { Value = 1, Unit = "ns", BytesAllocated = 1, MemoryUnit = unit }));
+            items.Add(new(new(), new() { Value = 1, Unit = "ns", BytesAllocated = 1, MemoryUnit = unit }));
         }
 
         // Act
         Home.NormalizeUnits(items);
 
-        // Assert: all scale to B (min is 1 B)
+        // Assert
         double value = 1;
+
         foreach (var item in items)
         {
-            item.Result.MemoryUnit.ShouldBe("B");
             item.Result.BytesAllocated.ShouldBe(value);
+            item.Result.MemoryUnit.ShouldBe("bytes");
+
             value *= 1_000;
         }
     }
@@ -354,29 +375,86 @@ public class HomeTests : DashboardTestContext
     {
         // Arrange
         string[] units = ["ns", "µs", "ms", "s"];
-        var items = new List<BenchmarkItem>();
+        List<BenchmarkItem> items = [];
 
         foreach (var unit in units)
         {
-            items.Add(new BenchmarkItem(new(), new BenchmarkResult { Value = 1, Unit = unit }));
+            items.Add(new(new(), new() { Value = 1, Unit = unit }));
         }
 
         // Act
         Home.NormalizeUnits(items);
 
-        // Assert: all scale to ns (min is 1 ns)
+        // Assert
         double value = 1;
+
         foreach (var item in items)
         {
-            item.Result.Unit.ShouldBe("ns");
             item.Result.Value.ShouldBe(value);
+            item.Result.Unit.ShouldBe("ns");
+
             value *= 1_000;
         }
     }
 
-    private static GitCommit CreateCommit(string sha)
+    [Fact]
+    public void NormalizeUnits_Handles_Missing_Values()
     {
-        return new GitCommit()
+        // Arrange
+        List<BenchmarkItem> items =
+        [
+            new(new(), new() { Value = 124367.601, Unit = "ns" }),
+            new(new(), new() { Value = double.NaN, Unit = "ns" }),
+            new(new(), new() { Value = 336148.104, Unit = "ns" }),
+        ];
+
+        // Act
+        Home.NormalizeUnits(items);
+
+        // Assert
+        items[0].Result.Value.ShouldBe(124.367601);
+        items[0].Result.Unit.ShouldBe("µs");
+
+        items[1].Result.Value.ShouldBe(double.NaN);
+        items[1].Result.Unit.ShouldBe("µs");
+
+        items[2].Result.Value.ShouldBe(336.148104);
+        items[2].Result.Unit.ShouldBe("µs");
+    }
+
+    [Fact]
+    public void NormalizeUnits_Handles_All_Missing_Values()
+    {
+        // Arrange
+        List<BenchmarkItem> items =
+        [
+            new(new(), new() { Value = double.NaN, Unit = "ns" }),
+            new(new(), new() { Value = double.NaN, Unit = "ns" }),
+        ];
+
+        // Act
+        Home.NormalizeUnits(items);
+
+        // Assert
+        items[0].Result.Value.ShouldBe(double.NaN);
+        items[0].Result.Unit.ShouldBe("ns");
+
+        items[1].Result.Value.ShouldBe(double.NaN);
+        items[1].Result.Unit.ShouldBe("ns");
+    }
+
+    [Fact]
+    public void NormalizeUnits_Handles_No_Values()
+    {
+        // Arrange
+        List<BenchmarkItem> items = [];
+
+        // Act and Assert
+        Should.NotThrow(() => Home.NormalizeUnits(items));
+    }
+
+    private static GitCommit CreateCommit(string sha) =>
+        new()
         {
             Author = new() { UserName = "octocat" },
             Committer = new() { UserName = "webflow" },
@@ -385,5 +463,4 @@ public class HomeTests : DashboardTestContext
             Sha = sha,
             Url = $"https://github.local/octocat/repository/commits/{sha}",
         };
-    }
 }

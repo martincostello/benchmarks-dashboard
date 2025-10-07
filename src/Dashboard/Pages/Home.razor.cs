@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Martin Costello, 2024. All rights reserved.
 // Licensed under the Apache 2.0 license. See the LICENSE file in the project root for full license information.
+
 using System.Text.RegularExpressions;
 using MartinCostello.Benchmarks.Models;
 using Microsoft.AspNetCore.Components;
@@ -9,6 +10,8 @@ namespace MartinCostello.Benchmarks.Pages;
 
 public partial class Home
 {
+    private const string DefaultMemoryUnit = "bytes";
+
     private bool _loading = true;
     private bool _notFound;
 
@@ -88,11 +91,11 @@ public partial class Home
                     // We have duplicate keys for the same commit, they may be different jobs.
                     // Check if we have already seen this job for this commit.
                     var match = DuplicateJobSuffixRegex().Match(key);
+
                     if (match.Success && match.Groups[3].Success)
                     {
-                        var baseKey = match.Groups[1].Value;
-                        var duplicate = int.Parse(match.Groups[3].Value, NumberFormatInfo.InvariantInfo) + 1;
-                        key = $"{baseKey}[{duplicate}]";
+                        var duplicate = int.Parse(match.Groups[3].Value, CultureInfo.InvariantCulture) + 1;
+                        key = $"{match.Groups[1].Value}[{duplicate}]";
                     }
                     else
                     {
@@ -134,7 +137,7 @@ public partial class Home
         // Allows 0.7+ values to scale up to the next unit.
         const double Limit = 700;
 
-        var hasAllocations = items.Any(p => p.Result.BytesAllocated is not null);
+        var hasAllocations = items.Any((p) => p.Result.BytesAllocated is not null);
 
         // Normalize input allocations
         foreach (var item in items)
@@ -142,7 +145,12 @@ public partial class Home
             NormalizeBenchmarkInput(item, hasAllocations);
         }
 
-        var minimumTime = items.Min((p) => p.Result.Value);
+        var minimumTime = items
+            .Where((p) => !double.IsNaN(p.Result.Value))
+            .Select((p) => p.Result.Value)
+            .DefaultIfEmpty(0)
+            .Min();
+
         string[] timeUnits = ["µs", "ms", "s"];
 
         foreach (var unit in timeUnits)
@@ -170,7 +178,7 @@ public partial class Home
             }
         }
 
-        if (items.Where((p) => p is not null).Min((p) => p.Result!.BytesAllocated) is { } minimumMem)
+        if (items.Where((p) => p is not null).Min((p) => p.Result!.BytesAllocated) is { } minimumMemory)
         {
             string[] memoryUnits = ["KB", "MB", "GB", "TB"];
 
@@ -178,12 +186,12 @@ public partial class Home
             {
                 // If the minimum is already less than the limit,
                 // we don't need to scale up further.
-                if (minimumMem < Limit)
+                if (minimumMemory < Limit)
                 {
                     break;
                 }
 
-                minimumMem *= Factor;
+                minimumMemory *= Factor;
 
                 foreach (var item in items)
                 {
@@ -267,7 +275,7 @@ public partial class Home
 
     private static double NormalizeMemoryValue(double value, string? unit) => unit switch
     {
-        null or "B" => value,
+        null or DefaultMemoryUnit => value,
         "KB" => value * 1e3,
         "MB" => value * 1e6,
         "GB" => value * 1e9,
@@ -282,10 +290,10 @@ public partial class Home
         // This is the expected prefix injection from benchmarkdotnet-results-publisher
         const string RangePrefix = "± ";
 
-        // normalize to nanoseconds
+        // Normalize to nanoseconds
         item.Result.Value = NormalizeTimeValue(item.Result.Value, item.Result.Unit);
 
-        // normalize error range
+        // Normalize error range
         if (!string.IsNullOrEmpty(item.Result.Range)
             && item.Result.Range.StartsWith(RangePrefix, StringComparison.OrdinalIgnoreCase))
         {
@@ -293,28 +301,28 @@ public partial class Home
                 item.Result.Range[2..],
                 NumberStyles.Float,
                 CultureInfo.InvariantCulture,
-                out var rangeDouble);
+                out var rangeValue);
 
             if (parsed)
             {
-                var updated = NormalizeTimeValue(rangeDouble, item.Result.Unit);
+                var updated = NormalizeTimeValue(rangeValue, item.Result.Unit);
                 item.Result.Range = $"{RangePrefix}{updated:F}";
             }
         }
 
-        // set the unit to nanoseconds
+        // Set the unit to nanoseconds
         item.Result.Unit = "ns";
 
-        if (item.Result.BytesAllocated is not null)
+        if (item.Result.BytesAllocated is { } allocated)
         {
-            item.Result.BytesAllocated = NormalizeMemoryValue(item.Result.BytesAllocated.Value, item.Result.MemoryUnit);
+            item.Result.BytesAllocated = NormalizeMemoryValue(allocated, item.Result.MemoryUnit);
         }
 
         // I'm not sure how real this will be, but there was an edge case
         // in the tests where 1 entry was missing allocations.
         if (hasAllocations)
         {
-            item.Result.MemoryUnit = "B";
+            item.Result.MemoryUnit = DefaultMemoryUnit;
         }
     }
 
