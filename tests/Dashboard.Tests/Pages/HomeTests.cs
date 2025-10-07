@@ -397,6 +397,31 @@ public class HomeTests : DashboardTestContext
         }
     }
 
+    [Fact]
+    public void NormalizeUnits_Handles_Missing_Values()
+    {
+        // Arrange
+        List<BenchmarkItem> items =
+        [
+            new(new(), new() { Value = 124367.601, Unit = "ns" }),
+            new(new(), new() { Value = double.NaN, Unit = "ns" }),
+            new(new(), new() { Value = 336148.104, Unit = "ns" }),
+        ];
+
+        // Act
+        Home.NormalizeUnits(items);
+
+        // Assert
+        items[0].Result.Value.ShouldBe(124.367601);
+        items[0].Result.Unit.ShouldBe("µs");
+
+        items[1].Result.Value.ShouldBe(double.NaN);
+        items[1].Result.Unit.ShouldBe("µs");
+
+        items[2].Result.Value.ShouldBe(336.148104);
+        items[2].Result.Unit.ShouldBe("µs");
+    }
+
     private static GitCommit CreateCommit(string sha) =>
         new()
         {
