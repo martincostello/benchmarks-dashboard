@@ -24,7 +24,7 @@
     <PackageVersion Include="System.Text.Encodings.Web" Version="9.0.10" />
     <PackageVersion Include="Verify.ImageMagick" Version="3.7.7" />
     <PackageVersion Include="Verify.Playwright" Version="3.1.0" />
-    <PackageVersion Include="Verify.XunitV3" Version="31.3.0" />
+    <PackageVersion Include="Verify.XunitV3" Version="31.4.1" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
     <PackageVersion Include="xunit.v3" Version="3.1.0" />
   </ItemGroup>
