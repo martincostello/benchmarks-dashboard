@@ -23,7 +23,7 @@ public class SpinnerTests : DashboardTestContext
         string expectedTitle)
     {
         // Act
-        var actual = RenderComponent<Spinner>((builder) =>
+        var actual = Render<Spinner>((builder) =>
         {
             builder.Add((p) => p.Id, id)
                    .Add((p) => p.Color, color)

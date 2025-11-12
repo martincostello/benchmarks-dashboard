@@ -12,10 +12,10 @@ public class MainLayoutTests : DashboardTestContext
     public void Component_Renders()
     {
         // Arrange
-        JSInterop.SetupVoid("configureToolTips", (_) => true);
+        JSInterop.SetupVoid("configureToolTips");
 
         // Act
-        var actual = RenderComponent<MainLayout>();
+        var actual = Render<MainLayout>();
 
         // Assert
         actual.Find(".blazor");
