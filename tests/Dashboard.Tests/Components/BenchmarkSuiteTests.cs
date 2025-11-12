@@ -29,7 +29,7 @@ public class BenchmarkSuiteTests : DashboardTestContext
         }
 
         // Act
-        var actual = RenderComponent<BenchmarkSuite>((builder) =>
+        var actual = Render<BenchmarkSuite>((builder) =>
         {
             builder.Add((p) => p.Name, suite)
                    .Add((p) => p.Benchmarks, benchmarks);

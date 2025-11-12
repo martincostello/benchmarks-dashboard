@@ -25,10 +25,10 @@ public class TokenTests : DashboardTestContext
 
         WithDeviceCode(deviceCode);
 
-        JSInterop.SetupVoid("configureClipboard", (_) => true);
+        JSInterop.SetupVoid("configureClipboard");
 
         // Act
-        var actual = RenderComponent<Token>();
+        var actual = Render<Token>();
 
         // Assert
         actual.WaitForAssertion(
@@ -56,10 +56,10 @@ public class TokenTests : DashboardTestContext
 
         builder.RegisterWith(Interceptor);
 
-        JSInterop.SetupVoid("configureClipboard", (_) => true);
+        JSInterop.SetupVoid("configureClipboard");
 
         // Act
-        var actual = RenderComponent<Token>();
+        var actual = Render<Token>();
 
         // Assert
         actual.WaitForAssertion(

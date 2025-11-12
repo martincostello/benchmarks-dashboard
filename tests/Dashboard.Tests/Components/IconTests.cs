@@ -23,7 +23,7 @@ public class IconTests : DashboardTestContext
         string expected)
     {
         // Act
-        var actual = RenderComponent<Icon>((builder) =>
+        var actual = Render<Icon>((builder) =>
         {
             builder.Add((p) => p.Name, name)
                    .Add((p) => p.Color, color)

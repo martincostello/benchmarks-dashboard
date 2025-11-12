@@ -15,7 +15,7 @@ public class NavbarTests : DashboardTestContext
         await WithValidAccessToken();
 
         // Act
-        var actual = RenderComponent<Navbar>();
+        var actual = Render<Navbar>();
 
         // Assert
         actual.WaitForAssertion(
@@ -30,7 +30,7 @@ public class NavbarTests : DashboardTestContext
         UsingGitHubDotCom();
 
         // Act
-        var actual = RenderComponent<Navbar>();
+        var actual = Render<Navbar>();
 
         // Assert
         actual.WaitForAssertion(
@@ -42,9 +42,9 @@ public class NavbarTests : DashboardTestContext
     public void Theme_Can_Be_Toggled()
     {
         // Arrange
-        JSInterop.SetupVoid("toggleTheme", _ => true);
+        JSInterop.SetupVoid("toggleTheme");
 
-        var actual = RenderComponent<Navbar>();
+        var actual = Render<Navbar>();
 
         // Act
         actual.Find("[id='toggle-theme']").Click();

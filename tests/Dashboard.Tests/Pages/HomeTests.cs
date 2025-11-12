@@ -148,12 +148,12 @@ public class HomeTests : DashboardTestContext
 
         WithBenchmarks(repository, "main");
 
-        JSInterop.SetupVoid("configureDataDownload", (_) => true);
-        JSInterop.SetupVoid("configureDeepLinks", (_) => true);
-        JSInterop.SetupVoid("renderChart", (_) => true);
+        JSInterop.SetupVoid("configureDataDownload");
+        JSInterop.SetupVoid("configureDeepLinks");
+        JSInterop.SetupVoid("renderChart");
 
         // Act
-        var actual = RenderComponent<Home>();
+        var actual = Render<Home>();
 
         // Assert
         actual.WaitForAssertion(
