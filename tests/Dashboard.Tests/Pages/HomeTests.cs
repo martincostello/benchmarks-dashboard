@@ -148,9 +148,9 @@ public class HomeTests : DashboardTestContext
 
         WithBenchmarks(repository, "main");
 
-        JSInterop.SetupVoid("configureDataDownload");
-        JSInterop.SetupVoid("configureDeepLinks");
-        JSInterop.SetupVoid("renderChart");
+        JSInterop.SetupVoid("configureDataDownload", static (_) => true);
+        JSInterop.SetupVoid("configureDeepLinks", static (_) => true);
+        JSInterop.SetupVoid("renderChart", static (_) => true);
 
         // Act
         var actual = Render<Home>();
