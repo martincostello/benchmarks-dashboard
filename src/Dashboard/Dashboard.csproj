@@ -1,9 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
   <PropertyGroup>
     <RootNamespace>MartinCostello.Benchmarks</RootNamespace>
-    <PublishTrimmed>true</PublishTrimmed>
     <TargetFramework>net10.0</TargetFramework>
-    <TrimMode>full</TrimMode>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" />
