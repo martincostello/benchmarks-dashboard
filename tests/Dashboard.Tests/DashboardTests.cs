@@ -51,7 +51,6 @@ public class DashboardTests(
             "api",
             "aspnetcore-openapi",
             "costellobot",
-            "dependabot-helper",
             "openapi-extensions",
             "project-euler",
             "website",
