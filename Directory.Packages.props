@@ -7,7 +7,7 @@
     <PackageVersion Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageVersion Include="bunit" Version="2.1.1" />
     <PackageVersion Include="coverlet.msbuild" Version="6.0.4" />
-    <PackageVersion Include="GitHubActionsTestLogger" Version="2.4.1" />
+    <PackageVersion Include="GitHubActionsTestLogger" Version="3.0.0" />
     <PackageVersion Include="Humanizer" Version="3.0.1" />
     <PackageVersion Include="JunitXml.TestLogger" Version="7.0.2" />
     <PackageVersion Include="JustEat.HttpClientInterception" Version="5.1.2" />
