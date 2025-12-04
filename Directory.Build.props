@@ -16,4 +16,8 @@
     <UseArtifactsOutput>true</UseArtifactsOutput>
     <VersionPrefix>1.0.0</VersionPrefix>
   </PropertyGroup>
+  <!-- HACK Suppress false positive https://github.com/github/advisory-database/pull/6499 -->
+  <ItemGroup>
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-q3hc-j9x5-mp9m" />
+  </ItemGroup>
 </Project>
