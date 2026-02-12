@@ -121,7 +121,7 @@ public sealed class GitHubClient(
 
         response.EnsureSuccessStatusCode();
 
-        return (await response.Content.ReadFromJsonAsync(AppJsonSerializerContext.Default.BenchmarkResults, cancellationToken))!;
+        return (await response.Content.ReadFromJsonAsync(AppJsonSerializerContext.Default.BenchmarkResults, cancellationToken));
     }
 
     /// <summary>
