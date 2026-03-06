@@ -65,13 +65,13 @@ public class DashboardTests(
         var browser = new BrowserFixture(options, Output);
         await browser.WithPageAsync(async page =>
         {
-            await page.GotoAsync(fixture.ServerAddress);
-            await page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
-
             var cancelled = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
             var authorized = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             await ConfigureMocksAsync(page, cancelled, authorized);
+
+            await page.GotoAsync(fixture.ServerAddress);
+            await page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
             var dashboard = new HomePage(page);
 
