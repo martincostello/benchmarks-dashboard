@@ -20,7 +20,7 @@ public sealed class BenchmarkResult
     /// Gets or sets the value of the benchmark.
     /// </summary>
     [JsonPropertyName("value")]
-    public double Value { get; set; } = default!;
+    public double Value { get; set; }
 
     /// <summary>
     /// Gets or sets the value range of the benchmark.
