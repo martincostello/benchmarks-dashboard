@@ -8,7 +8,7 @@
     <PackageVersion Include="bunit" Version="2.6.2" />
     <PackageVersion Include="coverlet.msbuild" Version="8.0.0" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="3.0.1" />
-    <PackageVersion Include="Humanizer" Version="3.0.1" />
+    <PackageVersion Include="Humanizer" Version="3.0.10" />
     <PackageVersion Include="JunitXml.TestLogger" Version="8.0.0" />
     <PackageVersion Include="JustEat.HttpClientInterception" Version="5.1.2" />
     <PackageVersion Include="Magick.NET-Q16-AnyCPU" Version="14.10.3" />
