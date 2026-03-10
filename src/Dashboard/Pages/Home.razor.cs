@@ -178,7 +178,7 @@ public partial class Home
             }
         }
 
-        if (items.Where((p) => p is not null).Min((p) => p.Result!.BytesAllocated) is { } minimumMemory)
+        if (items.Where((p) => p is not null).Min((p) => p.Result.BytesAllocated) is { } minimumMemory)
         {
             string[] memoryUnits = ["KB", "MB", "GB", "TB"];
 
