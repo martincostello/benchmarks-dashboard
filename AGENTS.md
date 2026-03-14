@@ -12,7 +12,6 @@ This file provides guidance to coding agents when working with code in this repo
 - Single test: `dotnet test tests\Dashboard.Tests\Dashboard.Tests.csproj --configuration Release --filter "FullyQualifiedName~MartinCostello.Benchmarks.GitHubServiceTests.Can_Sign_In_And_Out"`
 - UI tests only: `dotnet test tests\Dashboard.Tests\Dashboard.Tests.csproj --configuration Release --filter "Category=UI"`
   - UI tests install Playwright browsers in `UITest.InitializeAsync()` and start the Blazor app through `DashboardFixture`, so they are slower and more integration-heavy than the bUnit/unit tests.
-- Workspace MCP config: `.vscode\mcp.json` configures the Playwright MCP server via `npx -y @playwright/mcp@latest` for browser-driven inspection and debugging in MCP-capable clients.
 - Markdown linting used in CI: `markdownlint-cli2 "**/*.md" --config .markdownlint.json`
 - PowerShell linting used in CI:
 
