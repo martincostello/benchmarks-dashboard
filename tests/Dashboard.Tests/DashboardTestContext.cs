@@ -22,7 +22,7 @@ public abstract class DashboardTestContext : BunitContext
             BenchmarkFileName = "data.json",
             BrandIcons = ["fa-solid fa-rocket"],
             GitHubApiUrl = new("https://api.github.local"),
-            GitHubApiVersion = "2022-11-28",
+            GitHubApiVersion = "2026-03-10",
             GitHubClientId = "dkd73mfo9ASgjsfnhJD8",
             GitHubTokenUrl = new("https://github.local"),
             GitHubServerUrl = new("https://github.local"),

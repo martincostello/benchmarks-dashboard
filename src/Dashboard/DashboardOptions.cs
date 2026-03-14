@@ -41,7 +41,7 @@ public sealed class DashboardOptions
     /// <summary>
     /// Gets or sets the GitHub API version to use for requests.
     /// </summary>
-    public string GitHubApiVersion { get; set; } = "2022-11-28";
+    public string GitHubApiVersion { get; set; } = "2026-03-10";
 
     /// <summary>
     /// Gets or sets the GitHub client ID to use to authenticate using the device flow.
