@@ -3,6 +3,7 @@
     "EditorConfig.EditorConfig",
     "github.vscode-github-actions",
     "ms-dotnettools.csharp",
+    "ms-playwright.playwright",
     "ms-vscode.PowerShell"
   ]
 }
