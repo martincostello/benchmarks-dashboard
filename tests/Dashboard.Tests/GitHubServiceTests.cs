@@ -14,7 +14,7 @@ public class GitHubServiceTests
         {
             BenchmarkFileName = "data.json",
             GitHubApiUrl = new("https://api.github.local"),
-            GitHubApiVersion = "2022-11-28",
+            GitHubApiVersion = "2026-03-10",
             GitHubClientId = "dkd73mfo9ASgjsfnhJD8",
             GitHubServerUrl = new("https://github.local"),
             Repositories = ["benchmarks-demo", "website"],

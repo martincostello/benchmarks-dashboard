@@ -13,7 +13,7 @@ public class GitHubClientTests
         {
             BenchmarkFileName = "data.json",
             GitHubApiUrl = new("https://api.github.local"),
-            GitHubApiVersion = "2022-11-28",
+            GitHubApiVersion = "2026-03-10",
             GitHubClientId = "dkd73mfo9ASgjsfnhJD8",
             GitHubDataUrl = new("https://raw.githubusercontent.local"),
             GitHubTokenUrl = new("https://github.local"),
@@ -147,7 +147,7 @@ public class GitHubClientTests
             .ForUrl("https://api.github.com/repos/octocat/benchmarks/contents/my-repository/data.json?ref=my-branch")
             .ForRequestHeader("Accept", "application/vnd.github.v3.raw")
             .ForRequestHeader("Authorization", "token foo")
-            .ForRequestHeader("X-GitHub-Api-Version", "2022-11-28")
+            .ForRequestHeader("X-GitHub-Api-Version", "2026-03-10")
             .WithJsonContent(
                 new
                 {
@@ -183,7 +183,7 @@ public class GitHubClientTests
             .ForUrl("https://api.github.local/repos/octocat/benchmarks/contents/my-repository/data.json?ref=my-branch")
             .ForRequestHeader("Accept", "application/vnd.github.v3.raw")
             .ForRequestHeader("Authorization", "token foo")
-            .ForRequestHeader("X-GitHub-Api-Version", "2022-11-28")
+            .ForRequestHeader("X-GitHub-Api-Version", "2026-03-10")
             .WithJsonContent(
                 new
                 {
@@ -240,7 +240,7 @@ public class GitHubClientTests
             .ForGet()
             .ForUrl("https://api.github.local/repos/octocat/my-repository")
             .ForRequestHeader("Accept", "application/vnd.github+json")
-            .ForRequestHeader("X-GitHub-Api-Version", "2022-11-28")
+            .ForRequestHeader("X-GitHub-Api-Version", "2026-03-10")
             .WithJsonContent(
                 new
                 {
@@ -285,7 +285,7 @@ public class GitHubClientTests
             .ForGet()
             .ForUrl("https://api.github.local/repos/octocat/my-repository/branches")
             .ForRequestHeader("Accept", "application/vnd.github+json")
-            .ForRequestHeader("X-GitHub-Api-Version", "2022-11-28")
+            .ForRequestHeader("X-GitHub-Api-Version", "2026-03-10")
             .WithJsonContent(
                 new[]
                 {
@@ -320,7 +320,7 @@ public class GitHubClientTests
             .ForGet()
             .ForUrl("https://github.local/api/v3/user")
             .ForRequestHeader("Accept", "application/vnd.github+json")
-            .ForRequestHeader("X-GitHub-Api-Version", "2022-11-28")
+            .ForRequestHeader("X-GitHub-Api-Version", "2026-03-10")
             .WithJsonContent(
                 new
                 {
