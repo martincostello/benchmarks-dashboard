@@ -4,13 +4,13 @@ This file provides guidance to coding agents when working with code in this repo
 
 ## Build, test, and lint commands
 
-- Preferred full validation: `.\build.ps1`
-  - `build.ps1` bootstraps the SDK from `global.json` if needed, publishes `src\Dashboard\Dashboard.csproj`, and then runs `dotnet test --configuration Release`.
-- Publish-only: `.\build.ps1 -SkipTests`
-- App publish directly: `dotnet publish src\Dashboard\Dashboard.csproj`
-- Full test suite: `dotnet test tests\Dashboard.Tests\Dashboard.Tests.csproj --configuration Release`
-- Single test: `dotnet test tests\Dashboard.Tests\Dashboard.Tests.csproj --configuration Release --filter "FullyQualifiedName~MartinCostello.Benchmarks.GitHubServiceTests.Can_Sign_In_And_Out"`
-- UI tests only: `dotnet test tests\Dashboard.Tests\Dashboard.Tests.csproj --configuration Release --filter "Category=UI"`
+- Preferred full validation: `./build.ps1`
+  - `build.ps1` bootstraps the SDK from `global.json` if needed, publishes `src/Dashboard/Dashboard.csproj`, and then runs `dotnet test --configuration Release`.
+- Publish-only: `./build.ps1 -SkipTests`
+- App publish directly: `dotnet publish src/Dashboard/Dashboard.csproj`
+- Full test suite: `dotnet test tests/Dashboard.Tests/Dashboard.Tests.csproj --configuration Release`
+- Single test: `dotnet test tests/Dashboard.Tests/Dashboard.Tests.csproj --configuration Release --filter "FullyQualifiedName~MartinCostello.Benchmarks.GitHubServiceTests.Can_Sign_In_And_Out"`
+- UI tests only: `dotnet test tests/Dashboard.Tests/Dashboard.Tests.csproj --configuration Release --filter "Category=UI"`
   - UI tests install Playwright browsers in `UITest.InitializeAsync()` and start the Blazor app through `DashboardFixture`, so they are slower and more integration-heavy than the bUnit/unit tests.
 - Markdown linting used in CI: `markdownlint-cli2 "**/*.md" --config .markdownlint.json`
 - PowerShell linting used in CI:
@@ -24,15 +24,15 @@ This file provides guidance to coding agents when working with code in this repo
   if ($issues.Count -gt 0) { exit 1 }
   ```
 
-- Workflow linting is defined in `.github\workflows\lint.yml` with `actionlint` and `zizmor`.
+- Workflow linting is defined in `.github/workflows/lint.yml` with `actionlint` and `zizmor`.
 
 ## High-level architecture
 
-- This repository is a Blazor WebAssembly static app in `src\Dashboard`. CI publishes the site and uploads `artifacts\publish\Dashboard\release\wwwroot` for GitHub Pages deployment.
+- This repository is a Blazor WebAssembly static app in `src/Dashboard`. CI publishes the site and uploads `artifacts/publish/Dashboard/release/wwwroot` for GitHub Pages deployment.
 - `Program.cs` is the composition root. It binds the `Dashboard` configuration section into `DashboardOptions`, registers `Blazored.LocalStorage`, and wires the app services: `GitHubDeviceTokenService`, `GitHubClient`, `GitHubService`, and `GitHubTokenStore`.
 - `GitHubService` is the stateful orchestration layer. It owns the selected repository, branch, current commit, benchmark payload, and current user, and raises `OnUserChanged` for UI updates.
 - `GitHubClient` is the HTTP boundary. It handles GitHub REST calls, device-flow token exchange, and benchmark-data downloads. For public GitHub.com repositories it reads benchmark JSON from `raw.githubusercontent.com`; for private repositories or GitHub Enterprise it switches to the GitHub API and adds auth/version headers.
-- Routing is intentionally small and centralized in `Routes.cs`: the home dashboard page and the token/device-flow page. `Pages\Home.razor.cs` also binds `repo` and `branch` from the query string so deep links are part of the main app flow.
+- Routing is intentionally small and centralized in `Routes.cs`: the home dashboard page and the token/device-flow page. `Pages/Home.razor.cs` also binds `repo` and `branch` from the query string so deep links are part of the main app flow.
 - Benchmark rendering is split between C# and JavaScript:
   - `Pages\Home.razor.cs` loads benchmark data, groups duplicate jobs, normalizes time and memory units, and serializes the full payload for download/deep-link helpers.
   - `Components\Benchmark.razor.cs` serializes the chart-specific payload and calls `renderChart`.
