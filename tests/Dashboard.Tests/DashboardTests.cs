@@ -50,6 +50,7 @@ public class DashboardTests(
             "alexa-london-travel-site",
             "api",
             "aspnetcore-openapi",
+            "aspnetcore-opentelemetry-benchmarks",
             "costellobot",
             "openapi-extensions",
             "project-euler",
