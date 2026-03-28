@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Martin Costello, 2024. All rights reserved.
 // Licensed under the Apache 2.0 license. See the LICENSE file in the project root for full license information.
 
-using System.Text.RegularExpressions;
 using MartinCostello.Benchmarks.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -86,34 +85,14 @@ public partial class Home
 
                 var key = benchmark.Name;
 
-                // Loop until we find a unique key for this key + timestamp.
-                while (true)
+                if (!sortedGroups.TryGetValue(key, out var results))
                 {
-                    if (!sortedGroups.TryGetValue(key, out var results))
-                    {
-                        sortedGroups[key] = results = [];
-                    }
+                    sortedGroups[key] = results = [];
+                }
 
-                    if (!results.ContainsKey(timestamp))
-                    {
-                        results.Add(timestamp, new(run.Commit, benchmark));
-                        break;
-                    }
-
-                    // We have duplicate keys for the same commit, they may be different jobs.
-                    // Check if we have already seen this job for this commit.
-                    var match = DuplicateJobSuffixRegex().Match(key);
-
-                    if (match.Success && match.Groups[3].Success)
-                    {
-                        var duplicate = int.Parse(match.Groups[3].Value, CultureInfo.InvariantCulture) + 1;
-                        key = $"{match.Groups[1].Value}[{duplicate}]";
-                    }
-                    else
-                    {
-                        // First duplicate, add a [1] suffix.
-                        key = $"{key}[1]";
-                    }
+                if (!results.ContainsKey(timestamp))
+                {
+                    results.Add(timestamp, new(run.Commit, benchmark));
                 }
             }
         }
@@ -272,9 +251,6 @@ public partial class Home
             await JS.InvokeVoidAsync("configureDeepLinks", []);
         }
     }
-
-    [GeneratedRegex(@"^(.*?)(\[(\d+)\])+$", RegexOptions.CultureInvariant)]
-    private static partial Regex DuplicateJobSuffixRegex();
 
     private static double NormalizeTimeValue(double value, string? unit) => unit switch
     {
