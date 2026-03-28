@@ -139,6 +139,83 @@ public class HomeTests : DashboardTestContext
     }
 
     [Fact]
+    public static void GroupBenchmarks_Groups_Benchmarks_Correctly_With_Multiple_Benchmarks()
+    {
+        // Arrange
+        var runs = new List<BenchmarkRun>()
+        {
+            new()
+            {
+                Timestamp = new DateTimeOffset(2024, 08, 31, 00, 05, 00, TimeSpan.Zero),
+                Commit = CreateCommit("abc"),
+                Benchmarks =
+                [
+                    new() { Name = "A", Value = 1, Range = "± 0.1" },
+                ],
+            },
+            new()
+            {
+                Timestamp = new DateTimeOffset(2024, 08, 31, 00, 05, 00, TimeSpan.Zero),
+                Commit = CreateCommit("abc"),
+                Benchmarks =
+                [
+                    new() { Name = "C", Value = 3, Range = "± 0.3" },
+                ],
+            },
+            new()
+            {
+                Timestamp = new DateTimeOffset(2024, 09, 01, 00, 05, 00, TimeSpan.Zero),
+                Commit = CreateCommit("def"),
+                Benchmarks =
+                [
+                    new() { Name = "A", Value = 2 },
+                    new() { Name = "B", Value = 2678, Range = "± 17" },
+                ],
+            },
+            new()
+            {
+                Timestamp = new DateTimeOffset(2024, 09, 01, 00, 05, 00, TimeSpan.Zero),
+                Commit = CreateCommit("def"),
+                Benchmarks =
+                [
+                    new() { Name = "C", Value = 4, Range = "± 0.4" },
+                ],
+            },
+        };
+
+        // Act
+        var actual = Home.GroupBenchmarks(runs);
+
+        // Assert
+        actual.ShouldNotBeNull();
+        actual.ShouldContainKey("A");
+        actual.ShouldContainKey("B");
+        actual.ShouldContainKey("C");
+
+        var values = actual["A"];
+
+        values.Count.ShouldBe(2);
+        values[0].Result.Value.ShouldBe(1);
+        values[0].Result.Unit.ShouldBe("ns");
+        values[1].Result.Value.ShouldBe(2);
+        values[1].Result.Unit.ShouldBe("ns");
+
+        values = actual["B"];
+
+        values.Count.ShouldBe(1);
+        values[0].Result.Value.ShouldBe(2.678);
+        values[0].Result.Unit.ShouldBe("µs");
+
+        values = actual["C"];
+
+        values.Count.ShouldBe(2);
+        values[0].Result.Value.ShouldBe(3);
+        values[0].Result.Unit.ShouldBe("ns");
+        values[1].Result.Value.ShouldBe(4);
+        values[1].Result.Unit.ShouldBe("ns");
+    }
+
+    [Fact]
     public async Task Page_Renders()
     {
         // Arrange
@@ -252,20 +329,12 @@ public class HomeTests : DashboardTestContext
         [
             "Unique",
             "Duplicate",
-            "Duplicate[1]",
-            "Duplicate[2]",
             "Duplicate[Job]",
-            "Duplicate[Job][1]",
-            "Duplicate[Job][2]",
         ]);
 
         grouped["Unique"].Single().Result.Value.ShouldBe(1);
         grouped["Duplicate"].Single().Result.Value.ShouldBe(10);
-        grouped["Duplicate[1]"].Single().Result.Value.ShouldBe(20);
-        grouped["Duplicate[2]"].Single().Result.Value.ShouldBe(30);
         grouped["Duplicate[Job]"].Single().Result.Value.ShouldBe(40);
-        grouped["Duplicate[Job][1]"].Single().Result.Value.ShouldBe(50);
-        grouped["Duplicate[Job][2]"].Single().Result.Value.ShouldBe(60);
     }
 
     [Fact]

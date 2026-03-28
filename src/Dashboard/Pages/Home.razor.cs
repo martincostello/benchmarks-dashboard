@@ -68,10 +68,22 @@ public partial class Home
     {
         Dictionary<string, SortedList<DateTimeOffset, BenchmarkItem>> sortedGroups = [];
 
-        foreach (var run in runs.DistinctBy((p) => p.Commit.Sha))
+        var uniqueBenchmarks = new HashSet<(string, string)>();
+
+        foreach (var run in runs)
         {
+            var timestamp = run.Timestamp;
+
             foreach (var benchmark in run.Benchmarks)
             {
+                var benchmarkForCommit = (run.Commit.Sha, benchmark.Name);
+
+                if (!uniqueBenchmarks.Add(benchmarkForCommit))
+                {
+                    // We've already seen this commit-name pair, skip it to avoid duplicates.
+                    continue;
+                }
+
                 var key = benchmark.Name;
 
                 // Loop until we find a unique key for this key + timestamp.
@@ -82,9 +94,9 @@ public partial class Home
                         sortedGroups[key] = results = [];
                     }
 
-                    if (!results.ContainsKey(run.Timestamp))
+                    if (!results.ContainsKey(timestamp))
                     {
-                        results.Add(run.Timestamp, new(run.Commit, benchmark));
+                        results.Add(timestamp, new(run.Commit, benchmark));
                         break;
                     }
 
