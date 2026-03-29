@@ -184,6 +184,7 @@ window.renderChart = (chartId, configString) => {
       title: {
         text: 'Commit',
       },
+      type: 'category',
     },
     yaxis: {
       fixedrange: true,
