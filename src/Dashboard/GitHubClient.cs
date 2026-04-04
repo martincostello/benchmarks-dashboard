@@ -93,7 +93,14 @@ public sealed class GitHubClient(
     {
         var current = options.Value;
         var fileName = current.BenchmarkFileName;
-        var useApi = current.IsGitHubEnterprise || !isPublic;
+
+        // Try to always use the GitHub API to avoid hitting GitHub's rate limits.
+        // See https://github.blog/changelog/2025-05-08-updated-rate-limits-for-unauthenticated-requests/
+        var useApi =
+            current.IsGitHubEnterprise ||
+            !isPublic ||
+            !string.IsNullOrEmpty(await tokenStore.GetTokenAsync(cancellationToken));
+
         var baseAddress = useApi ? current.GitHubApiUrl : current.GitHubDataUrl;
 
         var relativeUri =

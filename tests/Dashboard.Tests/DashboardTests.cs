@@ -299,13 +299,22 @@ public class DashboardTests(
 
             foreach (var branch in branches)
             {
-                await page.RouteAsync($"{GitHubData}/{Owner}/benchmarks/{branch}/{repo}/data.json", async (route) =>
+                var dataUrls = new[]
                 {
-                    await route.FulfillAsync(new()
+                    $"{GitHubApi}/repos/{Owner}/benchmarks/contents/{repo}/data.json?ref={branch}",
+                    $"{GitHubData}/{Owner}/benchmarks/{branch}/{repo}/data.json",
+                };
+
+                foreach (var url in dataUrls)
+                {
+                    await page.RouteAsync(url, async (route) =>
                     {
-                        Path = JsonResponseFile($"{repo}-{branch}"),
+                        await route.FulfillAsync(new()
+                        {
+                            Path = JsonResponseFile($"{repo}-{branch}"),
+                        });
                     });
-                });
+                }
             }
         }
 
