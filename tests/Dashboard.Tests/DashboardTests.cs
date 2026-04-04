@@ -254,7 +254,6 @@ public class DashboardTests(
         TaskCompletionSource<string> authorized)
     {
         const string GitHubApi = "https://api.github.com";
-        const string GitHubData = "https://raw.githubusercontent.com";
         const string GitHubLogin = "https://github.com/login/device";
         const string GitHubToken = "https://api.martincostello.com/github";
         const string Owner = "martincostello";
@@ -299,7 +298,7 @@ public class DashboardTests(
 
             foreach (var branch in branches)
             {
-                await page.RouteAsync($"{GitHubData}/{Owner}/benchmarks/{branch}/{repo}/data.json", async (route) =>
+                await page.RouteAsync($"{GitHubApi}/repos/{Owner}/benchmarks/contents/{repo}/data.json?ref={branch}", async (route) =>
                 {
                     await route.FulfillAsync(new()
                     {
