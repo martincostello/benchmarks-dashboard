@@ -92,6 +92,30 @@ jobs:
         path: ./artifacts/publish/Dashboard/release/wwwroot
         if-no-files-found: error
 
+    - name: Publish screenshots
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      if: ${{ !cancelled() }}
+      with:
+        name: screenshots-${{ matrix.os-name }}
+        path: ./artifacts/screenshots/*
+        if-no-files-found: ignore
+
+    - name: Publish traces
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      if: ${{ !cancelled() }}
+      with:
+        name: traces-${{ matrix.os-name }}
+        path: ./artifacts/traces/*
+        if-no-files-found: ignore
+
+    - name: Publish videos
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      if: ${{ !cancelled() }}
+      with:
+        name: videos-${{ matrix.os-name }}
+        path: ./artifacts/videos/*
+        if-no-files-found: ignore
+
   deploy:
     needs: [ build ]
     runs-on: ubuntu-latest
