@@ -205,14 +205,16 @@ public class GitHubClientTests
         actual.RepositoryUrl.ShouldBe("https://github.local/octocat/my-repository");
     }
 
-    [Fact]
-    public async Task Can_Get_Benchmarks_Returns_Null_If_Not_Found()
+    [Theory]
+    [InlineData(404)]
+    [InlineData(429)]
+    public async Task Can_Get_Benchmarks_Returns_Null_For_Http_Status(int status)
     {
         // Arrange
         var builder = new HttpRequestInterceptionBuilder()
             .ForGet()
             .ForUrl("https://api.github.local/repos/octocat/benchmarks/contents/my-repository/data.json?ref=my-branch")
-            .WithStatus(404);
+            .WithStatus(status);
 
         builder.RegisterWith(Interceptor);
 
@@ -240,6 +242,7 @@ public class GitHubClientTests
             .ForGet()
             .ForUrl("https://api.github.local/repos/octocat/my-repository")
             .ForRequestHeader("Accept", "application/vnd.github+json")
+            .ForRequestHeader("Authorization", "token foo")
             .ForRequestHeader("X-GitHub-Api-Version", "2026-03-10")
             .WithJsonContent(
                 new
@@ -285,6 +288,7 @@ public class GitHubClientTests
             .ForGet()
             .ForUrl("https://api.github.local/repos/octocat/my-repository/branches")
             .ForRequestHeader("Accept", "application/vnd.github+json")
+            .ForRequestHeader("Authorization", "token foo")
             .ForRequestHeader("X-GitHub-Api-Version", "2026-03-10")
             .WithJsonContent(
                 new[]
@@ -320,6 +324,7 @@ public class GitHubClientTests
             .ForGet()
             .ForUrl("https://github.local/api/v3/user")
             .ForRequestHeader("Accept", "application/vnd.github+json")
+            .ForRequestHeader("Authorization", "token foo")
             .ForRequestHeader("X-GitHub-Api-Version", "2026-03-10")
             .WithJsonContent(
                 new

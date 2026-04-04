@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Martin Costello, 2024. All rights reserved.
 // Licensed under the Apache 2.0 license. See the LICENSE file in the project root for full license information.
 
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization.Metadata;
@@ -105,16 +106,15 @@ public sealed class GitHubClient(
 
         using var message = new HttpRequestMessage(HttpMethod.Get, requestUri);
 
-        if (useApi)
-        {
-            await SetHeadersAsync(message.Headers, cancellationToken);
-            message.Headers.Accept.Clear();
-            message.Headers.Add("Accept", "application/vnd.github.v3.raw");
-        }
+        // Always authenticate even without using the GitHub API to avoid hitting GitHub's rate limits.
+        // See https://github.blog/changelog/2025-05-08-updated-rate-limits-for-unauthenticated-requests/
+        await SetHeadersAsync(message.Headers, cancellationToken);
+        message.Headers.Accept.Clear();
+        message.Headers.Add("Accept", "application/vnd.github.v3.raw");
 
         using var response = await client.SendAsync(message, cancellationToken);
 
-        if (response.StatusCode is System.Net.HttpStatusCode.NotFound)
+        if (response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.TooManyRequests)
         {
             return null;
         }
