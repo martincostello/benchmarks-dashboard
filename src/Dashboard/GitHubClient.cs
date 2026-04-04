@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Martin Costello, 2024. All rights reserved.
 // Licensed under the Apache 2.0 license. See the LICENSE file in the project root for full license information.
 
-using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization.Metadata;
@@ -122,7 +121,7 @@ public sealed class GitHubClient(
 
         using var response = await client.SendAsync(message, cancellationToken);
 
-        if (response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.TooManyRequests)
+        if (response.StatusCode is System.Net.HttpStatusCode.NotFound)
         {
             return null;
         }

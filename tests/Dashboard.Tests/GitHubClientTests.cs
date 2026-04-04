@@ -243,7 +243,6 @@ public class GitHubClientTests
 
     [Theory]
     [InlineData(404)]
-    [InlineData(429)]
     public async Task Can_Get_Benchmarks_Returns_Null_For_Http_Status(int status)
     {
         // Arrange
