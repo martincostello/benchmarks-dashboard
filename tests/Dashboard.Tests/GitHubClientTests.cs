@@ -104,7 +104,7 @@ public class GitHubClientTests
     }
 
     [Fact]
-    public async Task Can_Get_Benchmarks_Public_GitHub_Repository()
+    public async Task Can_Get_Benchmarks_Public_GitHub_Repository_When_No_Token()
     {
         // Arrange
         Options.GitHubApiUrl = new("https://api.github.com");
@@ -112,6 +112,42 @@ public class GitHubClientTests
         var builder = new HttpRequestInterceptionBuilder()
             .ForGet()
             .ForUrl("https://raw.githubusercontent.local/octocat/benchmarks/my-branch/my-repository/data.json")
+            .WithJsonContent(
+                new
+                {
+                    lastUpdated = 1725355699000,
+                    repoUrl = "https://github.local/octocat/my-repository",
+                });
+
+        builder.RegisterWith(Interceptor);
+
+        string repository = "my-repository";
+        string branch = "my-branch";
+        bool isPublic = true;
+
+        // Act
+        var actual = await Target.GetBenchmarksAsync(repository, branch, isPublic, TestContext.Current.CancellationToken);
+
+        // Assert
+        actual.ShouldNotBeNull();
+        actual.LastUpdated.ShouldBe(new(2024, 09, 03, 09, 28, 19, TimeSpan.Zero));
+        actual.RepositoryUrl.ShouldBe("https://github.local/octocat/my-repository");
+    }
+
+    [Fact]
+    public async Task Can_Get_Benchmarks_Public_GitHub_Repository_With_Token()
+    {
+        // Arrange
+        await TokenStore.StoreTokenAsync("foo", TestContext.Current.CancellationToken);
+
+        Options.GitHubApiUrl = new("https://api.github.com");
+
+        var builder = new HttpRequestInterceptionBuilder()
+            .ForGet()
+            .ForUrl("https://api.github.com/repos/octocat/benchmarks/contents/my-repository/data.json?ref=my-branch")
+            .ForRequestHeader("Accept", "application/vnd.github.v3.raw")
+            .ForRequestHeader("Authorization", "token foo")
+            .ForRequestHeader("X-GitHub-Api-Version", "2026-03-10")
             .WithJsonContent(
                 new
                 {
