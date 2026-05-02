@@ -37,6 +37,7 @@ function createDashboardApp(dependencies = {}) {
         TextEncoderCtor = globalThis.TextEncoder,
         btoaRef = typeof globalThis.btoa === 'function' ? globalThis.btoa.bind(globalThis) : undefined,
         ClipboardItemCtor = globalThis.ClipboardItem,
+        navigateRef = typeof windowRef?.location?.assign === 'function' ? windowRef.location.assign.bind(windowRef.location) : undefined,
         openRef = typeof windowRef?.open === 'function' ? windowRef.open.bind(windowRef) : undefined,
         options = {},
     } = dependencies;
@@ -55,7 +56,17 @@ function createDashboardApp(dependencies = {}) {
         '>': '&gt;',
     });
 
+    let dateFilterNavigationRef;
+
     const htmlEncode = (value) => String(value).replaceAll(/[&"'<>]/g, (match) => htmlEntityMap[match]);
+    const readInputValue = (id) => documentRef.getElementById(id)?.value;
+    const setDateRangeRefreshing = (isRefreshing) => {
+        const loader = documentRef.getElementById('date-range-loader');
+        const benchmarks = documentRef.getElementById('benchmarks');
+
+        loader?.classList.toggle('d-none', !isRefreshing);
+        benchmarks?.classList.toggle('d-none', isRefreshing);
+    };
 
     const getThemeStyles = () => {
         const root = documentRef.documentElement;
@@ -250,6 +261,9 @@ function createDashboardApp(dependencies = {}) {
             };
         }
 
+        layout.dragmode = 'select';
+        layout.selectdirection = 'h';
+
         const seriesX = dataset.map((item) => item.commit.sha.slice(0, 7));
         const customdata = createCustomData(dataset);
         const hoverlabel = getHoverLabel();
@@ -307,11 +321,40 @@ function createDashboardApp(dependencies = {}) {
             .replaceAll('/', '_')
             .replaceAll('\\', '_');
 
-    const createDeepLinkUrl = (target) => {
-        const repo = documentRef.getElementById('repository').value;
-        const branch = documentRef.getElementById('branch').value;
+    const applyDateRangeFilters = (url, startDate, endDate) => {
+        const startDateInput = documentRef.getElementById('startDate');
+        const endDateInput = documentRef.getElementById('endDate');
 
-        if (!branch || !repo) {
+        if (startDate && startDate !== startDateInput?.min) {
+            url.searchParams.set('startDate', startDate);
+        } else {
+            url.searchParams.delete('startDate');
+        }
+
+        if (endDate && endDate !== endDateInput?.max) {
+            url.searchParams.set('endDate', endDate);
+        } else {
+            url.searchParams.delete('endDate');
+        }
+    };
+
+    const applyDashboardFilters = (url, startDate = readInputValue('startDate'), endDate = readInputValue('endDate')) => {
+        const repo = readInputValue('repository');
+        const branch = readInputValue('branch');
+
+        if (repo) {
+            url.searchParams.set('repo', repo);
+        }
+
+        if (branch) {
+            url.searchParams.set('branch', branch);
+        }
+
+        applyDateRangeFilters(url, startDate, endDate);
+    };
+
+    const createDeepLinkUrl = (target) => {
+        if (!readInputValue('branch') || !readInputValue('repository')) {
             return undefined;
         }
 
@@ -325,10 +368,108 @@ function createDashboardApp(dependencies = {}) {
         }
 
         const url = new URLCtor(href);
-        url.searchParams.set('repo', repo);
-        url.searchParams.set('branch', branch);
+        applyDashboardFilters(url);
 
         return url;
+    };
+
+    const formatDateValue = (value) => {
+        if (!value) {
+            return undefined;
+        }
+
+        const date = new Date(value);
+
+        if (Number.isNaN(date.getTime())) {
+            return undefined;
+        }
+
+        return date.toISOString().slice(0, 10);
+    };
+
+    const getSelectedDateRange = (points, dataset) => {
+        const uniqueIndexes = [...new Set(points.map((point) => point.pointIndex).filter((pointIndex) => Number.isInteger(pointIndex)))];
+
+        const dates = uniqueIndexes
+            .map((pointIndex) => formatDateValue(dataset[pointIndex]?.timestamp))
+            .filter((value) => typeof value === 'string')
+            .sort();
+
+        if (dates.length < 1) {
+            return undefined;
+        }
+
+        return {
+            endDate: dates[dates.length - 1],
+            startDate: dates[0],
+        };
+    };
+
+    const isValidDateRange = (startDate, endDate) => {
+        if (!startDate || !endDate || startDate > endDate) {
+            return false;
+        }
+
+        const startDateInput = documentRef.getElementById('startDate');
+        const endDateInput = documentRef.getElementById('endDate');
+        const minimumDate = startDateInput?.min;
+        const maximumDate = endDateInput?.max;
+
+        if (minimumDate && startDate < minimumDate) {
+            return false;
+        }
+
+        if (maximumDate && endDate > maximumDate) {
+            return false;
+        }
+
+        return true;
+    };
+
+    const applyDateFilter = (startDate, endDate, hash) => {
+        if (!isValidDateRange(startDate, endDate)) {
+            return undefined;
+        }
+
+        const url = new URLCtor(windowRef.location.href);
+        applyDashboardFilters(url, startDate, endDate);
+
+        const navigateToDateFilter = async () => {
+            if (typeof dateFilterNavigationRef?.invokeMethodAsync === 'function') {
+                try {
+                    await dateFilterNavigationRef.invokeMethodAsync('ApplyDateRangeFromChartAsync', startDate, endDate, hash);
+                } catch (error) {
+                    console.error('Failed to apply the date filter from chart selection.', error);
+                    setDateRangeRefreshing(false);
+                }
+            } else if (navigateRef) {
+                navigateRef(url.toString());
+            }
+        };
+
+        if (hash) {
+            url.hash = hash;
+        }
+
+        if (typeof dateFilterNavigationRef?.invokeMethodAsync !== 'function' && !navigateRef) {
+            return undefined;
+        }
+
+        setDateRangeRefreshing(true);
+
+        if (setTimeoutRef) {
+            setTimeoutRef(() => {
+                void navigateToDateFilter();
+            }, 0);
+        } else {
+            void navigateToDateFilter();
+        }
+
+        return url;
+    };
+
+    const configureDateFilterNavigation = (navigationRef) => {
+        dateFilterNavigationRef = navigationRef;
     };
 
     const showCopyConfirmation = (target) => {
@@ -532,6 +673,26 @@ function createDashboardApp(dependencies = {}) {
         });
     };
 
+    const clearDateSelection = (chart) => {
+        PlotlyRef.relayout(chart, {
+            selections: [],
+        });
+    };
+
+    const configureDateSelection = (chartDefinition) => {
+        chartDefinition.chart.on('plotly_selected', (event) => {
+            const range = getSelectedDateRange(event?.points ?? [], chartDefinition.dataset);
+
+            if (!range || !isValidDateRange(range.startDate, range.endDate)) {
+                clearDateSelection(chartDefinition.chart);
+                return;
+            }
+
+            const chartHash = `#${encodeURIComponent(chartDefinition.chart.parentElement.id)}`;
+            applyDateFilter(range.startDate, range.endDate, chartHash);
+        });
+    };
+
     const renderChart = (chartId, configString) => {
         const config = JSON.parse(configString);
         const chartDefinition = createChartDefinition(chartId, config);
@@ -546,6 +707,7 @@ function createDashboardApp(dependencies = {}) {
         configurePlotHover(chartDefinition.chart);
         configureChartClipboard(chartId, chartDefinition.chart, config.imageFormat);
         configureChartDownload(chartId, chartDefinition.chart, config);
+        configureDateSelection(chartDefinition);
     };
 
     const registerGlobals = () => {
@@ -556,6 +718,7 @@ function createDashboardApp(dependencies = {}) {
         windowRef.toggleTheme = toggleTheme;
         windowRef.scrollToActiveChart = scrollToActiveChart;
         windowRef.configureClipboard = configureClipboard;
+        windowRef.configureDateFilterNavigation = configureDateFilterNavigation;
         windowRef.configureDeepLinks = configureDeepLinks;
         windowRef.configureToolTips = configureToolTips;
         windowRef.configureDataDownload = configureDataDownload;
@@ -565,19 +728,25 @@ function createDashboardApp(dependencies = {}) {
 
     const api = {
         applyThemeToLayout,
+        applyDateFilter,
         configureClipboard,
         configureDataDownload,
+        configureDateFilterNavigation,
         configureDeepLinks,
         configureToolTips,
         createChartDefinition,
         createDashboardApp,
         createDeepLinkUrl,
         createJsonDataUrl,
+        formatDateValue,
         getThemeStyles,
+        getSelectedDateRange,
+        isValidDateRange,
         refreshChartThemes,
         registerGlobals,
         renderChart,
         sanitizeImageFileName,
+        setDateRangeRefreshing,
         scrollToActiveChart,
         toggleTheme,
     };

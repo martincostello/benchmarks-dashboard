@@ -14,6 +14,11 @@ public static class Icons
     public static string Ban => "fa-solid fa-ban";
 
     /// <summary>
+    /// Gets the <c>calendar-days</c> icon.
+    /// </summary>
+    public static string CalendarDays => "fa-regular fa-calendar-days";
+
+    /// <summary>
     /// Gets the <c>chart-line</c> icon.
     /// </summary>
     public static string ChartLine => "fa-solid fa-chart-line";

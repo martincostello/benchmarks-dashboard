@@ -25,8 +25,10 @@ public class BenchmarkSuiteTests : DashboardTestContext
 
         foreach (string benchmark in benchmarks.Keys)
         {
-            JSInterop.SetupVoid("renderChart", (args) => RenderArgumentsAreValid($"{suite}-{benchmark}-chart", args.Arguments));
+            JSInterop.SetupVoid("renderChart", (args) => RenderArgumentsAreValid($"{suite}-{benchmark}-chart", args.Arguments)).SetVoidResult();
         }
+
+        JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
 
         // Act
         var actual = Render<BenchmarkSuite>((builder) =>
