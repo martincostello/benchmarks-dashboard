@@ -419,10 +419,22 @@ function createDashboardApp(dependencies = {}) {
             return undefined;
         }
 
+        const startDateInput = documentRef.getElementById('startDate');
+        const endDateInput = documentRef.getElementById('endDate');
         const url = new URLCtor(windowRef.location.href);
         applyDashboardFilters(url);
-        url.searchParams.set('startDate', startDate);
-        url.searchParams.set('endDate', endDate);
+
+        if (startDate !== startDateInput?.min) {
+            url.searchParams.set('startDate', startDate);
+        } else {
+            url.searchParams.delete('startDate');
+        }
+
+        if (endDate !== endDateInput?.max) {
+            url.searchParams.set('endDate', endDate);
+        } else {
+            url.searchParams.delete('endDate');
+        }
 
         if (hash) {
             url.hash = hash;
