@@ -58,7 +58,13 @@ function createDashboardApp(dependencies = {}) {
 
     let dateFilterNavigationRef;
 
+    const htmlDecode = (value) => {
+        const element = documentRef.createElement('textarea');
+        element.innerText = String(value);
+        return element.value;
+    };
     const htmlEncode = (value) => String(value).replaceAll(/[&"'<>]/g, (match) => htmlEntityMap[match]);
+    const normalizeHtml = (value) => htmlDecode(value);
     const readInputValue = (id) => documentRef.getElementById(id)?.value;
     const setDateRangeRefreshing = (isRefreshing) => {
         const loader = documentRef.getElementById('date-range-loader');
@@ -133,11 +139,11 @@ function createDashboardApp(dependencies = {}) {
                 .split('\n')
                 .slice(0, 20)
                 .map((part) => (part.length > 70 ? `${part.slice(0, 70)}...` : part))
-                .map((part) => htmlEncode(part))
+                .map((part) => normalizeHtml(part))
                 .join(newline);
 
-            const timestamp = htmlEncode(item.commit.timestamp);
-            const author = htmlEncode(item.commit.author.username);
+            const timestamp = normalizeHtml(item.commit.timestamp);
+            const author = normalizeHtml(item.commit.author.username);
 
             return message + newline + newline + `${timestamp} authored by @${author}` + newline;
         });
