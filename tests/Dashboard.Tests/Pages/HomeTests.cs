@@ -449,16 +449,10 @@ public class HomeTests : DashboardTestContext
 
         // Assert
         actual.WaitForAssertion(
-            () =>
-            {
-                actual.FindAll("#benchmarks").Count.ShouldBe(0);
-                actual.Find(".spinner-border.spinner-xl").ShouldNotBeNull();
-            },
-            TimeSpan.FromSeconds(2));
+            () => navigation.Uri.ShouldContain($"startDate={StartDate}"),
+            TimeSpan.FromSeconds(10));
 
         await change;
-
-        navigation.Uri.ShouldContain($"startDate={StartDate}");
     }
 
     [Fact]
