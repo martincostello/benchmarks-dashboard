@@ -1,0 +1,36 @@
+{
+  "name": "benchmarks-dashboard",
+  "private": true,
+  "author": "martincostello",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/martincostello/benchmarks-dashboard.git"
+  },
+  "scripts": {
+    "format": "prettier --write src/Dashboard/wwwroot/app.js tests/**/*.js",
+    "format-check": "prettier --check src/Dashboard/wwwroot/app.js tests/**/*.js",
+    "test": "npm run format-check && vitest run"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "4.1.5",
+    "jsdom": "29.1.0",
+    "prettier": "3.8.3",
+    "vitest": "4.1.5"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "prettier": {
+    "arrowParens": "always",
+    "bracketSpacing": true,
+    "endOfLine": "auto",
+    "printWidth": 140,
+    "quoteProps": "consistent",
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 4,
+    "trailingComma": "es5",
+    "useTabs": false
+  }
+}

@@ -15,7 +15,8 @@ The dashboard is a [Blazor WASM][blazor] static application deployed to [a GitHu
 
 ## Building and Testing
 
-Compiling the application yourself requires Git and the [.NET SDK][dotnet-sdk] to be installed.
+Compiling the application yourself requires Git, the [.NET SDK][dotnet-sdk],
+and [Node.js][nodejs] to be installed.
 
 To build and test the application locally from a terminal/command-line, run the
 following set of commands:
@@ -50,5 +51,6 @@ This project is licensed under the [Apache 2.0][license] license.
 [dotnet-sdk]: https://dotnet.microsoft.com/download "Download the .NET SDK"
 [issues]: https://github.com/martincostello/benchmarks-dashboard/issues "Issues for this project on GitHub.com"
 [license]: https://www.apache.org/licenses/LICENSE-2.0.txt "The Apache 2.0 license"
+[nodejs]: https://nodejs.org/ "Download Node.js"
 [repo]: https://github.com/martincostello/benchmarks-dashboard "This project on GitHub.com"
 [site]: https://benchmarks.martincostello.com

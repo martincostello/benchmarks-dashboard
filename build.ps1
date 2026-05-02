@@ -41,12 +41,12 @@ if ($installDotNetSdk) {
     ${env:DOTNET_INSTALL_DIR} = Join-Path $PSScriptRoot ".dotnet"
     $sdkPath = Join-Path ${env:DOTNET_INSTALL_DIR} "sdk" $dotnetVersion
 
-    if (!(Test-Path $sdkPath)) {
-        if (!(Test-Path ${env:DOTNET_INSTALL_DIR})) {
+    if (-Not (Test-Path $sdkPath)) {
+        if (-Not (Test-Path ${env:DOTNET_INSTALL_DIR})) {
             mkdir ${env:DOTNET_INSTALL_DIR} | Out-Null
         }
         [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor "Tls12"
-        if (($PSVersionTable.PSVersion.Major -ge 6) -And !$IsWindows) {
+        if (($PSVersionTable.PSVersion.Major -ge 6) -And -Not $IsWindows) {
             $installScript = Join-Path ${env:DOTNET_INSTALL_DIR} "install.sh"
             Invoke-WebRequest "https://dot.net/v1/dotnet-install.sh" -OutFile $installScript -UseBasicParsing
             chmod +x $installScript
@@ -96,6 +96,36 @@ function DotNetPublish {
     }
 }
 
+function JavaScriptTest {
+    param()
+
+    $npm = Get-Command "npm" -ErrorAction SilentlyContinue
+
+    if ($null -eq $npm) {
+        throw "npm is required to run the JavaScript test suite."
+    }
+
+    $nodeModules = Join-Path $solutionPath "node_modules"
+    $packageLock = Join-Path $solutionPath "package-lock.json"
+
+    if (-Not (Test-Path $nodeModules) -Or ((Test-Path $packageLock) -And (Get-Item $packageLock).LastWriteTime -gt (Get-Item $nodeModules).LastWriteTime)) {
+        Write-Information "Installing JavaScript dependencies..."
+        $command = (Test-Path $packageLock) ? "ci" : "install"
+
+        & $npm.Source $command "--no-audit" "--no-fund"
+
+        if ($LASTEXITCODE -ne 0) {
+            throw "npm $command failed with exit code $LASTEXITCODE"
+        }
+    }
+
+    & $npm.Source "test"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "npm test failed with exit code $LASTEXITCODE"
+    }
+}
+
 $publishProjects = @(
     (Join-Path $solutionPath "src" "Dashboard" "Dashboard.csproj")
 )
@@ -106,6 +136,9 @@ ForEach ($project in $publishProjects) {
 }
 
 if (-Not $SkipTests) {
+    Write-Information "Testing JavaScript..."
+    JavaScriptTest
+
     Write-Information "Testing solution..."
     DotNetTest
 }

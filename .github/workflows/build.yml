@@ -36,11 +36,11 @@ jobs:
       matrix:
         include:
           - os-name: macos
-            runner: macos-latest
+            runner: macos-15
           - os-name: linux
-            runner: ubuntu-latest
+            runner: ubuntu-24.04
           - os-name: windows
-            runner: windows-latest
+            runner: windows-2025
 
     steps:
 
@@ -61,6 +61,11 @@ jobs:
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+
+    - name: Setup Node
+      uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+      with:
+        node-version: '24.x'
 
     - name: Install .NET WASM tools
       shell: pwsh
@@ -118,7 +123,7 @@ jobs:
 
   deploy:
     needs: [ build ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: |
       github.event.repository.fork == false &&
       github.ref_name == github.event.repository.default_branch
