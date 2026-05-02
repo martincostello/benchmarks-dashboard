@@ -72,40 +72,6 @@ function createDependencies(overrides = {}) {
     };
 }
 
-function createDocumentWithTextareaDecoder() {
-    const decodeHtml = (value) =>
-        String(value)
-            .replaceAll('&amp;', '&')
-            .replaceAll('&quot;', '"')
-            .replaceAll('&#39;', "'")
-            .replaceAll('&lt;', '<')
-            .replaceAll('&gt;', '>');
-
-    return {
-        body: document.body,
-        createElement(tagName) {
-            if (tagName === 'textarea') {
-                let text = '';
-
-                return {
-                    set innerText(value) {
-                        text = String(value);
-                    },
-                    get value() {
-                        return decodeHtml(text);
-                    },
-                };
-            }
-
-            return document.createElement(tagName);
-        },
-        documentElement: document.documentElement,
-        getElementById: document.getElementById.bind(document),
-        querySelector: document.querySelector.bind(document),
-        querySelectorAll: document.querySelectorAll.bind(document),
-    };
-}
-
 describe('DashboardApp', () => {
     it('applies the current theme colors to a layout', () => {
         document.documentElement.style.setProperty('--bs-body-color', '#123456');
