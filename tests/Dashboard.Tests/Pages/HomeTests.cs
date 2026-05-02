@@ -230,11 +230,7 @@ public class HomeTests : DashboardTestContext
 
         WithBenchmarks(repository, "main");
 
-        JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("configureDateFilterNavigation", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
+        SetupJSInterop();
 
         // Act
         var actual = Render<Home>();
@@ -265,11 +261,7 @@ public class HomeTests : DashboardTestContext
 
         WithBenchmarks(Repository, Branch);
 
-        JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("configureDateFilterNavigation", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
+        SetupJSInterop();
 
         (var expectedStart, var expectedEnd) = GetAvailableDateRange($"{Repository}-{Branch}");
 
@@ -309,11 +301,7 @@ public class HomeTests : DashboardTestContext
 
         WithBenchmarks(Repository, Branch);
 
-        JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("configureDateFilterNavigation", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
+        SetupJSInterop();
 
         Services.GetRequiredService<NavigationManager>()
             .NavigateTo($"?repo={Repository}&branch={Branch}&startDate={StartDate}&endDate={EndDate}");
@@ -360,11 +348,7 @@ public class HomeTests : DashboardTestContext
 
         WithBenchmarks(Repository, Branch);
 
-        JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("configureDateFilterNavigation", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
+        SetupJSInterop();
 
         Services.GetRequiredService<NavigationManager>()
             .NavigateTo($"?repo={Repository}&branch={Branch}&startDate=2024-08-21&endDate=not-a-date");
@@ -395,11 +379,7 @@ public class HomeTests : DashboardTestContext
 
         WithBenchmarks(Repository, Branch);
 
-        JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("configureDateFilterNavigation", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
+        SetupJSInterop();
 
         var navigation = Services.GetRequiredService<NavigationManager>();
         navigation.NavigateTo($"?repo={Repository}&branch={Branch}&startDate=2024-08-21&endDate=2024-08-22");
@@ -464,11 +444,7 @@ public class HomeTests : DashboardTestContext
 
         WithBenchmarks(Repository, Branch);
 
-        JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("configureDateFilterNavigation", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
+        SetupJSInterop();
 
         var navigation = Services.GetRequiredService<NavigationManager>();
         var actual = Render<Home>();
@@ -508,11 +484,7 @@ public class HomeTests : DashboardTestContext
 
         WithBenchmarks(Repository, Branch);
 
-        JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("configureDateFilterNavigation", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
+        SetupJSInterop();
 
         var actual = Render<Home>();
 
@@ -528,6 +500,55 @@ public class HomeTests : DashboardTestContext
                 actual.Find("#endDate").GetAttribute("value").ShouldBe(EndDate);
             },
             TimeSpan.FromSeconds(2));
+    }
+
+    [Fact]
+    public async Task Page_Uses_Current_Branch_For_Date_Filter_After_Branch_Change()
+    {
+        // Arrange
+        const string Repository = "benchmarks-demo";
+        const string InitialBranch = "dotnet-nightly";
+        const string UpdatedBranch = "main";
+        const string InitialStartDate = "2024-08-21";
+        const string InitialEndDate = "2024-08-22";
+        const string UpdatedStartDate = "2024-08-22";
+
+        await WithValidAccessToken();
+
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Repository}", $"{Repository}-repo");
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Repository}/branches", $"{Repository}-branches");
+        RegisterResponse(
+            $"https://api.github.local/repos/{Options.RepositoryOwner}/{Options.RepositoryName}/contents/{Repository}/data.json?ref={InitialBranch}",
+            $"{Repository}-main");
+        RegisterResponse(
+            $"https://api.github.local/repos/{Options.RepositoryOwner}/{Options.RepositoryName}/contents/{Repository}/data.json?ref={UpdatedBranch}",
+            $"{Repository}-main");
+
+        SetupJSInterop();
+
+        var navigation = Services.GetRequiredService<NavigationManager>();
+        navigation.NavigateTo($"?repo={Repository}&branch={InitialBranch}&startDate={InitialStartDate}&endDate={InitialEndDate}");
+
+        var actual = Render<Home>();
+
+        actual.WaitForAssertion(
+            () => Services.GetRequiredService<GitHubService>().CurrentBranch.ShouldBe(InitialBranch),
+            TimeSpan.FromSeconds(2));
+
+        // Act
+        await actual.Find("#branch").TriggerEventAsync("onchange", new ChangeEventArgs() { Value = UpdatedBranch });
+
+        actual.WaitForAssertion(
+            () => Services.GetRequiredService<GitHubService>().CurrentBranch.ShouldBe(UpdatedBranch),
+            TimeSpan.FromSeconds(2));
+
+        await actual.Find("#startDate").TriggerEventAsync("onchange", new ChangeEventArgs() { Value = UpdatedStartDate });
+
+        // Assert
+        navigation.Uri.ShouldContain($"repo={Repository}");
+        navigation.Uri.ShouldContain($"branch={UpdatedBranch}");
+        navigation.Uri.ShouldNotContain($"branch={InitialBranch}");
+        navigation.Uri.ShouldContain($"startDate={UpdatedStartDate}");
     }
 
     [Fact]
@@ -553,11 +574,7 @@ public class HomeTests : DashboardTestContext
 
         builder.RegisterWith(Interceptor);
 
-        JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("configureDateFilterNavigation", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
-        JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
+        SetupJSInterop();
 
         // Act
         var actual = Render<Home>();
@@ -878,5 +895,14 @@ public class HomeTests : DashboardTestContext
     {
         using var stream = File.OpenRead(Path.Combine(".", "Responses", $"{responseName}.json"));
         return JsonSerializer.Deserialize(stream, AppJsonSerializerContext.Default.BenchmarkResults)!;
+    }
+
+    private void SetupJSInterop()
+    {
+        JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("configureDateFilterNavigation", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
     }
 }

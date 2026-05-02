@@ -321,21 +321,9 @@ function createDashboardApp(dependencies = {}) {
             .replaceAll('/', '_')
             .replaceAll('\\', '_');
 
-    const applyDashboardFilters = (url) => {
-        const repo = readInputValue('repository');
-        const branch = readInputValue('branch');
+    const applyDateRangeFilters = (url, startDate, endDate) => {
         const startDateInput = documentRef.getElementById('startDate');
         const endDateInput = documentRef.getElementById('endDate');
-        const startDate = readInputValue('startDate');
-        const endDate = readInputValue('endDate');
-
-        if (repo) {
-            url.searchParams.set('repo', repo);
-        }
-
-        if (branch) {
-            url.searchParams.set('branch', branch);
-        }
 
         if (startDate && startDate !== startDateInput?.min) {
             url.searchParams.set('startDate', startDate);
@@ -348,6 +336,21 @@ function createDashboardApp(dependencies = {}) {
         } else {
             url.searchParams.delete('endDate');
         }
+    };
+
+    const applyDashboardFilters = (url, startDate = readInputValue('startDate'), endDate = readInputValue('endDate')) => {
+        const repo = readInputValue('repository');
+        const branch = readInputValue('branch');
+
+        if (repo) {
+            url.searchParams.set('repo', repo);
+        }
+
+        if (branch) {
+            url.searchParams.set('branch', branch);
+        }
+
+        applyDateRangeFilters(url, startDate, endDate);
     };
 
     const createDeepLinkUrl = (target) => {
@@ -428,22 +431,8 @@ function createDashboardApp(dependencies = {}) {
             return undefined;
         }
 
-        const startDateInput = documentRef.getElementById('startDate');
-        const endDateInput = documentRef.getElementById('endDate');
         const url = new URLCtor(windowRef.location.href);
-        applyDashboardFilters(url);
-
-        if (startDate !== startDateInput?.min) {
-            url.searchParams.set('startDate', startDate);
-        } else {
-            url.searchParams.delete('startDate');
-        }
-
-        if (endDate !== endDateInput?.max) {
-            url.searchParams.set('endDate', endDate);
-        } else {
-            url.searchParams.delete('endDate');
-        }
+        applyDashboardFilters(url, startDate, endDate);
 
         if (hash) {
             url.hash = hash;

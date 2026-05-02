@@ -78,8 +78,8 @@ public partial class Home : IAsyncDisposable
     /// Gets the currently selected branch, if any.
     /// </summary>
     public string? SelectedBranch =>
-        Branch ??
         GitHubService.CurrentBranch ??
+        Branch ??
         GitHubService.CurrentRepository?.DefaultBranch;
 
     /// <summary>
@@ -507,6 +507,7 @@ public partial class Home : IAsyncDisposable
     {
         if (args.Value is string branch)
         {
+            Branch = branch;
             await LoadAsync(() => GitHubService.LoadBenchmarksAsync(branch));
             StateHasChanged();
         }
