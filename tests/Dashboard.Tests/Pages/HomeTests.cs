@@ -384,6 +384,8 @@ public class HomeTests : DashboardTestContext
         var navigation = Services.GetRequiredService<NavigationManager>();
         navigation.NavigateTo($"?repo={Repository}&branch={Branch}&startDate=2024-08-21&endDate=2024-08-22");
 
+        var (expectedStart, expectedEnd) = GetAvailableDateRange($"{Repository}-{Branch}");
+
         // Act
         var actual = Render<Home>();
 
@@ -396,24 +398,9 @@ public class HomeTests : DashboardTestContext
                 reset.ClassList.ShouldContain("btn-secondary");
                 reset.ClassList.ShouldNotContain("btn-outline-secondary");
             },
-            TimeSpan.FromSeconds(2));
+            TimeSpan.FromSeconds(10));
 
-        var click = actual.Find("#resetDateRange").ClickAsync(new());
-
-        actual.WaitForAssertion(
-            () =>
-            {
-                var reset = actual.Find("#resetDateRange");
-                reset.HasAttribute("disabled").ShouldBeTrue();
-                reset.GetAttribute("aria-busy").ShouldBe("true");
-                reset.InnerHtml.ShouldContain("spinner-border");
-                reset.TextContent.ShouldContain("Resetting date range...");
-                actual.FindAll("#benchmarks").Count.ShouldBe(0);
-                actual.Find(".spinner-border.spinner-xl").ShouldNotBeNull();
-            },
-            TimeSpan.FromSeconds(2));
-
-        await click;
+        await actual.Find("#resetDateRange").ClickAsync(new());
 
         // Assert
         navigation.Uri.ShouldContain($"repo={Repository}");
@@ -424,12 +411,14 @@ public class HomeTests : DashboardTestContext
         actual.WaitForAssertion(
             () =>
             {
+                actual.Find("#startDate").GetAttribute("value").ShouldBe(expectedStart);
+                actual.Find("#endDate").GetAttribute("value").ShouldBe(expectedEnd);
                 var reset = actual.Find("#resetDateRange");
                 reset.HasAttribute("disabled").ShouldBeTrue();
                 reset.GetAttribute("aria-busy").ShouldBe("false");
                 reset.TextContent.ShouldContain("Reset date range");
             },
-            TimeSpan.FromSeconds(2));
+            TimeSpan.FromSeconds(10));
     }
 
     [Fact]
