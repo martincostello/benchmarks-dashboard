@@ -65,3 +65,4 @@ This file provides guidance to coding agents when working with code in this repo
 - Bug fixes should **always** include a test that would fail without the corresponding fix.
 - Do not introduce new dependencies unless specifically requested.
 - Do not update existing dependencies unless specifically requested.
+- Do not use private reflection or change the access modifiers of existing members for the sake of writing tests.

@@ -430,6 +430,9 @@ public partial class Home : IAsyncDisposable
             return null;
         }
 
+        var start = startDate.ToDateTime(TimeOnly.MinValue);
+        var endExclusive = endDate.AddDays(1).ToDateTime(TimeOnly.MinValue);
+
         Dictionary<string, IList<BenchmarkRun>> filtered = [];
 
         foreach ((var suite, var runs) in source.Suites)
@@ -437,8 +440,8 @@ public partial class Home : IAsyncDisposable
             var inRange = runs
                 .Where((run) =>
                 {
-                    var date = ToDate(run.Timestamp);
-                    return date >= startDate && date <= endDate;
+                    var timestamp = run.Timestamp.DateTime;
+                    return timestamp >= start && timestamp < endExclusive;
                 })
                 .ToList();
 
@@ -493,7 +496,7 @@ public partial class Home : IAsyncDisposable
            !string.Equals(value, FormatDate(date), StringComparison.Ordinal);
 
     private static DateOnly ToDate(DateTimeOffset value)
-        => DateOnly.FromDateTime(value.UtcDateTime);
+        => DateOnly.FromDateTime(value.Date);
 
     private async Task RepositoryChangedAsync(ChangeEventArgs args)
     {
