@@ -434,9 +434,14 @@ function createDashboardApp(dependencies = {}) {
         const url = new URLCtor(windowRef.location.href);
         applyDashboardFilters(url, startDate, endDate);
 
-        const navigateToDateFilter = () => {
+        const navigateToDateFilter = async () => {
             if (typeof dateFilterNavigationRef?.invokeMethodAsync === 'function') {
-                void dateFilterNavigationRef.invokeMethodAsync('ApplyDateRangeFromChartAsync', startDate, endDate, hash);
+                try {
+                    await dateFilterNavigationRef.invokeMethodAsync('ApplyDateRangeFromChartAsync', startDate, endDate, hash);
+                } catch (error) {
+                    console.error('Failed to apply the date filter from chart selection.', error);
+                    setDateRangeRefreshing(false);
+                }
             } else if (navigateRef) {
                 navigateRef(url.toString());
             }
@@ -453,9 +458,11 @@ function createDashboardApp(dependencies = {}) {
         setDateRangeRefreshing(true);
 
         if (setTimeoutRef) {
-            setTimeoutRef(navigateToDateFilter, 0);
+            setTimeoutRef(() => {
+                void navigateToDateFilter();
+            }, 0);
         } else {
-            navigateToDateFilter();
+            void navigateToDateFilter();
         }
 
         return url;
