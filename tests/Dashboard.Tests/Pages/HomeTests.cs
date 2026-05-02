@@ -338,6 +338,86 @@ public class HomeTests : DashboardTestContext
     }
 
     [Fact]
+    public async Task Page_Applies_Same_Day_Date_Filter_As_Exact_24_Hour_Period()
+    {
+        // Arrange
+        const string Repository = "benchmarks-demo";
+        const string Branch = "main";
+        const string SelectedDate = "2024-08-22";
+        const string SuiteName = "SameDayBenchmarks";
+        const string BenchmarkName = "SameDayBenchmarks.ExactDay";
+
+        await WithValidAccessToken();
+
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Repository}", $"{Repository}-repo");
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Repository}/branches", $"{Repository}-branches");
+
+        var builder = new HttpRequestInterceptionBuilder()
+            .ForUrl($"https://api.github.local/repos/{Options.RepositoryOwner}/{Options.RepositoryName}/contents/{Repository}/data.json?ref={Branch}")
+            .WithJsonContent(new BenchmarkResults()
+            {
+                LastUpdated = DateTimeOffset.UtcNow,
+                RepositoryUrl = $"https://github.local/{Options.RepositoryOwner}/{Repository}",
+                Suites = new Dictionary<string, IList<BenchmarkRun>>()
+                {
+                    [SuiteName] =
+                    [
+                        new()
+                        {
+                            Commit = CreateCommit("aaaaaaa1"),
+                            Timestamp = new DateTimeOffset(2024, 08, 22, 00, 00, 00, TimeSpan.Zero),
+                            Benchmarks = [new() { Name = BenchmarkName, Value = 1, Unit = "ns" }],
+                        },
+                        new()
+                        {
+                            Commit = CreateCommit("bbbbbbb2"),
+                            Timestamp = new DateTimeOffset(2024, 08, 22, 23, 59, 59, TimeSpan.Zero),
+                            Benchmarks = [new() { Name = BenchmarkName, Value = 2, Unit = "ns" }],
+                        },
+                        new()
+                        {
+                            Commit = CreateCommit("ccccccc3"),
+                            Timestamp = new DateTimeOffset(2024, 08, 21, 23, 59, 59, TimeSpan.Zero),
+                            Benchmarks = [new() { Name = BenchmarkName, Value = 3, Unit = "ns" }],
+                        },
+                        new()
+                        {
+                            Commit = CreateCommit("ddddddd4"),
+                            Timestamp = new DateTimeOffset(2024, 08, 23, 00, 00, 00, TimeSpan.Zero),
+                            Benchmarks = [new() { Name = BenchmarkName, Value = 4, Unit = "ns" }],
+                        },
+                    ],
+                },
+            });
+
+        builder.RegisterWith(Interceptor);
+
+        SetupJSInterop();
+
+        Services.GetRequiredService<NavigationManager>()
+            .NavigateTo($"?repo={Repository}&branch={Branch}&startDate={SelectedDate}&endDate={SelectedDate}");
+
+        // Act
+        var actual = Render<Home>();
+
+        // Assert
+        actual.WaitForAssertion(
+            () =>
+            {
+                actual.Find("#startDate").GetAttribute("value").ShouldBe(SelectedDate);
+                actual.Find("#endDate").GetAttribute("value").ShouldBe(SelectedDate);
+
+                var benchmark = actual.FindComponents<Benchmark>()
+                    .Single((item) =>
+                        item.Instance.Name == BenchmarkName &&
+                        item.Instance.Suite == SuiteName);
+
+                benchmark.Instance.Items.Count.ShouldBe(2);
+            },
+            TimeSpan.FromSeconds(2));
+    }
+
+    [Fact]
     public async Task Page_Treats_Invalid_Date_Filter_As_Absent()
     {
         // Arrange

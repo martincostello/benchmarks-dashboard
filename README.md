@@ -27,6 +27,22 @@ cd benchmarks-dashboard
 ./build.ps1
 ```
 
+## Custom Styling
+
+An optional custom stylesheet can be loaded by setting `Dashboard:CustomCssUrl` in
+`src/Dashboard/wwwroot/appsettings.json` to either an absolute or relative URL.
+
+For example, to use a custom theme and matching brand icon:
+
+```json
+{
+  "Dashboard": {
+    "BrandIcons": [ "fa-solid fa-stopwatch" ],
+    "CustomCssUrl": "custom.css"
+  }
+}
+```
+
 ## Feedback
 
 Any feedback or issues can be added to the issues for this project in [GitHub][issues].
