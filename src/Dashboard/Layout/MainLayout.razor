@@ -1,5 +1,12 @@
 @inherits LayoutComponentBase
 
+@if (!string.IsNullOrWhiteSpace(Options.Value.CustomCssUrl))
+{
+    <HeadContent>
+        <link href="@(Options.Value.CustomCssUrl)" rel="stylesheet" />
+    </HeadContent>
+}
+
 <Navbar />
 <main class="body-content container-fluid" id="main">
     @Body

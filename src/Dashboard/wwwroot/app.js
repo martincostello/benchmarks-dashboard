@@ -217,7 +217,7 @@ function createDashboardApp(dependencies = {}) {
         const chart = documentRef.getElementById(chartId);
         const parent = chart.parentElement;
         const chartLink = htmlEncode(`#${encodeURIComponent(parent.id)}`);
-        const chartTitle = `${htmlEncode(config.name)} <a class="benchmark-anchor text-secondary" href="${chartLink}" target="_self">#</a>`;
+        const chartTitle = `${htmlEncode(config.name)} <a class="benchmark-anchor text-secondary" href="${chartLink}" style="font:inherit;line-height:inherit;vertical-align:baseline;" target="_self">#</a>`;
 
         const layout = {
             font: {

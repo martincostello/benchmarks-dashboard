@@ -3,6 +3,7 @@
 
 using Bunit;
 using MartinCostello.Benchmarks.Layout;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace MartinCostello.Benchmarks.Layouts;
 
@@ -19,5 +20,21 @@ public class MainLayoutTests : DashboardTestContext
 
         // Assert
         actual.Find(".blazor");
+    }
+
+    [Fact]
+    public void Component_Loads_Configured_Custom_Stylesheet()
+    {
+        // Arrange
+        JSInterop.Mode = JSRuntimeMode.Loose;
+        Options.CustomCssUrl = "my-custom.css";
+
+        var head = Render<HeadOutlet>();
+
+        // Act
+        Render<MainLayout>();
+
+        // Assert
+        head.Markup.ShouldContain("href=\"my-custom.css\"");
     }
 }

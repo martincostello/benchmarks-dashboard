@@ -24,6 +24,11 @@ public sealed class DashboardOptions
     public IList<string> BrandIcons { get; set; } = [];
 
     /// <summary>
+    /// Gets or sets the optional URL of a custom stylesheet to load after the base styles.
+    /// </summary>
+    public string? CustomCssUrl { get; set; }
+
+    /// <summary>
     /// Gets or sets the colors to use for the chart data sets.
     /// </summary>
     public IDictionary<string, string> DataSetColors { get; set; } = new Dictionary<string, string>();
