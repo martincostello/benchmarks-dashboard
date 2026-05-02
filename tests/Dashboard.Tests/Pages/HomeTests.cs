@@ -400,17 +400,16 @@ public class HomeTests : DashboardTestContext
             },
             TimeSpan.FromSeconds(10));
 
-        await actual.Find("#resetDateRange").ClickAsync(new());
+        var click = actual.Find("#resetDateRange").ClickAsync(new());
 
         // Assert
-        navigation.Uri.ShouldContain($"repo={Repository}");
-        navigation.Uri.ShouldContain($"branch={Branch}");
-        navigation.Uri.ShouldNotContain("startDate=");
-        navigation.Uri.ShouldNotContain("endDate=");
-
         actual.WaitForAssertion(
             () =>
             {
+                navigation.Uri.ShouldContain($"repo={Repository}");
+                navigation.Uri.ShouldContain($"branch={Branch}");
+                navigation.Uri.ShouldNotContain("startDate=");
+                navigation.Uri.ShouldNotContain("endDate=");
                 actual.Find("#startDate").GetAttribute("value").ShouldBe(expectedStart);
                 actual.Find("#endDate").GetAttribute("value").ShouldBe(expectedEnd);
                 var reset = actual.Find("#resetDateRange");
@@ -419,6 +418,8 @@ public class HomeTests : DashboardTestContext
                 reset.TextContent.ShouldContain("Reset date range");
             },
             TimeSpan.FromSeconds(10));
+
+        await click;
     }
 
     [Fact]
