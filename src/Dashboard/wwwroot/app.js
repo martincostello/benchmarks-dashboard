@@ -315,6 +315,8 @@ function createDashboardApp(dependencies = {}) {
     const applyDashboardFilters = (url) => {
         const repo = readInputValue('repository');
         const branch = readInputValue('branch');
+        const startDateInput = documentRef.getElementById('startDate');
+        const endDateInput = documentRef.getElementById('endDate');
         const startDate = readInputValue('startDate');
         const endDate = readInputValue('endDate');
 
@@ -326,13 +328,13 @@ function createDashboardApp(dependencies = {}) {
             url.searchParams.set('branch', branch);
         }
 
-        if (startDate) {
+        if (startDate && startDate !== startDateInput?.min) {
             url.searchParams.set('startDate', startDate);
         } else {
             url.searchParams.delete('startDate');
         }
 
-        if (endDate) {
+        if (endDate && endDate !== endDateInput?.max) {
             url.searchParams.set('endDate', endDate);
         } else {
             url.searchParams.delete('endDate');

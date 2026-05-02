@@ -401,8 +401,8 @@ describe('DashboardApp', () => {
         document.body.innerHTML = `
       <input id="repository" value="martincostello/benchmarks-dashboard" />
       <input id="branch" value="main" />
-      <input id="startDate" value="2026-05-01" />
-      <input id="endDate" value="2026-05-31" />
+      <input id="startDate" min="2026-05-01" value="2026-05-01" />
+      <input id="endDate" max="2026-05-31" value="2026-05-31" />
     `;
 
         const app = window.DashboardApp.createDashboardApp(createDependencies());
@@ -412,12 +412,33 @@ describe('DashboardApp', () => {
         const url = app.createDeepLinkUrl(target);
 
         expect(url?.toString()).toBe(
-            'https://benchmarks.martincostello.com/?repo=martincostello%2Fbenchmarks-dashboard&branch=main&startDate=2026-05-01&endDate=2026-05-31#suite-name'
+            'https://benchmarks.martincostello.com/?repo=martincostello%2Fbenchmarks-dashboard&branch=main#suite-name'
         );
         expect(url?.searchParams.getAll('repo')).toEqual(['martincostello/benchmarks-dashboard']);
         expect(url?.searchParams.getAll('branch')).toEqual(['main']);
-        expect(url?.searchParams.get('startDate')).toBe('2026-05-01');
-        expect(url?.searchParams.get('endDate')).toBe('2026-05-31');
+        expect(url?.searchParams.get('startDate')).toBeNull();
+        expect(url?.searchParams.get('endDate')).toBeNull();
+    });
+
+    it('persists non-default date filters in deep links', () => {
+        document.body.innerHTML = `
+      <input id="repository" value="martincostello/benchmarks-dashboard" />
+      <input id="branch" value="main" />
+      <input id="startDate" min="2026-05-01" value="2026-05-02" />
+      <input id="endDate" max="2026-05-31" value="2026-05-30" />
+    `;
+
+        const app = window.DashboardApp.createDashboardApp(createDependencies());
+        const target = document.createElement('a');
+        target.href = 'https://benchmarks.martincostello.com/#suite-name';
+
+        const url = app.createDeepLinkUrl(target);
+
+        expect(url?.toString()).toBe(
+            'https://benchmarks.martincostello.com/?repo=martincostello%2Fbenchmarks-dashboard&branch=main&startDate=2026-05-02&endDate=2026-05-30#suite-name'
+        );
+        expect(url?.searchParams.get('startDate')).toBe('2026-05-02');
+        expect(url?.searchParams.get('endDate')).toBe('2026-05-30');
     });
 
     it('renders charts and sanitizes downloaded image filenames', () => {

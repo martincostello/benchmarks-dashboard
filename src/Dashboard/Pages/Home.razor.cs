@@ -438,19 +438,25 @@ public partial class Home
             return null;
         }
 
-        var dates = source.Suites
-            .Values
-            .SelectMany((runs) => runs)
-            .Select((run) => ToDate(run.Timestamp))
-            .OrderBy((date) => date)
-            .ToList();
+        DateOnly? minimumDate = null;
+        DateOnly? maximumDate = null;
 
-        if (dates.Count < 1)
+        foreach (var run in source.Suites.Values.SelectMany((runs) => runs))
         {
-            return null;
+            var date = ToDate(run.Timestamp);
+
+            if (minimumDate is null || date < minimumDate)
+            {
+                minimumDate = date;
+            }
+
+            if (maximumDate is null || date > maximumDate)
+            {
+                maximumDate = date;
+            }
         }
 
-        return (dates[0], dates[^1]);
+        return minimumDate is { } minimum && maximumDate is { } maximum ? (minimum, maximum) : null;
     }
 
     private static bool ShouldPersistDateValue(string? value, DateOnly? boundary)
