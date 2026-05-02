@@ -92,7 +92,8 @@
                     </li>
                 </ul>
             }
-            else if (!Dashboard.IsGitHubEnterprise)
+            else if (!Dashboard.IsGitHubEnterprise &&
+                     !string.IsNullOrWhiteSpace(Options.Value.GitHubClientId))
             {
                 <ul class="nav navbar-nav">
                     <li>
