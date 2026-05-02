@@ -200,26 +200,24 @@ else if (GitHubService.Benchmarks is not null)
     </div>
 }
 
-@if (ShowLoaders)
-{
-    <div class="d-flex justify-content-center">
-        <Spinner SpinnerType="@(SpinnerType.Border)" Large="true" LoadingText="Fetching data..." />
-    </div>
-}
-else if (GitHubService.Benchmarks is not null && !HasAvailableBenchmarkDateRange)
+<div class="d-flex justify-content-center @(ShowLoaders ? string.Empty : "d-none")" id="date-range-loader">
+    <Spinner SpinnerType="@(SpinnerType.Border)" Large="true" LoadingText="Fetching data..." />
+</div>
+
+@if (!ShowLoaders && GitHubService.Benchmarks is not null && !HasAvailableBenchmarkDateRange)
 {
     <div class="alert alert-warning m-2" id="no-benchmarks-available" role="alert">
         No benchmark data is available.
     </div>
 }
-else if (GitHubService.Benchmarks is not null && !HasFilteredBenchmarks)
+else if (!ShowLoaders && GitHubService.Benchmarks is not null && !HasFilteredBenchmarks)
 {
     <div class="alert alert-warning m-2" id="no-benchmarks-in-range" role="alert">
         No benchmark data is available between <span class="font-monospace">@(SelectedStartDateValue)</span> and
         <span class="font-monospace">@(SelectedEndDateValue)</span>.
     </div>
 }
-else if (HasFilteredBenchmarks)
+else if (!ShowLoaders && HasFilteredBenchmarks)
 {
     <div id="benchmarks">
         @foreach ((var name, var runs) in FilteredBenchmarks.Suites)

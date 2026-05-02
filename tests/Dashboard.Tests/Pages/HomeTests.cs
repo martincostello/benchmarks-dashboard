@@ -231,6 +231,7 @@ public class HomeTests : DashboardTestContext
         WithBenchmarks(repository, "main");
 
         JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("configureDateFilterNavigation", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
@@ -265,6 +266,7 @@ public class HomeTests : DashboardTestContext
         WithBenchmarks(Repository, Branch);
 
         JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("configureDateFilterNavigation", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
@@ -308,6 +310,7 @@ public class HomeTests : DashboardTestContext
         WithBenchmarks(Repository, Branch);
 
         JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("configureDateFilterNavigation", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
@@ -358,6 +361,7 @@ public class HomeTests : DashboardTestContext
         WithBenchmarks(Repository, Branch);
 
         JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("configureDateFilterNavigation", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
@@ -392,6 +396,7 @@ public class HomeTests : DashboardTestContext
         WithBenchmarks(Repository, Branch);
 
         JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("configureDateFilterNavigation", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
@@ -423,6 +428,8 @@ public class HomeTests : DashboardTestContext
                 reset.GetAttribute("aria-busy").ShouldBe("true");
                 reset.InnerHtml.ShouldContain("spinner-border");
                 reset.TextContent.ShouldContain("Resetting date range...");
+                actual.FindAll("#benchmarks").Count.ShouldBe(0);
+                actual.Find(".spinner-border.spinner-xl").ShouldNotBeNull();
             },
             TimeSpan.FromSeconds(2));
 
@@ -446,6 +453,49 @@ public class HomeTests : DashboardTestContext
     }
 
     [Fact]
+    public async Task Page_Hides_Charts_While_Date_Filter_Changes()
+    {
+        // Arrange
+        const string Repository = "benchmarks-demo";
+        const string Branch = "main";
+        const string StartDate = "2024-08-22";
+
+        await WithValidAccessToken();
+
+        WithBenchmarks(Repository, Branch);
+
+        JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("configureDateFilterNavigation", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
+
+        var navigation = Services.GetRequiredService<NavigationManager>();
+        var actual = Render<Home>();
+
+        actual.WaitForAssertion(
+            () => actual.FindAll("#benchmarks").Count.ShouldBe(1),
+            TimeSpan.FromSeconds(2));
+
+        // Act
+        var change = actual.Find("#startDate")
+            .TriggerEventAsync("onchange", new ChangeEventArgs() { Value = StartDate });
+
+        // Assert
+        actual.WaitForAssertion(
+            () =>
+            {
+                actual.FindAll("#benchmarks").Count.ShouldBe(0);
+                actual.Find(".spinner-border.spinner-xl").ShouldNotBeNull();
+            },
+            TimeSpan.FromSeconds(2));
+
+        await change;
+
+        navigation.Uri.ShouldContain($"startDate={StartDate}");
+    }
+
+    [Fact]
     public async Task Page_Updates_Date_Filter_When_Query_String_Changes()
     {
         // Arrange
@@ -459,6 +509,7 @@ public class HomeTests : DashboardTestContext
         WithBenchmarks(Repository, Branch);
 
         JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("configureDateFilterNavigation", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
@@ -503,6 +554,7 @@ public class HomeTests : DashboardTestContext
         builder.RegisterWith(Interceptor);
 
         JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("configureDateFilterNavigation", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
         JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();

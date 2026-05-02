@@ -56,8 +56,17 @@ function createDashboardApp(dependencies = {}) {
         '>': '&gt;',
     });
 
+    let dateFilterNavigationRef;
+
     const htmlEncode = (value) => String(value).replaceAll(/[&"'<>]/g, (match) => htmlEntityMap[match]);
     const readInputValue = (id) => documentRef.getElementById(id)?.value;
+    const setDateRangeRefreshing = (isRefreshing) => {
+        const loader = documentRef.getElementById('date-range-loader');
+        const benchmarks = documentRef.getElementById('benchmarks');
+
+        loader?.classList.toggle('d-none', !isRefreshing);
+        benchmarks?.classList.toggle('d-none', isRefreshing);
+    };
 
     const getThemeStyles = () => {
         const root = documentRef.documentElement;
@@ -415,7 +424,7 @@ function createDashboardApp(dependencies = {}) {
     };
 
     const applyDateFilter = (startDate, endDate, hash) => {
-        if (!navigateRef || !isValidDateRange(startDate, endDate)) {
+        if (!isValidDateRange(startDate, endDate)) {
             return undefined;
         }
 
@@ -440,9 +449,21 @@ function createDashboardApp(dependencies = {}) {
             url.hash = hash;
         }
 
-        navigateRef(url.toString());
+        setDateRangeRefreshing(true);
+
+        if (typeof dateFilterNavigationRef?.invokeMethodAsync === 'function') {
+            void dateFilterNavigationRef.invokeMethodAsync('ApplyDateRangeFromChartAsync', startDate, endDate, hash);
+        } else if (navigateRef) {
+            navigateRef(url.toString());
+        } else {
+            return undefined;
+        }
 
         return url;
+    };
+
+    const configureDateFilterNavigation = (navigationRef) => {
+        dateFilterNavigationRef = navigationRef;
     };
 
     const showCopyConfirmation = (target) => {
@@ -684,6 +705,7 @@ function createDashboardApp(dependencies = {}) {
         windowRef.toggleTheme = toggleTheme;
         windowRef.scrollToActiveChart = scrollToActiveChart;
         windowRef.configureClipboard = configureClipboard;
+        windowRef.configureDateFilterNavigation = configureDateFilterNavigation;
         windowRef.configureDeepLinks = configureDeepLinks;
         windowRef.configureToolTips = configureToolTips;
         windowRef.configureDataDownload = configureDataDownload;
@@ -696,6 +718,7 @@ function createDashboardApp(dependencies = {}) {
         applyDateFilter,
         configureClipboard,
         configureDataDownload,
+        configureDateFilterNavigation,
         configureDeepLinks,
         configureToolTips,
         createChartDefinition,
@@ -710,6 +733,7 @@ function createDashboardApp(dependencies = {}) {
         registerGlobals,
         renderChart,
         sanitizeImageFileName,
+        setDateRangeRefreshing,
         scrollToActiveChart,
         toggleTheme,
     };

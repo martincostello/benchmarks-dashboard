@@ -7,14 +7,16 @@ using Microsoft.JSInterop;
 
 namespace MartinCostello.Benchmarks.Pages;
 
-public partial class Home
+public partial class Home : IAsyncDisposable
 {
     private const string DefaultMemoryUnit = "bytes";
     private const string EndDateQueryParameter = "endDate";
     private const string QueryDateFormat = "yyyy-MM-dd";
     private const string StartDateQueryParameter = "startDate";
 
+    private DotNetObjectReference<Home>? _dateFilterNavigationReference;
     private BenchmarkResults? _filteredBenchmarks;
+    private bool _applyingDateRange;
     private bool _loading = true;
     private DateOnly? _maximumBenchmarkDate;
     private DateOnly? _minimumBenchmarkDate;
@@ -26,17 +28,17 @@ public partial class Home
     /// <summary>
     /// Gets a value indicating whether to disable the repositories input.
     /// </summary>
-    public bool DisableRepositories => GitHubService.Repositories.Count < 1 || _loading;
+    public bool DisableRepositories => GitHubService.Repositories.Count < 1 || ShowLoaders;
 
     /// <summary>
     /// Gets a value indicating whether to disable the branches input.
     /// </summary>
-    public bool DisableBranches => GitHubService.Branches.Count < 1 || _loading;
+    public bool DisableBranches => GitHubService.Branches.Count < 1 || ShowLoaders;
 
     /// <summary>
     /// Gets a value indicating whether to disable the date range inputs.
     /// </summary>
-    public bool DisableDateInputs => _loading || _resettingDateRange || _minimumBenchmarkDate is null || _maximumBenchmarkDate is null;
+    public bool DisableDateInputs => ShowLoaders || _resettingDateRange || _minimumBenchmarkDate is null || _maximumBenchmarkDate is null;
 
     /// <summary>
     /// Gets a value indicating whether to disable the date range reset button.
@@ -93,7 +95,7 @@ public partial class Home
     /// <summary>
     /// Gets a value indicating whether to show the loading indicators.
     /// </summary>
-    public bool ShowLoaders => _loading;
+    public bool ShowLoaders => _loading || _applyingDateRange;
 
     /// <summary>
     /// Gets or sets the branch specified by the query string, if any.
@@ -266,6 +268,29 @@ public partial class Home
         }
     }
 
+    /// <summary>
+    /// Applies the specified date range from a chart interaction.
+    /// </summary>
+    /// <param name="startDate">The start date to apply.</param>
+    /// <param name="endDate">The end date to apply.</param>
+    /// <param name="hash">The optional hash to apply.</param>
+    /// <returns>
+    /// A <see cref="Task"/> representing the asynchronous operation.
+    /// </returns>
+    [JSInvokable]
+    public Task ApplyDateRangeFromChartAsync(string? startDate, string? endDate, string? hash)
+        => ApplyDateRangeAsync(startDate, endDate, hash);
+
+    /// <inheritdoc/>
+    public ValueTask DisposeAsync()
+    {
+        _dateFilterNavigationReference?.Dispose();
+        _dateFilterNavigationReference = null;
+        GC.SuppressFinalize(this);
+
+        return ValueTask.CompletedTask;
+    }
+
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
     {
@@ -319,12 +344,15 @@ public partial class Home
             var json = System.Text.Json.JsonSerializer.Serialize(_filteredBenchmarks ?? data, AppJsonSerializerContext.Default.BenchmarkResults);
             await JS.InvokeVoidAsync("configureDataDownload", [json, Options.Value.BenchmarkFileName]);
             await JS.InvokeVoidAsync("configureDeepLinks", []);
+            _dateFilterNavigationReference ??= DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("configureDateFilterNavigation", [_dateFilterNavigationReference]);
         }
     }
 
     /// <inheritdoc/>
     protected override void OnParametersSet()
     {
+        _applyingDateRange = false;
         _resettingDateRange = false;
 
         if (GitHubService.Benchmarks is not null)
@@ -521,15 +549,23 @@ public partial class Home
         => ApplyDateRangeAsync(FormatDate(startDate), endDate);
 
     private Task ApplyDateRangeAsync(string? startDate, string? endDate)
+        => ApplyDateRangeAsync(startDate, endDate, hash: null);
+
+    private async Task ApplyDateRangeAsync(string? startDate, string? endDate, string? hash)
     {
         if (_minimumBenchmarkDate is null ||
             _maximumBenchmarkDate is null)
         {
-            return Task.CompletedTask;
+            return;
         }
 
         startDate = string.IsNullOrWhiteSpace(startDate) ? MinimumDateValue : startDate;
         endDate = string.IsNullOrWhiteSpace(endDate) ? MaximumDateValue : endDate;
+
+        _applyingDateRange = true;
+        StateHasChanged();
+
+        await Task.Yield();
 
         var uri = Navigation.GetUriWithQueryParameters(
             new Dictionary<string, object?>()
@@ -540,9 +576,12 @@ public partial class Home
                 [StartDateQueryParameter] = ShouldPersistDateValue(startDate, _minimumBenchmarkDate) ? startDate : null,
             });
 
-        Navigation.NavigateTo(uri);
+        if (!string.IsNullOrWhiteSpace(hash))
+        {
+            uri += hash;
+        }
 
-        return Task.CompletedTask;
+        Navigation.NavigateTo(uri);
     }
 
     private void RefreshFilteredBenchmarks()
