@@ -195,7 +195,8 @@ function createDashboardApp(dependencies = {}) {
         const isDesktop = documentRef.documentElement.clientWidth > settings.mobileBreakpoint;
         const chart = documentRef.getElementById(chartId);
         const parent = chart.parentElement;
-        const chartTitle = `${htmlEncode(config.name)} <a class="benchmark-anchor text-secondary" href="#${parent.id}" target="_self">#</a>`;
+        const chartLink = htmlEncode(`#${encodeURIComponent(parent.id)}`);
+        const chartTitle = `${htmlEncode(config.name)} <a class="benchmark-anchor text-secondary" href="${chartLink}" target="_self">#</a>`;
 
         const layout = {
             font: {
@@ -314,8 +315,8 @@ function createDashboardApp(dependencies = {}) {
         }
 
         const url = new URLCtor(href);
-        url.searchParams.append('repo', repo);
-        url.searchParams.append('branch', branch);
+        url.searchParams.set('repo', repo);
+        url.searchParams.set('branch', branch);
 
         return url;
     };
@@ -490,7 +491,7 @@ function createDashboardApp(dependencies = {}) {
     const configureChartClipboard = (chartId, chart, format) => {
         const copyButton = documentRef.getElementById(`${chartId}-copy`);
 
-        if ('ClipboardItem' in windowRef && ClipboardItemCtor.supports(`image/${format}`)) {
+        if (typeof ClipboardItemCtor?.supports === 'function' && ClipboardItemCtor.supports(`image/${format}`)) {
             copyButton.addEventListener('click', async () => {
                 const dataUrl = await PlotlyRef.toImage(chart, {
                     format,

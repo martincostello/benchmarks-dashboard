@@ -252,6 +252,36 @@ describe('DashboardApp', () => {
         expect(definition.data[0].customdata[0]).toContain('2026-05-02T08:00:00Z&lt;script&gt; authored by @user&lt;script&gt;');
     });
 
+    it('HTML-encodes the chart anchor id in chart definitions', () => {
+        document.documentElement.style.setProperty('--bs-body-color', '#123456');
+        document.documentElement.style.setProperty('--bs-body-bg', '#abcdef');
+        document.documentElement.style.setProperty('--plot-hover-color', '#111111');
+        document.documentElement.style.setProperty('--plot-hover-background-color', '#222222');
+        document.documentElement.style.setProperty('--bs-font-sans-serif', 'Inter');
+
+        document.body.innerHTML = '<div id=\'suite"&lt;unsafe&gt;\'><div id="chart"></div></div>';
+
+        Object.defineProperty(document.documentElement, 'clientWidth', {
+            configurable: true,
+            value: 1280,
+        });
+
+        const app = window.DashboardApp.createDashboardApp(createDependencies());
+        const definition = app.createChartDefinition('chart', {
+            colors: {
+                memory: '#e34c26',
+                time: '#178600',
+            },
+            dataset: [createBenchmarkItem()],
+            errorBars: false,
+            imageFormat: 'png',
+            name: 'My Benchmark',
+        });
+
+        expect(definition.layout.title.text).toContain('href="#suite%22%3Cunsafe%3E"');
+        expect(definition.layout.title.text).not.toContain('href="#suite"&lt;unsafe&gt;"');
+    });
+
     it('uses the anchor element for deep links when a child node is clicked', () => {
         document.body.innerHTML = `
       <input id="repository" value="martincostello/benchmarks-dashboard" />
@@ -284,6 +314,25 @@ describe('DashboardApp', () => {
         expect(navigatorRef.clipboard.writeText).toHaveBeenCalledWith(
             'https://benchmarks.martincostello.com/?repo=martincostello%2Fbenchmarks-dashboard&branch=main#suite-name'
         );
+    });
+
+    it('replaces existing repo and branch query parameters in deep links', () => {
+        document.body.innerHTML = `
+      <input id="repository" value="martincostello/benchmarks-dashboard" />
+      <input id="branch" value="main" />
+    `;
+
+        const app = window.DashboardApp.createDashboardApp(createDependencies());
+        const target = document.createElement('a');
+        target.href = 'https://benchmarks.martincostello.com/?repo=old/repo&branch=dev#suite-name';
+
+        const url = app.createDeepLinkUrl(target);
+
+        expect(url?.toString()).toBe(
+            'https://benchmarks.martincostello.com/?repo=martincostello%2Fbenchmarks-dashboard&branch=main#suite-name'
+        );
+        expect(url?.searchParams.getAll('repo')).toEqual(['martincostello/benchmarks-dashboard']);
+        expect(url?.searchParams.getAll('branch')).toEqual(['main']);
     });
 
     it('renders charts and sanitizes downloaded image filenames', () => {
@@ -361,6 +410,60 @@ describe('DashboardApp', () => {
         expect(plotly.downloadImage).toHaveBeenCalledWith(chart, {
             filename: 'My_Benchmark___1_2.png',
             format: 'png',
+        });
+    });
+
+    it('disables chart clipboard when ClipboardItemCtor is not available', () => {
+        document.documentElement.style.setProperty('--bs-body-color', '#123456');
+        document.documentElement.style.setProperty('--bs-body-bg', '#abcdef');
+        document.documentElement.style.setProperty('--plot-hover-color', '#111111');
+        document.documentElement.style.setProperty('--plot-hover-background-color', '#222222');
+        document.documentElement.style.setProperty('--bs-font-sans-serif', 'Inter');
+
+        document.body.innerHTML = `
+      <div id="suite-name">
+        <div id="chart"></div>
+      </div>
+      <button id="chart-copy"></button>
+      <button id="chart-download"></button>
+      <div class="nsewdrag"></div>
+    `;
+
+        const chart = document.getElementById('chart');
+        chart.on = vi.fn();
+
+        const plotly = {
+            downloadImage: vi.fn(),
+            newPlot: vi.fn(),
+            relayout: vi.fn(),
+            toImage: vi.fn(),
+        };
+
+        const app = window.DashboardApp.createDashboardApp(
+            createDependencies({
+                ClipboardItemCtor: undefined,
+                PlotlyRef: plotly,
+            })
+        );
+
+        expect(() =>
+            app.renderChart(
+                'chart',
+                JSON.stringify({
+                    colors: {
+                        memory: '#e34c26',
+                        time: '#178600',
+                    },
+                    dataset: [createBenchmarkItem()],
+                    errorBars: false,
+                    imageFormat: 'png',
+                    name: 'My Benchmark',
+                })
+            )
+        ).not.toThrow();
+
+        expect(document.getElementById('chart-copy')).toMatchObject({
+            disabled: true,
         });
     });
 });
