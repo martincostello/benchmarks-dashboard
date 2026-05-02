@@ -380,6 +380,47 @@ public class HomeTests : DashboardTestContext
     }
 
     [Fact]
+    public async Task Page_Can_Reset_Date_Filter()
+    {
+        // Arrange
+        const string Repository = "benchmarks-demo";
+        const string Branch = "main";
+
+        await WithValidAccessToken();
+
+        WithBenchmarks(Repository, Branch);
+
+        JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
+
+        var navigation = Services.GetRequiredService<NavigationManager>();
+        navigation.NavigateTo($"?repo={Repository}&branch={Branch}&startDate=2024-08-21&endDate=2024-08-22");
+
+        // Act
+        var actual = Render<Home>();
+
+        actual.WaitForAssertion(
+            () =>
+            {
+                var reset = actual.Find("#resetDateRange");
+                reset.HasAttribute("disabled").ShouldBeFalse();
+                reset.ClassList.ShouldContain("btn-secondary");
+                reset.ClassList.ShouldNotContain("btn-outline-secondary");
+            },
+            TimeSpan.FromSeconds(2));
+
+        await actual.Find("#resetDateRange").ClickAsync(new());
+
+        // Assert
+        navigation.Uri.ShouldContain($"repo={Repository}");
+        navigation.Uri.ShouldContain($"branch={Branch}");
+        navigation.Uri.ShouldNotContain("startDate=");
+        navigation.Uri.ShouldNotContain("endDate=");
+    }
+
+    [Fact]
     public void NormalizeUnits_Handles_Mixed_Memory_Units()
     {
         // Arrange: three items, memory in KB, MB, and null

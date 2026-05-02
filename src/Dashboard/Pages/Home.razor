@@ -4,71 +4,92 @@
 
 <header>
     <form>
-        <div class="g-3 row row-cols-1 row-cols-sm-2 row-cols-lg-4">
+        <div class="g-3 row row-cols-1 row-cols-sm-2">
             <div class="input-group col">
-                <label class="input-group-text col-auto" for="repository" title="Repository" aria-label="Repository">
-                    <Icon Name="@(Icons.Code)" FixedWidth="true" />
-                </label>
-                <select class="form-select" id="repository" name="repo" disabled="@(DisableRepositories)" @onchange="RepositoryChangedAsync">
-                    @if (GitHubService.Repositories.Count < 1)
-                    {
-                        <option>Loading...</option>
-                    }
-                    else
-                    {
-                        @foreach (var repo in GitHubService.Repositories)
+                    <label class="input-group-text col-auto" for="repository" title="Repository" aria-label="Repository">
+                        <Icon Name="@(Icons.Code)" FixedWidth="true" />
+                    </label>
+                    <select class="form-select" id="repository" name="repo" disabled="@(DisableRepositories)" @onchange="RepositoryChangedAsync">
+                        @if (GitHubService.Repositories.Count < 1)
                         {
-                            var selected = Repository is not null && repo == Repository;
-                            <option value="@(repo)" selected="@(selected)">@(repo)</option>
+                            <option>Loading...</option>
                         }
-                    }
-                </select>
-            </div>
-            <div class="input-group col">
-                <label class="input-group-text col-auto" for="branch" title="Branch" aria-label="Branch">
-                    <Icon Name="@(Icons.CodeBranch)" FixedWidth="true" />
-                </label>
-                <select class="form-select" id="branch" name="branch" disabled="@(DisableBranches)" @onchange="@(BranchChangedAsync)">
-                    @if (GitHubService.Branches.Count < 1)
-                    {
-                        <option>Loading...</option>
-                    }
-                    else
-                    {
-                        @foreach (var branch in GitHubService.Branches)
+                        else
                         {
-                            <option value="@(branch)" selected="@(branch == SelectedBranch)">@(branch)</option>
+                            @foreach (var repo in GitHubService.Repositories)
+                            {
+                                var selected = Repository is not null && repo == Repository;
+                                <option value="@(repo)" selected="@(selected)">@(repo)</option>
+                            }
                         }
-                    }
-                </select>
+                    </select>
             </div>
             <div class="input-group col">
-                <label class="input-group-text col-auto" for="startDate" title="Start date" aria-label="Start date">
-                    <Icon Name="@(Icons.CalendarDays)" FixedWidth="true" />
-                </label>
-                <input class="form-control"
-                       disabled="@(DisableDateInputs)"
-                       id="startDate"
-                       max="@(SelectedEndDateValue)"
-                       min="@(MinimumDateValue)"
-                       name="startDate"
-                       type="date"
-                       value="@(SelectedStartDateValue)"
-                       @onchange="StartDateChangedAsync" />
+                    <label class="input-group-text col-auto" for="branch" title="Branch" aria-label="Branch">
+                        <Icon Name="@(Icons.CodeBranch)" FixedWidth="true" />
+                    </label>
+                    <select class="form-select" id="branch" name="branch" disabled="@(DisableBranches)" @onchange="@(BranchChangedAsync)">
+                        @if (GitHubService.Branches.Count < 1)
+                        {
+                            <option>Loading...</option>
+                        }
+                        else
+                        {
+                            @foreach (var branch in GitHubService.Branches)
+                            {
+                                <option value="@(branch)" selected="@(branch == SelectedBranch)">@(branch)</option>
+                            }
+                        }
+                    </select>
             </div>
-            <div class="input-group col">
-                <label class="input-group-text col-auto" for="endDate" title="End date" aria-label="End date">
-                    <Icon Name="@(Icons.CalendarDays)" FixedWidth="true" />
-                </label>
-                <input class="form-control"
-                       disabled="@(DisableDateInputs)"
-                       id="endDate"
-                       max="@(MaximumDateValue)"
-                       min="@(SelectedStartDateValue)"
-                       name="endDate"
-                       type="date"
-                       value="@(SelectedEndDateValue)"
-                       @onchange="EndDateChangedAsync" />
+        </div>
+        <div class="g-3 mt-1 row align-items-end">
+            <div class="col-12">
+                <div class="g-3 row">
+                    <div class="col-12 col-sm-6 col-lg">
+                        <div class="input-group">
+                            <label class="input-group-text col-auto" for="startDate" title="Start date" aria-label="Start date">
+                                <Icon Name="@(Icons.CalendarDays)" FixedWidth="true" />
+                            </label>
+                            <input class="form-control"
+                                   disabled="@(DisableDateInputs)"
+                                   id="startDate"
+                                   max="@(SelectedEndDateValue)"
+                                   min="@(MinimumDateValue)"
+                                   name="startDate"
+                                   type="date"
+                                   value="@(SelectedStartDateValue)"
+                                   @onchange="StartDateChangedAsync" />
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg">
+                        <div class="input-group">
+                            <label class="input-group-text col-auto" for="endDate" title="End date" aria-label="End date">
+                                <Icon Name="@(Icons.CalendarDays)" FixedWidth="true" />
+                            </label>
+                            <input class="form-control"
+                                   disabled="@(DisableDateInputs)"
+                                   id="endDate"
+                                   max="@(MaximumDateValue)"
+                                   min="@(SelectedStartDateValue)"
+                                   name="endDate"
+                                   type="date"
+                                   value="@(SelectedEndDateValue)"
+                                   @onchange="EndDateChangedAsync" />
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-auto d-grid">
+                        <button class="btn @(DisableDateReset ? "btn-outline-secondary" : "btn-secondary")"
+                                disabled="@(DisableDateReset)"
+                                id="resetDateRange"
+                                title="Reset date range"
+                                type="button"
+                                @onclick="ResetDateRangeAsync">
+                            Reset date range
+                            <Icon Name="@(Icons.RotateRight)" />
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </form>

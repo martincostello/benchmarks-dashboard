@@ -38,6 +38,14 @@ public partial class Home
     public bool DisableDateInputs => _loading || _minimumBenchmarkDate is null || _maximumBenchmarkDate is null;
 
     /// <summary>
+    /// Gets a value indicating whether to disable the date range reset button.
+    /// </summary>
+    public bool DisableDateReset =>
+        DisableDateInputs ||
+        (!ShouldPersistDateValue(SelectedStartDateValue, _minimumBenchmarkDate) &&
+         !ShouldPersistDateValue(SelectedEndDateValue, _maximumBenchmarkDate));
+
+    /// <summary>
     /// Gets the filtered benchmarks for the selected date range.
     /// </summary>
     public BenchmarkResults FilteredBenchmarks => _filteredBenchmarks ?? new();
@@ -454,6 +462,9 @@ public partial class Home
 
     private Task EndDateChangedAsync(ChangeEventArgs args)
         => ApplyDateRangeAsync(_selectedStartDate, args.Value as string);
+
+    private Task ResetDateRangeAsync()
+        => ApplyDateRangeAsync(MinimumDateValue, MaximumDateValue);
 
     private async Task LoadAsync(Func<Task> loader)
     {
