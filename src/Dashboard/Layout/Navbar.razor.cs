@@ -17,6 +17,11 @@ public sealed partial class Navbar : IAsyncDisposable
     public required IJSRuntime JS { get; init; }
 
     /// <summary>
+    /// Gets the URL of the data repository.
+    /// </summary>
+    public string DataRepositoryUrl => _dataRepoUrl ?? string.Empty;
+
+    /// <summary>
     /// Gets the dashboard options.
     /// </summary>
     private DashboardOptions Dashboard => Options.Value;

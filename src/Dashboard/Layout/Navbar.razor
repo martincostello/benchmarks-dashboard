@@ -18,19 +18,22 @@
         </button>
         <div class="collapse navbar-collapse" id="site-navbar">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item" id="link-blog">
-                    <a class="nav-link" href="https://blog.martincostello.com/" rel="noopener" target="_blank" title="My blog">
-                        Blog
-                    </a>
-                </li>
-                <li class="nav-item" id="link-about">
-                    <a class="nav-link" href="https://martincostello.com/home/about/" rel="noopener" target="_blank" title="About me">
-                        About
-                    </a>
-                </li>
+                @if (Options.Value.RepositoryOwner == "martincostello")
+                {
+                    <li class="nav-item" id="link-blog">
+                        <a class="nav-link" href="https://blog.martincostello.com/" rel="noopener" target="_blank" title="My blog">
+                            Blog
+                        </a>
+                    </li>
+                    <li class="nav-item" id="link-about">
+                        <a class="nav-link" href="https://martincostello.com/home/about/" rel="noopener" target="_blank" title="About me">
+                            About
+                        </a>
+                    </li>
+                }
                 <li class="nav-item">
                     <a class="nav-link"
-                       href="@(_dataRepoUrl)"
+                       href="@(DataRepositoryUrl)"
                        rel="noopener"
                        target="_blank"
                        title="Benchmarks data repository in @(Dashboard.GitHubInstance)">
@@ -39,7 +42,7 @@
                         <Icon Name="@(Icons.GitHub)" />
                     </a>
                 </li>
-                @if (!string.Equals(_dataRepoUrl, GitMetadata.RepositoryUrl, StringComparison.Ordinal))
+                @if (!string.Equals(DataRepositoryUrl, GitMetadata.RepositoryUrl, StringComparison.Ordinal))
                 {
                     <li class="nav-item">
                         <a class="nav-link"
