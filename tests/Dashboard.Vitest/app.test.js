@@ -1,0 +1,287 @@
+// Copyright (c) Martin Costello, 2024. All rights reserved.
+// Licensed under the Apache 2.0 license. See the LICENSE file in the project root for full license information.
+
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+
+beforeAll(async () => {
+    await import('../../src/Dashboard/wwwroot/app.js');
+});
+
+afterEach(() => {
+    document.body.innerHTML = '';
+    document.documentElement.style.cssText = '';
+    document.documentElement.removeAttribute('data-bs-theme');
+    vi.restoreAllMocks();
+});
+
+function createBenchmarkItem(overrides = {}) {
+    return {
+        commit: {
+            author: {
+                username: 'martincostello',
+            },
+            message: 'Improve benchmark stability',
+            sha: '0123456789abcdef',
+            timestamp: '2026-05-02T08:00:00Z',
+            url: 'https://github.com/martincostello/benchmarks-dashboard/commit/0123456789abcdef',
+        },
+        result: {
+            bytesAllocated: null,
+            memoryUnit: 'bytes',
+            range: null,
+            unit: 'ns',
+            value: 123.456,
+        },
+        ...overrides,
+    };
+}
+
+function createDependencies(overrides = {}) {
+    return {
+        ClipboardConstructor: undefined,
+        ClipboardItemCtor: {
+            supports: vi.fn(() => false),
+        },
+        PlotlyRef: {
+            downloadImage: vi.fn(),
+            newPlot: vi.fn(),
+            relayout: vi.fn(),
+            toImage: vi.fn(),
+        },
+        bootstrapRef: {
+            Tooltip: vi.fn(),
+        },
+        btoaRef: (value) => Buffer.from(value, 'binary').toString('base64'),
+        documentRef: document,
+        fetchRef: vi.fn(),
+        getComputedStyleRef: window.getComputedStyle.bind(window),
+        navigatorRef: {
+            clipboard: {
+                write: vi.fn(),
+                writeText: vi.fn(),
+            },
+        },
+        openRef: vi.fn(),
+        requestAnimationFrameRef: vi.fn((callback) => callback()),
+        setTimeoutRef: vi.fn((callback) => callback()),
+        windowRef: window,
+        ...overrides,
+    };
+}
+
+describe('DashboardApp', () => {
+    it('applies the current theme colors to a layout', () => {
+        document.documentElement.style.setProperty('--bs-body-color', '#123456');
+        document.documentElement.style.setProperty('--bs-body-bg', '#abcdef');
+        document.documentElement.style.setProperty('--plot-hover-color', '#111111');
+        document.documentElement.style.setProperty('--plot-hover-background-color', '#222222');
+
+        const app = window.DashboardApp.createDashboardApp(createDependencies());
+        const layout = {
+            title: {},
+            xaxis: {},
+            yaxis: {},
+            yaxis2: {},
+        };
+
+        app.applyThemeToLayout(layout);
+
+        expect(layout).toMatchObject({
+            font: {
+                color: '#123456',
+            },
+            paper_bgcolor: '#abcdef',
+            plot_bgcolor: '#abcdef',
+            title: {
+                font: {
+                    color: '#123456',
+                },
+            },
+            xaxis: {
+                color: '#123456',
+            },
+            yaxis: {
+                color: '#123456',
+            },
+            yaxis2: {
+                color: '#123456',
+            },
+        });
+    });
+
+    it('builds deep links from SVG title links when repository filters are selected', () => {
+        document.body.innerHTML = `
+      <input id="repository" value="martincostello/benchmarks-dashboard" />
+      <input id="branch" value="main" />
+    `;
+
+        window.location.hash = '#Old Value';
+
+        const app = window.DashboardApp.createDashboardApp(createDependencies());
+        const target = document.createElement('a');
+        target.setAttribute('xlink:href', '#My Benchmark');
+
+        const url = app.createDeepLinkUrl(target);
+
+        expect(url?.pathname).toBe(window.location.pathname);
+        expect(url?.hash).toBe('#My%20Benchmark');
+        expect(url?.searchParams.get('repo')).toBe('martincostello/benchmarks-dashboard');
+        expect(url?.searchParams.get('branch')).toBe('main');
+    });
+
+    it('creates chart definitions with a memory series and error bars', () => {
+        document.documentElement.style.setProperty('--bs-body-color', '#123456');
+        document.documentElement.style.setProperty('--bs-body-bg', '#abcdef');
+        document.documentElement.style.setProperty('--plot-hover-color', '#111111');
+        document.documentElement.style.setProperty('--plot-hover-background-color', '#222222');
+        document.documentElement.style.setProperty('--bs-font-sans-serif', 'Inter');
+
+        document.body.innerHTML = '<div id="suite-name"><div id="chart"></div></div>';
+
+        Object.defineProperty(document.documentElement, 'clientWidth', {
+            configurable: true,
+            value: 1280,
+        });
+
+        const dataset = [
+            createBenchmarkItem({
+                result: {
+                    bytesAllocated: 0,
+                    memoryUnit: 'KB',
+                    range: '± 0.42',
+                    unit: 'ms',
+                    value: 12.34,
+                },
+            }),
+            createBenchmarkItem({
+                commit: {
+                    author: {
+                        username: 'martin_costello',
+                    },
+                    message: 'Add memory column',
+                    sha: 'fedcba9876543210',
+                    timestamp: '2026-05-03T08:00:00Z',
+                    url: 'https://github.com/martincostello/benchmarks-dashboard/commit/fedcba9876543210',
+                },
+                result: {
+                    bytesAllocated: 0,
+                    memoryUnit: 'KB',
+                    range: '± 0.84',
+                    unit: 'ms',
+                    value: 23.45,
+                },
+            }),
+        ];
+
+        const app = window.DashboardApp.createDashboardApp(createDependencies());
+        const definition = app.createChartDefinition('chart', {
+            colors: {
+                memory: '#e34c26',
+                time: '#178600',
+            },
+            dataset,
+            errorBars: true,
+            imageFormat: 'png',
+            name: 'My Benchmark',
+        });
+
+        expect(definition.data).toHaveLength(2);
+        expect(definition.data[0].error_y).toEqual({
+            array: [0.42, 0.84],
+            type: 'data',
+        });
+        expect(definition.data[1]).toMatchObject({
+            name: 'Memory',
+            text: ['0.00KB', '0.00KB'],
+            yaxis: 'y2',
+        });
+        expect(definition.layout.title.text).toContain('href="#suite-name"');
+        expect(definition.layout.yaxis.title.text).toBe('t (ms)');
+        expect(definition.layout.yaxis2).toMatchObject({
+            maxallowed: 1,
+            tickformat: '.0f',
+            tickmode: 'linear',
+            title: {
+                text: 'KB',
+            },
+        });
+    });
+
+    it('renders charts and sanitizes downloaded image filenames', () => {
+        document.documentElement.style.setProperty('--bs-body-color', '#123456');
+        document.documentElement.style.setProperty('--bs-body-bg', '#abcdef');
+        document.documentElement.style.setProperty('--plot-hover-color', '#111111');
+        document.documentElement.style.setProperty('--plot-hover-background-color', '#222222');
+        document.documentElement.style.setProperty('--bs-font-sans-serif', 'Inter');
+
+        document.body.innerHTML = `
+      <div id="suite-name">
+        <div id="chart"></div>
+      </div>
+      <button id="chart-copy"></button>
+      <button id="chart-download"></button>
+      <div class="nsewdrag"></div>
+    `;
+
+        const chart = document.getElementById('chart');
+        const handlers = new Map();
+        chart.on = vi.fn((eventName, callback) => {
+            handlers.set(eventName, callback);
+        });
+
+        const plotly = {
+            downloadImage: vi.fn(),
+            newPlot: vi.fn(),
+            relayout: vi.fn(),
+            toImage: vi.fn(),
+        };
+
+        const openRef = vi.fn();
+
+        const app = window.DashboardApp.createDashboardApp(
+            createDependencies({
+                ClipboardItemCtor: {
+                    supports: vi.fn(() => false),
+                },
+                PlotlyRef: plotly,
+                openRef,
+            })
+        );
+
+        app.renderChart(
+            'chart',
+            JSON.stringify({
+                colors: {
+                    memory: '#e34c26',
+                    time: '#178600',
+                },
+                dataset: [createBenchmarkItem()],
+                errorBars: false,
+                imageFormat: 'png',
+                name: 'My Benchmark: #1/2',
+            })
+        );
+
+        expect(plotly.newPlot).toHaveBeenCalledTimes(1);
+        expect(document.getElementById('chart-copy')).toMatchObject({
+            disabled: true,
+        });
+
+        handlers.get('plotly_click')({
+            points: [
+                {
+                    pointIndex: 0,
+                },
+            ],
+        });
+
+        expect(openRef).toHaveBeenCalledWith('https://github.com/martincostello/benchmarks-dashboard/commit/0123456789abcdef', '_blank');
+
+        document.getElementById('chart-download').click();
+
+        expect(plotly.downloadImage).toHaveBeenCalledWith(chart, {
+            filename: 'My_Benchmark___1_2.png',
+            format: 'png',
+        });
+    });
+});
