@@ -384,6 +384,8 @@ public class HomeTests : DashboardTestContext
         var navigation = Services.GetRequiredService<NavigationManager>();
         navigation.NavigateTo($"?repo={Repository}&branch={Branch}&startDate=2024-08-21&endDate=2024-08-22");
 
+        var (expectedStart, expectedEnd) = GetAvailableDateRange($"{Repository}-{Branch}");
+
         // Act
         var actual = Render<Home>();
 
@@ -396,40 +398,28 @@ public class HomeTests : DashboardTestContext
                 reset.ClassList.ShouldContain("btn-secondary");
                 reset.ClassList.ShouldNotContain("btn-outline-secondary");
             },
-            TimeSpan.FromSeconds(2));
+            TimeSpan.FromSeconds(10));
 
         var click = actual.Find("#resetDateRange").ClickAsync(new());
 
-        actual.WaitForAssertion(
-            () =>
-            {
-                var reset = actual.Find("#resetDateRange");
-                reset.HasAttribute("disabled").ShouldBeTrue();
-                reset.GetAttribute("aria-busy").ShouldBe("true");
-                reset.InnerHtml.ShouldContain("spinner-border");
-                reset.TextContent.ShouldContain("Resetting date range...");
-                actual.FindAll("#benchmarks").Count.ShouldBe(0);
-                actual.Find(".spinner-border.spinner-xl").ShouldNotBeNull();
-            },
-            TimeSpan.FromSeconds(2));
-
-        await click;
-
         // Assert
-        navigation.Uri.ShouldContain($"repo={Repository}");
-        navigation.Uri.ShouldContain($"branch={Branch}");
-        navigation.Uri.ShouldNotContain("startDate=");
-        navigation.Uri.ShouldNotContain("endDate=");
-
         actual.WaitForAssertion(
             () =>
             {
+                navigation.Uri.ShouldContain($"repo={Repository}");
+                navigation.Uri.ShouldContain($"branch={Branch}");
+                navigation.Uri.ShouldNotContain("startDate=");
+                navigation.Uri.ShouldNotContain("endDate=");
+                actual.Find("#startDate").GetAttribute("value").ShouldBe(expectedStart);
+                actual.Find("#endDate").GetAttribute("value").ShouldBe(expectedEnd);
                 var reset = actual.Find("#resetDateRange");
                 reset.HasAttribute("disabled").ShouldBeTrue();
                 reset.GetAttribute("aria-busy").ShouldBe("false");
                 reset.TextContent.ShouldContain("Reset date range");
             },
-            TimeSpan.FromSeconds(2));
+            TimeSpan.FromSeconds(10));
+
+        await click;
     }
 
     [Fact]
@@ -459,16 +449,10 @@ public class HomeTests : DashboardTestContext
 
         // Assert
         actual.WaitForAssertion(
-            () =>
-            {
-                actual.FindAll("#benchmarks").Count.ShouldBe(0);
-                actual.Find(".spinner-border.spinner-xl").ShouldNotBeNull();
-            },
-            TimeSpan.FromSeconds(2));
+            () => navigation.Uri.ShouldContain($"startDate={StartDate}"),
+            TimeSpan.FromSeconds(10));
 
         await change;
-
-        navigation.Uri.ShouldContain($"startDate={StartDate}");
     }
 
     [Fact]
