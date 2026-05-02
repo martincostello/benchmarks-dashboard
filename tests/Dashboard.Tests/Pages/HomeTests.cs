@@ -3,6 +3,7 @@
 
 using System.Text.Json;
 using Bunit;
+using JustEat.HttpClientInterception;
 using MartinCostello.Benchmarks.Components;
 using MartinCostello.Benchmarks.Models;
 using Microsoft.AspNetCore.Components;
@@ -418,6 +419,81 @@ public class HomeTests : DashboardTestContext
         navigation.Uri.ShouldContain($"branch={Branch}");
         navigation.Uri.ShouldNotContain("startDate=");
         navigation.Uri.ShouldNotContain("endDate=");
+    }
+
+    [Fact]
+    public async Task Page_Updates_Date_Filter_When_Query_String_Changes()
+    {
+        // Arrange
+        const string Repository = "benchmarks-demo";
+        const string Branch = "main";
+        const string StartDate = "2024-08-21";
+        const string EndDate = "2024-08-22";
+
+        await WithValidAccessToken();
+
+        WithBenchmarks(Repository, Branch);
+
+        JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
+
+        var actual = Render<Home>();
+
+        // Act
+        Services.GetRequiredService<NavigationManager>()
+            .NavigateTo($"?repo={Repository}&branch={Branch}&startDate={StartDate}&endDate={EndDate}");
+
+        // Assert
+        actual.WaitForAssertion(
+            () =>
+            {
+                actual.Find("#startDate").GetAttribute("value").ShouldBe(StartDate);
+                actual.Find("#endDate").GetAttribute("value").ShouldBe(EndDate);
+            },
+            TimeSpan.FromSeconds(2));
+    }
+
+    [Fact]
+    public async Task Page_Shows_Empty_Data_Message_When_No_Benchmarks_Are_Available()
+    {
+        // Arrange
+        const string Repository = "benchmarks-demo";
+        const string Branch = "main";
+
+        await WithValidAccessToken();
+
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Repository}", $"{Repository}-repo");
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Repository}/branches", $"{Repository}-branches");
+
+        var builder = new HttpRequestInterceptionBuilder()
+            .ForUrl($"https://api.github.local/repos/{Options.RepositoryOwner}/{Options.RepositoryName}/contents/{Repository}/data.json?ref={Branch}")
+            .WithJsonContent(new BenchmarkResults()
+            {
+                LastUpdated = DateTimeOffset.UtcNow,
+                RepositoryUrl = "https://github.local/martincostello/benchmarks-demo",
+                Suites = new Dictionary<string, IList<BenchmarkRun>>(),
+            });
+
+        builder.RegisterWith(Interceptor);
+
+        JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
+
+        // Act
+        var actual = Render<Home>();
+
+        // Assert
+        actual.WaitForAssertion(
+            () =>
+            {
+                actual.Find("#no-benchmarks-available").TextContent.ShouldContain("No benchmark data is available.");
+                actual.FindAll("#no-benchmarks-in-range").Count.ShouldBe(0);
+            },
+            TimeSpan.FromSeconds(2));
     }
 
     [Fact]

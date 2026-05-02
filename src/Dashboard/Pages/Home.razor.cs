@@ -51,6 +51,11 @@ public partial class Home
     public BenchmarkResults FilteredBenchmarks => _filteredBenchmarks ?? new();
 
     /// <summary>
+    /// Gets a value indicating whether benchmark data has an available date range.
+    /// </summary>
+    public bool HasAvailableBenchmarkDateRange => _minimumBenchmarkDate is not null && _maximumBenchmarkDate is not null;
+
+    /// <summary>
     /// Gets a value indicating whether any benchmarks are available for the selected range.
     /// </summary>
     public bool HasFilteredBenchmarks => _filteredBenchmarks is { Suites.Count: > 0 };
@@ -315,6 +320,15 @@ public partial class Home
         }
     }
 
+    /// <inheritdoc/>
+    protected override void OnParametersSet()
+    {
+        if (GitHubService.Benchmarks is not null)
+        {
+            RefreshFilteredBenchmarks();
+        }
+    }
+
     private static double NormalizeTimeValue(double value, string? unit) => unit switch
     {
         null or "ns" => value,
@@ -510,7 +524,7 @@ public partial class Home
                 [StartDateQueryParameter] = ShouldPersistDateValue(startDate, _minimumBenchmarkDate) ? startDate : null,
             });
 
-        Navigation.NavigateTo(uri, forceLoad: true);
+        Navigation.NavigateTo(uri);
 
         return Task.CompletedTask;
     }

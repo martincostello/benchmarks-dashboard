@@ -396,8 +396,10 @@ function createDashboardApp(dependencies = {}) {
             return false;
         }
 
-        const minimumDate = readInputValue('startDate') ? documentRef.getElementById('startDate')?.min : undefined;
-        const maximumDate = readInputValue('endDate') ? documentRef.getElementById('endDate')?.max : undefined;
+        const startDateInput = documentRef.getElementById('startDate');
+        const endDateInput = documentRef.getElementById('endDate');
+        const minimumDate = startDateInput?.min;
+        const maximumDate = endDateInput?.max;
 
         if (minimumDate && startDate < minimumDate) {
             return false;
