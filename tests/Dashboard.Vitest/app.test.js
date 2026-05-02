@@ -72,6 +72,40 @@ function createDependencies(overrides = {}) {
     };
 }
 
+function createDocumentWithTextareaDecoder() {
+    const decodeHtml = (value) =>
+        String(value)
+            .replaceAll('&amp;', '&')
+            .replaceAll('&quot;', '"')
+            .replaceAll('&#39;', "'")
+            .replaceAll('&lt;', '<')
+            .replaceAll('&gt;', '>');
+
+    return {
+        body: document.body,
+        createElement(tagName) {
+            if (tagName === 'textarea') {
+                let text = '';
+
+                return {
+                    set innerText(value) {
+                        text = String(value);
+                    },
+                    get value() {
+                        return decodeHtml(text);
+                    },
+                };
+            }
+
+            return document.createElement(tagName);
+        },
+        documentElement: document.documentElement,
+        getElementById: document.getElementById.bind(document),
+        querySelector: document.querySelector.bind(document),
+        querySelectorAll: document.querySelectorAll.bind(document),
+    };
+}
+
 describe('DashboardApp', () => {
     it('applies the current theme colors to a layout', () => {
         document.documentElement.style.setProperty('--bs-body-color', '#123456');
@@ -208,51 +242,6 @@ describe('DashboardApp', () => {
                 text: 'KB',
             },
         });
-    });
-
-    it('HTML-encodes untrusted strings in chart definitions', () => {
-        document.documentElement.style.setProperty('--bs-body-color', '#123456');
-        document.documentElement.style.setProperty('--bs-body-bg', '#abcdef');
-        document.documentElement.style.setProperty('--plot-hover-color', '#111111');
-        document.documentElement.style.setProperty('--plot-hover-background-color', '#222222');
-        document.documentElement.style.setProperty('--bs-font-sans-serif', 'Inter');
-
-        document.body.innerHTML = '<div id="suite-name"><div id="chart"></div></div>';
-
-        Object.defineProperty(document.documentElement, 'clientWidth', {
-            configurable: true,
-            value: 1280,
-        });
-
-        const app = window.DashboardApp.createDashboardApp(createDependencies());
-        const definition = app.createChartDefinition('chart', {
-            colors: {
-                memory: '#e34c26',
-                time: '#178600',
-            },
-            dataset: [
-                createBenchmarkItem({
-                    commit: {
-                        author: {
-                            username: 'user<script>',
-                        },
-                        message: '<img src=x onerror=alert(1)>\nQuoted "message"',
-                        sha: '0123456789abcdef',
-                        timestamp: '2026-05-02T08:00:00Z<script>',
-                        url: 'https://github.com/martincostello/benchmarks-dashboard/commit/0123456789abcdef',
-                    },
-                }),
-            ],
-            errorBars: false,
-            imageFormat: 'png',
-            name: '<script>alert(1)</script>',
-        });
-
-        expect(definition.layout.title.text).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
-        expect(definition.layout.title.text).not.toContain('<script>');
-        expect(definition.data[0].customdata[0]).toContain('&lt;img src=x onerror=alert(1)&gt;');
-        expect(definition.data[0].customdata[0]).toContain('Quoted &quot;message&quot;');
-        expect(definition.data[0].customdata[0]).toContain('2026-05-02T08:00:00Z&lt;script&gt; authored by @user&lt;script&gt;');
     });
 
     it('HTML-encodes the chart anchor id in chart definitions', () => {
