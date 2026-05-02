@@ -652,11 +652,16 @@ describe('DashboardApp', () => {
         const navigationRef = {
             invokeMethodAsync: vi.fn().mockResolvedValue(undefined),
         };
+        const scheduledCallbacks = [];
+        const setTimeoutRef = vi.fn((callback) => {
+            scheduledCallbacks.push(callback);
+        });
 
         const app = window.DashboardApp.createDashboardApp(
             createDependencies({
                 PlotlyRef: plotly,
                 navigateRef,
+                setTimeoutRef,
             })
         );
 
@@ -692,6 +697,11 @@ describe('DashboardApp', () => {
 
         expect(document.getElementById('date-range-loader')?.classList.contains('d-none')).toBe(false);
         expect(document.getElementById('benchmarks')?.classList.contains('d-none')).toBe(true);
+        expect(setTimeoutRef).toHaveBeenCalledOnce();
+        expect(navigationRef.invokeMethodAsync).not.toHaveBeenCalled();
+        expect(navigateRef).not.toHaveBeenCalled();
+
+        scheduledCallbacks[0]();
 
         await Promise.resolve();
 

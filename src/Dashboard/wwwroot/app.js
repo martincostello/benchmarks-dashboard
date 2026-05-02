@@ -434,18 +434,28 @@ function createDashboardApp(dependencies = {}) {
         const url = new URLCtor(windowRef.location.href);
         applyDashboardFilters(url, startDate, endDate);
 
+        const navigateToDateFilter = () => {
+            if (typeof dateFilterNavigationRef?.invokeMethodAsync === 'function') {
+                void dateFilterNavigationRef.invokeMethodAsync('ApplyDateRangeFromChartAsync', startDate, endDate, hash);
+            } else if (navigateRef) {
+                navigateRef(url.toString());
+            }
+        };
+
         if (hash) {
             url.hash = hash;
         }
 
+        if (typeof dateFilterNavigationRef?.invokeMethodAsync !== 'function' && !navigateRef) {
+            return undefined;
+        }
+
         setDateRangeRefreshing(true);
 
-        if (typeof dateFilterNavigationRef?.invokeMethodAsync === 'function') {
-            void dateFilterNavigationRef.invokeMethodAsync('ApplyDateRangeFromChartAsync', startDate, endDate, hash);
-        } else if (navigateRef) {
-            navigateRef(url.toString());
+        if (setTimeoutRef) {
+            setTimeoutRef(navigateToDateFilter, 0);
         } else {
-            return undefined;
+            navigateToDateFilter();
         }
 
         return url;
