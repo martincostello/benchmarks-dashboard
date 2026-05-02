@@ -427,7 +427,7 @@ function createDashboardApp(dependencies = {}) {
 
     const configureToolTips = () => {
         const tooltips = [...documentRef.querySelectorAll('[data-bs-toggle="tooltip"]')];
-        tooltips.map((element) => new bootstrapRef.Tooltip(element));
+        tooltips.forEach((element) => new bootstrapRef.Tooltip(element));
     };
 
     const createJsonDataUrl = (json) => {
