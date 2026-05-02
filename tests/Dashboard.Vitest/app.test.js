@@ -927,6 +927,77 @@ describe('DashboardApp', () => {
         expect(navigateRef).not.toHaveBeenCalled();
     });
 
+    it('clears the drag selection when no benchmark points are selected', () => {
+        window.history.replaceState({}, '', '/');
+
+        document.documentElement.style.setProperty('--bs-body-color', '#123456');
+        document.documentElement.style.setProperty('--bs-body-bg', '#abcdef');
+        document.documentElement.style.setProperty('--plot-hover-color', '#111111');
+        document.documentElement.style.setProperty('--plot-hover-background-color', '#222222');
+        document.documentElement.style.setProperty('--bs-font-sans-serif', 'Inter');
+
+        document.body.innerHTML = `
+      <input id="repository" value="martincostello/benchmarks-dashboard" />
+      <input id="branch" value="main" />
+      <input id="startDate" min="2026-05-01" value="2026-05-01" />
+      <input id="endDate" max="2026-05-31" value="2026-05-31" />
+      <div id="suite-name">
+        <div id="chart"></div>
+      </div>
+      <button id="chart-copy"></button>
+      <button id="chart-download"></button>
+      <div class="nsewdrag"></div>
+    `;
+
+        const chart = document.getElementById('chart');
+        const handlers = new Map();
+        chart.on = vi.fn((eventName, callback) => {
+            handlers.set(eventName, callback);
+        });
+
+        const plotly = {
+            downloadImage: vi.fn(),
+            newPlot: vi.fn(),
+            relayout: vi.fn(),
+            toImage: vi.fn(),
+        };
+
+        const navigateRef = vi.fn();
+
+        const app = window.DashboardApp.createDashboardApp(
+            createDependencies({
+                PlotlyRef: plotly,
+                navigateRef,
+            })
+        );
+
+        app.renderChart(
+            'chart',
+            JSON.stringify({
+                colors: {
+                    memory: '#e34c26',
+                    time: '#178600',
+                },
+                dataset: [
+                    createBenchmarkItem({ timestamp: '2026-05-02T08:00:00Z' }),
+                    createBenchmarkItem({ timestamp: '2026-05-12T08:00:00Z' }),
+                ],
+                errorBars: false,
+                imageFormat: 'png',
+                name: 'My Benchmark',
+            })
+        );
+
+        handlers.get('plotly_selected')({
+            points: [],
+        });
+
+        expect(navigateRef).not.toHaveBeenCalled();
+        expect(plotly.relayout).toHaveBeenCalledWith(chart, {
+            selections: [],
+        });
+    });
+
     it('uses the injected window for default open behavior', () => {
         document.documentElement.style.setProperty('--bs-body-color', '#123456');
         document.documentElement.style.setProperty('--bs-body-bg', '#abcdef');

@@ -656,11 +656,18 @@ function createDashboardApp(dependencies = {}) {
         });
     };
 
+    const clearDateSelection = (chart) => {
+        PlotlyRef.relayout(chart, {
+            selections: [],
+        });
+    };
+
     const configureDateSelection = (chartDefinition) => {
         chartDefinition.chart.on('plotly_selected', (event) => {
             const range = getSelectedDateRange(event?.points ?? [], chartDefinition.dataset);
 
             if (!range || !isValidDateRange(range.startDate, range.endDate)) {
+                clearDateSelection(chartDefinition.chart);
                 return;
             }
 
