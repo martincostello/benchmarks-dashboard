@@ -231,6 +231,122 @@ public class DashboardTests(
         });
     }
 
+    [Fact]
+    public async Task Can_Render_Encoded_Commit_Text_In_Tooltips()
+    {
+        // Arrange
+        var options = new BrowserFixtureOptions()
+        {
+            BrowserType = BrowserType.Chromium,
+        };
+
+        var browser = new BrowserFixture(options, Output);
+        await browser.WithPageAsync(async page =>
+        {
+            var cancelled = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var authorized = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            await ConfigureMocksAsync(page, cancelled, authorized);
+            await ConfigureTooltipProbeAsync(page);
+
+            await page.GotoAsync(fixture.ServerAddress);
+            await page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+
+            var dashboard = new HomePage(page);
+            await dashboard.WaitForContentAsync();
+
+            var chart = page.Locator(".benchmark-chart[name='TooltipBenchmarks.TooltipBenchmark']");
+            await Assertions.Expect(chart).ToBeVisibleAsync();
+
+            var point = chart.Locator(".point").First;
+            await point.ScrollIntoViewIfNeededAsync();
+
+            var bounds = await point.BoundingBoxAsync();
+            bounds.ShouldNotBeNull();
+
+            await page.Mouse.MoveAsync(bounds.X + (bounds.Width / 2), bounds.Y + (bounds.Height / 2));
+
+            var tooltip = page.Locator(".hoverlayer .hovertext").First;
+            await Assertions.Expect(tooltip).ToBeVisibleAsync();
+
+            var html = await tooltip.EvaluateAsync<string>("element => element.innerHTML");
+            var text = await tooltip.EvaluateAsync<string>("element => element.textContent ?? String.Empty");
+            var imageCount = await tooltip.EvaluateAsync<int>("element => element.querySelectorAll('img, image').length");
+
+            imageCount.ShouldBe(0);
+            html.ShouldNotContain("&amp;quot;");
+            text.ShouldContain("Revert \"Test performance improvements (#3325)\" (#3326)");
+            text.ShouldContain("<img alt=\"Injected\" src=\"x\" />");
+        });
+
+        static async Task ConfigureTooltipProbeAsync(IPage page)
+        {
+            const string GitHubApi = "https://api.github.com";
+            const string GitHubData = "https://raw.githubusercontent.com";
+            const string Owner = "martincostello";
+            const string Repo = "benchmarks-demo";
+            const string Branch = "main";
+
+            var payload = new
+            {
+                lastUpdated = 1724648394718,
+                repoUrl = $"https://github.com/{Owner}/{Repo}",
+                entries = new Dictionary<string, object[]>()
+                {
+                    ["TooltipBenchmarks"] =
+                    [
+                        new
+                        {
+                            commit = new
+                            {
+                                author = new
+                                {
+                                    username = "martincostello",
+                                },
+                                committer = new
+                                {
+                                    username = "web-flow",
+                                },
+                                sha = "0194b8ef6b74ab7f2abc88f0d0bce6e9a5d1d8a4",
+                                message = "Revert &quot;Test performance improvements (#3325)&quot; (#3326)\n&lt;img alt=&quot;Injected&quot; src=&quot;x&quot; /&gt;",
+                                timestamp = "2026-04-12T16:38:54+00:00",
+                                url = $"https://github.com/{Owner}/{Repo}/commit/0194b8ef6b74ab7f2abc88f0d0bce6e9a5d1d8a4",
+                            },
+                            date = 1776000000000,
+                            benches = new object[]
+                            {
+                                new
+                                {
+                                    name = "TooltipBenchmarks.TooltipBenchmark",
+                                    value = 554.52,
+                                    unit = "ns",
+                                    range = "± 3.01",
+                                    bytesAllocated = 0,
+                                },
+                            },
+                        },
+                    ],
+                },
+            };
+
+            foreach (var url in new[]
+            {
+                $"{GitHubApi}/repos/{Owner}/benchmarks/contents/{Repo}/data.json?ref={Branch}",
+                $"{GitHubData}/{Owner}/benchmarks/{Branch}/{Repo}/data.json",
+            })
+            {
+                await page.RouteAsync(url, async (route) =>
+                {
+                    await route.FulfillAsync(new()
+                    {
+                        Status = 200,
+                        Json = payload,
+                    });
+                });
+            }
+        }
+    }
+
     private static string JsonResponseFile(string name)
         => Path.Combine(".", "Responses", $"{name}.json");
 

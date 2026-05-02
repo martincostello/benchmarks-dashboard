@@ -210,6 +210,93 @@ describe('DashboardApp', () => {
         });
     });
 
+    it('normalizes encoded commit strings in chart definitions', () => {
+        document.documentElement.style.setProperty('--bs-body-color', '#123456');
+        document.documentElement.style.setProperty('--bs-body-bg', '#abcdef');
+        document.documentElement.style.setProperty('--plot-hover-color', '#111111');
+        document.documentElement.style.setProperty('--plot-hover-background-color', '#222222');
+        document.documentElement.style.setProperty('--bs-font-sans-serif', 'Inter');
+
+        document.body.innerHTML = '<div id="suite-name"><div id="chart"></div></div>';
+
+        Object.defineProperty(document.documentElement, 'clientWidth', {
+            configurable: true,
+            value: 1280,
+        });
+
+        const app = window.DashboardApp.createDashboardApp(createDependencies());
+        const definition = app.createChartDefinition('chart', {
+            colors: {
+                memory: '#e34c26',
+                time: '#178600',
+            },
+            dataset: [
+                createBenchmarkItem({
+                    commit: {
+                        author: {
+                            username: 'martincostello',
+                        },
+                        message:
+                            'Revert &quot;Test performance improvements (#3325)&quot; (#3326)\n&lt;img alt=&quot;Injected&quot; src=&quot;x&quot; /&gt;',
+                        sha: '0123456789abcdef',
+                        timestamp: '2026-04-12T16:38:54+00:00',
+                        url: 'https://github.com/martincostello/benchmarks-dashboard/commit/0123456789abcdef',
+                    },
+                }),
+            ],
+            errorBars: false,
+            imageFormat: 'png',
+            name: 'My Benchmark',
+        });
+
+        expect(definition.data[0].customdata[0]).toContain('Revert "Test performance improvements (#3325)" (#3326)');
+        expect(definition.data[0].customdata[0]).toContain('<img alt="Injected" src="x" />');
+        expect(definition.data[0].customdata[0]).not.toContain('&quot;');
+        expect(definition.data[0].customdata[0]).not.toContain('&lt;img');
+    });
+
+    it('preserves plain double-quotes in commit strings in chart definitions', () => {
+        document.documentElement.style.setProperty('--bs-body-color', '#123456');
+        document.documentElement.style.setProperty('--bs-body-bg', '#abcdef');
+        document.documentElement.style.setProperty('--plot-hover-color', '#111111');
+        document.documentElement.style.setProperty('--plot-hover-background-color', '#222222');
+        document.documentElement.style.setProperty('--bs-font-sans-serif', 'Inter');
+
+        document.body.innerHTML = '<div id="suite-name"><div id="chart"></div></div>';
+
+        Object.defineProperty(document.documentElement, 'clientWidth', {
+            configurable: true,
+            value: 1280,
+        });
+
+        const app = window.DashboardApp.createDashboardApp(createDependencies());
+        const definition = app.createChartDefinition('chart', {
+            colors: {
+                memory: '#e34c26',
+                time: '#178600',
+            },
+            dataset: [
+                createBenchmarkItem({
+                    commit: {
+                        author: {
+                            username: 'martincostello',
+                        },
+                        message: 'Revert "Test performance improvements (#3325)" (#3326)',
+                        sha: '0123456789abcdef',
+                        timestamp: '2026-04-12T16:38:54+00:00',
+                        url: 'https://github.com/martincostello/benchmarks-dashboard/commit/0123456789abcdef',
+                    },
+                }),
+            ],
+            errorBars: false,
+            imageFormat: 'png',
+            name: 'My Benchmark',
+        });
+
+        expect(definition.data[0].customdata[0]).toContain('Revert "Test performance improvements (#3325)" (#3326)');
+        expect(definition.data[0].customdata[0]).not.toContain('&quot;');
+    });
+
     it('HTML-encodes the chart anchor id in chart definitions', () => {
         document.documentElement.style.setProperty('--bs-body-color', '#123456');
         document.documentElement.style.setProperty('--bs-body-bg', '#abcdef');

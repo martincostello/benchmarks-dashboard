@@ -55,14 +55,17 @@ function createDashboardApp(dependencies = {}) {
         '<': '&lt;',
         '>': '&gt;',
     });
+    const htmlDecodeMap = Object.freeze({
+        '&amp;': '&',
+        '&quot;': '"',
+        '&#39;': "'",
+        '&lt;': '<',
+        '&gt;': '>',
+    });
 
     let dateFilterNavigationRef;
 
-    const htmlDecode = (value) => {
-        const element = documentRef.createElement('textarea');
-        element.innerText = String(value);
-        return element.value;
-    };
+    const htmlDecode = (value) => String(value).replaceAll(/&(amp|quot|#39|lt|gt);/g, (match) => htmlDecodeMap[match]);
     const htmlEncode = (value) => String(value).replaceAll(/[&"'<>]/g, (match) => htmlEntityMap[match]);
     const normalizeHtml = (value) => htmlDecode(value);
     const readInputValue = (id) => documentRef.getElementById(id)?.value;
