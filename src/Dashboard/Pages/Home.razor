@@ -82,11 +82,20 @@
                         <button class="btn @(DisableDateReset ? "btn-outline-secondary" : "btn-secondary")"
                                 disabled="@(DisableDateReset)"
                                 id="resetDateRange"
+                                aria-busy="@(_resettingDateRange ? "true" : "false")"
                                 title="Reset date range"
                                 type="button"
                                 @onclick="ResetDateRangeAsync">
-                            Reset date range
-                            <Icon Name="@(Icons.RotateRight)" />
+                            @if (_resettingDateRange)
+                            {
+                                <span aria-hidden="true" class="me-2 spinner-border spinner-border-sm"></span>
+                                <span>Resetting date range...</span>
+                            }
+                            else
+                            {
+                                <span>Reset date range</span>
+                                <Icon Name="@(Icons.RotateRight)" />
+                            }
                         </button>
                     </div>
                 </div>

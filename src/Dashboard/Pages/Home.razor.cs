@@ -19,6 +19,7 @@ public partial class Home
     private DateOnly? _maximumBenchmarkDate;
     private DateOnly? _minimumBenchmarkDate;
     private bool _notFound;
+    private bool _resettingDateRange;
     private DateOnly? _selectedEndDate;
     private DateOnly? _selectedStartDate;
 
@@ -35,12 +36,13 @@ public partial class Home
     /// <summary>
     /// Gets a value indicating whether to disable the date range inputs.
     /// </summary>
-    public bool DisableDateInputs => _loading || _minimumBenchmarkDate is null || _maximumBenchmarkDate is null;
+    public bool DisableDateInputs => _loading || _resettingDateRange || _minimumBenchmarkDate is null || _maximumBenchmarkDate is null;
 
     /// <summary>
     /// Gets a value indicating whether to disable the date range reset button.
     /// </summary>
     public bool DisableDateReset =>
+        _resettingDateRange ||
         DisableDateInputs ||
         (!ShouldPersistDateValue(SelectedStartDateValue, _minimumBenchmarkDate) &&
          !ShouldPersistDateValue(SelectedEndDateValue, _maximumBenchmarkDate));
@@ -323,6 +325,8 @@ public partial class Home
     /// <inheritdoc/>
     protected override void OnParametersSet()
     {
+        _resettingDateRange = false;
+
         if (GitHubService.Benchmarks is not null)
         {
             RefreshFilteredBenchmarks();
@@ -477,8 +481,14 @@ public partial class Home
     private Task EndDateChangedAsync(ChangeEventArgs args)
         => ApplyDateRangeAsync(_selectedStartDate, args.Value as string);
 
-    private Task ResetDateRangeAsync()
-        => ApplyDateRangeAsync(MinimumDateValue, MaximumDateValue);
+    private async Task ResetDateRangeAsync()
+    {
+        _resettingDateRange = true;
+        StateHasChanged();
+
+        await Task.Yield();
+        await ApplyDateRangeAsync(MinimumDateValue, MaximumDateValue);
+    }
 
     private async Task LoadAsync(Func<Task> loader)
     {

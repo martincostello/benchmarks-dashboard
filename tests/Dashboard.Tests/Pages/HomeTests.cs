@@ -407,18 +407,42 @@ public class HomeTests : DashboardTestContext
             {
                 var reset = actual.Find("#resetDateRange");
                 reset.HasAttribute("disabled").ShouldBeFalse();
+                reset.GetAttribute("aria-busy").ShouldBe("false");
                 reset.ClassList.ShouldContain("btn-secondary");
                 reset.ClassList.ShouldNotContain("btn-outline-secondary");
             },
             TimeSpan.FromSeconds(2));
 
-        await actual.Find("#resetDateRange").ClickAsync(new());
+        var click = actual.Find("#resetDateRange").ClickAsync(new());
+
+        actual.WaitForAssertion(
+            () =>
+            {
+                var reset = actual.Find("#resetDateRange");
+                reset.HasAttribute("disabled").ShouldBeTrue();
+                reset.GetAttribute("aria-busy").ShouldBe("true");
+                reset.InnerHtml.ShouldContain("spinner-border");
+                reset.TextContent.ShouldContain("Resetting date range...");
+            },
+            TimeSpan.FromSeconds(2));
+
+        await click;
 
         // Assert
         navigation.Uri.ShouldContain($"repo={Repository}");
         navigation.Uri.ShouldContain($"branch={Branch}");
         navigation.Uri.ShouldNotContain("startDate=");
         navigation.Uri.ShouldNotContain("endDate=");
+
+        actual.WaitForAssertion(
+            () =>
+            {
+                var reset = actual.Find("#resetDateRange");
+                reset.HasAttribute("disabled").ShouldBeTrue();
+                reset.GetAttribute("aria-busy").ShouldBe("false");
+                reset.TextContent.ShouldContain("Reset date range");
+            },
+            TimeSpan.FromSeconds(2));
     }
 
     [Fact]
