@@ -316,6 +316,84 @@ describe('DashboardApp', () => {
         );
     });
 
+    it('only shows deep link confirmation after a successful clipboard write', async () => {
+        document.body.innerHTML = `
+      <input id="repository" value="martincostello/benchmarks-dashboard" />
+      <input id="branch" value="main" />
+      <a class="benchmark-anchor" href="https://benchmarks.martincostello.com/#suite-name">
+        <span class="fade"></span>
+      </a>
+    `;
+
+        const navigatorRef = {
+            clipboard: {
+                write: vi.fn(),
+                writeText: vi.fn().mockResolvedValue(undefined),
+            },
+        };
+
+        const setTimeoutRef = vi.fn();
+
+        const app = window.DashboardApp.createDashboardApp(
+            createDependencies({
+                navigatorRef,
+                setTimeoutRef,
+            })
+        );
+
+        app.configureDeepLinks();
+
+        const anchor = document.querySelector('.benchmark-anchor');
+        const icon = document.querySelector('.fade');
+
+        anchor.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await Promise.resolve();
+
+        expect(navigatorRef.clipboard.writeText).toHaveBeenCalledOnce();
+        expect(icon.classList.contains('show')).toBe(true);
+        expect(icon.title).toBe('URL copied to clipboard');
+        expect(setTimeoutRef).toHaveBeenCalledOnce();
+    });
+
+    it('does not show deep link confirmation when clipboard write fails', async () => {
+        document.body.innerHTML = `
+      <input id="repository" value="martincostello/benchmarks-dashboard" />
+      <input id="branch" value="main" />
+      <a class="benchmark-anchor" href="https://benchmarks.martincostello.com/#suite-name">
+        <span class="fade"></span>
+      </a>
+    `;
+
+        const navigatorRef = {
+            clipboard: {
+                write: vi.fn(),
+                writeText: vi.fn().mockRejectedValue(new Error('copy failed')),
+            },
+        };
+
+        const setTimeoutRef = vi.fn();
+
+        const app = window.DashboardApp.createDashboardApp(
+            createDependencies({
+                navigatorRef,
+                setTimeoutRef,
+            })
+        );
+
+        app.configureDeepLinks();
+
+        const anchor = document.querySelector('.benchmark-anchor');
+        const icon = document.querySelector('.fade');
+
+        anchor.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await Promise.resolve();
+
+        expect(navigatorRef.clipboard.writeText).toHaveBeenCalledOnce();
+        expect(icon.classList.contains('show')).toBe(false);
+        expect(icon.title).toBe('');
+        expect(setTimeoutRef).not.toHaveBeenCalled();
+    });
+
     it('replaces existing repo and branch query parameters in deep links', () => {
         document.body.innerHTML = `
       <input id="repository" value="martincostello/benchmarks-dashboard" />
@@ -411,6 +489,75 @@ describe('DashboardApp', () => {
             filename: 'My_Benchmark___1_2.png',
             format: 'png',
         });
+    });
+
+    it('uses the injected window for default open behavior', () => {
+        document.documentElement.style.setProperty('--bs-body-color', '#123456');
+        document.documentElement.style.setProperty('--bs-body-bg', '#abcdef');
+        document.documentElement.style.setProperty('--plot-hover-color', '#111111');
+        document.documentElement.style.setProperty('--plot-hover-background-color', '#222222');
+        document.documentElement.style.setProperty('--bs-font-sans-serif', 'Inter');
+
+        document.body.innerHTML = `
+      <div id="suite-name">
+        <div id="chart"></div>
+      </div>
+      <button id="chart-copy"></button>
+      <button id="chart-download"></button>
+      <div class="nsewdrag"></div>
+    `;
+
+        const chart = document.getElementById('chart');
+        const handlers = new Map();
+        chart.on = vi.fn((eventName, callback) => {
+            handlers.set(eventName, callback);
+        });
+
+        const plotly = {
+            downloadImage: vi.fn(),
+            newPlot: vi.fn(),
+            relayout: vi.fn(),
+            toImage: vi.fn(),
+        };
+
+        const windowRef = {
+            open: vi.fn(),
+        };
+
+        const app = window.DashboardApp.createDashboardApp(
+            createDependencies({
+                PlotlyRef: plotly,
+                openRef: undefined,
+                windowRef,
+            })
+        );
+
+        app.renderChart(
+            'chart',
+            JSON.stringify({
+                colors: {
+                    memory: '#e34c26',
+                    time: '#178600',
+                },
+                dataset: [createBenchmarkItem()],
+                errorBars: false,
+                imageFormat: 'png',
+                name: 'My Benchmark',
+            })
+        );
+
+        handlers.get('plotly_click')({
+            points: [
+                {
+                    pointIndex: 0,
+                },
+            ],
+        });
+
+        expect(windowRef.open).toHaveBeenCalledWith(
+            'https://github.com/martincostello/benchmarks-dashboard/commit/0123456789abcdef',
+            '_blank'
+        );
     });
 
     it('disables chart clipboard when ClipboardItemCtor is not available', () => {

@@ -17,17 +17,27 @@ function createDashboardApp(dependencies = {}) {
         PlotlyRef = globalThis.Plotly,
         bootstrapRef = globalThis.bootstrap,
         ClipboardConstructor = globalThis.ClipboardJS,
-        getComputedStyleRef = typeof globalThis.getComputedStyle === 'function' ? globalThis.getComputedStyle.bind(globalThis) : undefined,
-        requestAnimationFrameRef = typeof globalThis.requestAnimationFrame === 'function'
-            ? globalThis.requestAnimationFrame.bind(globalThis)
-            : undefined,
-        setTimeoutRef = typeof globalThis.setTimeout === 'function' ? globalThis.setTimeout.bind(globalThis) : undefined,
+        getComputedStyleRef = typeof windowRef?.getComputedStyle === 'function'
+            ? windowRef.getComputedStyle.bind(windowRef)
+            : typeof globalThis.getComputedStyle === 'function'
+              ? globalThis.getComputedStyle.bind(globalThis)
+              : undefined,
+        requestAnimationFrameRef = typeof windowRef?.requestAnimationFrame === 'function'
+            ? windowRef.requestAnimationFrame.bind(windowRef)
+            : typeof globalThis.requestAnimationFrame === 'function'
+              ? globalThis.requestAnimationFrame.bind(globalThis)
+              : undefined,
+        setTimeoutRef = typeof windowRef?.setTimeout === 'function'
+            ? windowRef.setTimeout.bind(windowRef)
+            : typeof globalThis.setTimeout === 'function'
+              ? globalThis.setTimeout.bind(globalThis)
+              : undefined,
         fetchRef = typeof globalThis.fetch === 'function' ? globalThis.fetch.bind(globalThis) : undefined,
         URLCtor = globalThis.URL,
         TextEncoderCtor = globalThis.TextEncoder,
         btoaRef = typeof globalThis.btoa === 'function' ? globalThis.btoa.bind(globalThis) : undefined,
         ClipboardItemCtor = globalThis.ClipboardItem,
-        openRef = globalThis.window?.open?.bind(globalThis.window),
+        openRef = typeof windowRef?.open === 'function' ? windowRef.open.bind(windowRef) : undefined,
         options = {},
     } = dependencies;
 
@@ -336,7 +346,7 @@ function createDashboardApp(dependencies = {}) {
         }, 3000);
     };
 
-    const copyDeepLink = (event) => {
+    const copyDeepLink = async (event) => {
         const target = event.currentTarget ?? event.target?.closest?.('a');
         const url = target ? createDeepLinkUrl(target) : undefined;
 
@@ -345,7 +355,7 @@ function createDashboardApp(dependencies = {}) {
         }
 
         try {
-            navigatorRef.clipboard.writeText(url.href);
+            await navigatorRef.clipboard.writeText(url.href);
             showCopyConfirmation(target);
         } catch {
             // Ignore

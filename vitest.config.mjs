@@ -8,7 +8,7 @@ export default defineConfig({
     clearMocks: true,
     coverage: {
       enabled: true,
-      exclude: ['scripts/**/*.test.js'],
+      exclude: ['tests/**/*.test.js'],
       include: ['src/Dashboard/wwwroot/app.js'],
       provider: 'v8',
       reporter: ['html', 'lcov', 'text'],
