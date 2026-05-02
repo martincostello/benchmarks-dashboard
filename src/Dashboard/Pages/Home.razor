@@ -4,7 +4,7 @@
 
 <header>
     <form>
-        <div class="g-3 row row-cols-6">
+        <div class="g-3 row row-cols-1 row-cols-sm-2 row-cols-lg-4">
             <div class="input-group col">
                 <label class="input-group-text col-auto" for="repository" title="Repository" aria-label="Repository">
                     <Icon Name="@(Icons.Code)" FixedWidth="true" />
@@ -41,6 +41,34 @@
                         }
                     }
                 </select>
+            </div>
+            <div class="input-group col">
+                <label class="input-group-text col-auto" for="startDate" title="Start date" aria-label="Start date">
+                    <Icon Name="@(Icons.CalendarDays)" FixedWidth="true" />
+                </label>
+                <input class="form-control"
+                       disabled="@(DisableDateInputs)"
+                       id="startDate"
+                       max="@(SelectedEndDateValue)"
+                       min="@(MinimumDateValue)"
+                       name="startDate"
+                       type="date"
+                       value="@(SelectedStartDateValue)"
+                       @onchange="StartDateChangedAsync" />
+            </div>
+            <div class="input-group col">
+                <label class="input-group-text col-auto" for="endDate" title="End date" aria-label="End date">
+                    <Icon Name="@(Icons.CalendarDays)" FixedWidth="true" />
+                </label>
+                <input class="form-control"
+                       disabled="@(DisableDateInputs)"
+                       id="endDate"
+                       max="@(MaximumDateValue)"
+                       min="@(SelectedStartDateValue)"
+                       name="endDate"
+                       type="date"
+                       value="@(SelectedEndDateValue)"
+                       @onchange="EndDateChangedAsync" />
             </div>
         </div>
     </form>
@@ -148,10 +176,17 @@ else if (GitHubService.Benchmarks is not null)
         <Spinner SpinnerType="@(SpinnerType.Border)" Large="true" LoadingText="Fetching data..." />
     </div>
 }
-else if (GitHubService.Benchmarks?.Suites.Count > 0)
+else if (GitHubService.Benchmarks is not null && !HasFilteredBenchmarks)
+{
+    <div class="alert alert-warning m-2" id="no-benchmarks-in-range" role="alert">
+        No benchmark data is available between <span class="font-monospace">@(SelectedStartDateValue)</span> and
+        <span class="font-monospace">@(SelectedEndDateValue)</span>.
+    </div>
+}
+else if (HasFilteredBenchmarks)
 {
     <div id="benchmarks">
-        @foreach ((var name, var runs) in GitHubService.Benchmarks.Suites)
+        @foreach ((var name, var runs) in FilteredBenchmarks.Suites)
         {
             <BenchmarkSuite Name="@(name)" Benchmarks="@(GroupBenchmarks(runs))" />
         }

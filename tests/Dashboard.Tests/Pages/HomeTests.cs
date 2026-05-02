@@ -1,8 +1,12 @@
 ﻿// Copyright (c) Martin Costello, 2024. All rights reserved.
 // Licensed under the Apache 2.0 license. See the LICENSE file in the project root for full license information.
 
+using System.Text.Json;
 using Bunit;
+using MartinCostello.Benchmarks.Components;
 using MartinCostello.Benchmarks.Models;
+using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MartinCostello.Benchmarks.Pages;
 
@@ -225,9 +229,10 @@ public class HomeTests : DashboardTestContext
 
         WithBenchmarks(repository, "main");
 
-        JSInterop.SetupVoid("configureDataDownload", static (_) => true);
-        JSInterop.SetupVoid("configureDeepLinks", static (_) => true);
-        JSInterop.SetupVoid("renderChart", static (_) => true);
+        JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
 
         // Act
         var actual = Render<Home>();
@@ -238,9 +243,138 @@ public class HomeTests : DashboardTestContext
             {
                 actual.Find("[name='repo']").ShouldNotBeNull();
                 actual.Find("[name='branch']").ShouldNotBeNull();
+                actual.Find("[name='startDate']").ShouldNotBeNull();
+                actual.Find("[name='endDate']").ShouldNotBeNull();
                 actual.Find("[id='branch']").ShouldNotBeNull();
                 actual.FindAll(".benchmark-set").Count.ShouldBe(4);
                 actual.FindAll(".benchmark-chart").Count.ShouldBe(9);
+            },
+            TimeSpan.FromSeconds(2));
+    }
+
+    [Fact]
+    public async Task Page_Uses_Available_Date_Range_By_Default()
+    {
+        // Arrange
+        const string Repository = "benchmarks-demo";
+        const string Branch = "main";
+
+        await WithValidAccessToken();
+
+        WithBenchmarks(Repository, Branch);
+
+        JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
+
+        (var expectedStart, var expectedEnd) = GetAvailableDateRange($"{Repository}-{Branch}");
+
+        // Act
+        var actual = Render<Home>();
+
+        // Assert
+        actual.WaitForAssertion(
+            () =>
+            {
+                var start = actual.Find("#startDate");
+                var end = actual.Find("#endDate");
+
+                start.GetAttribute("value").ShouldBe(expectedStart);
+                start.GetAttribute("min").ShouldBe(expectedStart);
+                start.GetAttribute("max").ShouldBe(expectedEnd);
+
+                end.GetAttribute("value").ShouldBe(expectedEnd);
+                end.GetAttribute("min").ShouldBe(expectedStart);
+                end.GetAttribute("max").ShouldBe(expectedEnd);
+            },
+            TimeSpan.FromSeconds(2));
+    }
+
+    [Fact]
+    public async Task Page_Applies_Valid_Date_Filter_From_Query_String()
+    {
+        // Arrange
+        const string Repository = "benchmarks-demo";
+        const string Branch = "main";
+        const string StartDate = "2024-08-21";
+        const string EndDate = "2024-08-22";
+        const string BenchmarkName = "DotNetBenchmarks.TodoAppBenchmarks.GetOneTodo";
+        const string SuiteName = "DotNetBenchmarks.TodoAppBenchmarks";
+
+        await WithValidAccessToken();
+
+        WithBenchmarks(Repository, Branch);
+
+        JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
+
+        Services.GetRequiredService<NavigationManager>()
+            .NavigateTo($"?repo={Repository}&branch={Branch}&startDate={StartDate}&endDate={EndDate}");
+
+        var data = LoadBenchmarkResults($"{Repository}-{Branch}");
+
+        var start = DateOnly.Parse(StartDate, CultureInfo.InvariantCulture).ToDateTime(TimeOnly.MinValue);
+        var end = DateOnly.Parse(EndDate, CultureInfo.InvariantCulture).ToDateTime(TimeOnly.MinValue);
+
+        var filtered = data.Suites[SuiteName]
+            .Where((run) => run.Timestamp.UtcDateTime.Date >= start && run.Timestamp.UtcDateTime.Date <= end)
+            .ToList();
+
+        var expectedCount = Home.GroupBenchmarks(filtered)[BenchmarkName].Count;
+
+        // Act
+        var actual = Render<Home>();
+
+        // Assert
+        actual.WaitForAssertion(
+            () =>
+            {
+                actual.Find("#startDate").GetAttribute("value").ShouldBe(StartDate);
+                actual.Find("#endDate").GetAttribute("value").ShouldBe(EndDate);
+
+                var benchmark = actual.FindComponents<Benchmark>()
+                    .Single((item) =>
+                        item.Instance.Name == BenchmarkName &&
+                        item.Instance.Suite == SuiteName);
+
+                benchmark.Instance.Items.Count.ShouldBe(expectedCount);
+            },
+            TimeSpan.FromSeconds(2));
+    }
+
+    [Fact]
+    public async Task Page_Treats_Invalid_Date_Filter_As_Absent()
+    {
+        // Arrange
+        const string Repository = "benchmarks-demo";
+        const string Branch = "main";
+
+        await WithValidAccessToken();
+
+        WithBenchmarks(Repository, Branch);
+
+        JSInterop.SetupVoid("configureDataDownload", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("configureDeepLinks", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("renderChart", static (_) => true).SetVoidResult();
+        JSInterop.SetupVoid("scrollToActiveChart").SetVoidResult();
+
+        Services.GetRequiredService<NavigationManager>()
+            .NavigateTo($"?repo={Repository}&branch={Branch}&startDate=2024-08-21&endDate=not-a-date");
+
+        var (expectedStart, expectedEnd) = GetAvailableDateRange($"{Repository}-{Branch}");
+
+        // Act
+        var actual = Render<Home>();
+
+        // Assert
+        actual.WaitForAssertion(
+            () =>
+            {
+                actual.Find("#startDate").GetAttribute("value").ShouldBe(expectedStart);
+                actual.Find("#endDate").GetAttribute("value").ShouldBe(expectedEnd);
             },
             TimeSpan.FromSeconds(2));
     }
@@ -532,4 +666,24 @@ public class HomeTests : DashboardTestContext
             Sha = sha,
             Url = $"https://github.local/octocat/repository/commits/{sha}",
         };
+
+    private static (string StartDate, string EndDate) GetAvailableDateRange(string responseName)
+    {
+        var data = LoadBenchmarkResults(responseName);
+
+        var dates = data.Suites
+            .Values
+            .SelectMany((runs) => runs)
+            .Select((run) => DateOnly.FromDateTime(run.Timestamp.UtcDateTime).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))
+            .OrderBy((value) => value, StringComparer.Ordinal)
+            .ToList();
+
+        return (dates[0], dates[^1]);
+    }
+
+    private static BenchmarkResults LoadBenchmarkResults(string responseName)
+    {
+        using var stream = File.OpenRead(Path.Combine(".", "Responses", $"{responseName}.json"));
+        return JsonSerializer.Deserialize(stream, AppJsonSerializerContext.Default.BenchmarkResults)!;
+    }
 }

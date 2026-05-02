@@ -37,6 +37,7 @@ function createDashboardApp(dependencies = {}) {
         TextEncoderCtor = globalThis.TextEncoder,
         btoaRef = typeof globalThis.btoa === 'function' ? globalThis.btoa.bind(globalThis) : undefined,
         ClipboardItemCtor = globalThis.ClipboardItem,
+        navigateRef = typeof windowRef?.location?.assign === 'function' ? windowRef.location.assign.bind(windowRef.location) : undefined,
         openRef = typeof windowRef?.open === 'function' ? windowRef.open.bind(windowRef) : undefined,
         options = {},
     } = dependencies;
@@ -56,6 +57,7 @@ function createDashboardApp(dependencies = {}) {
     });
 
     const htmlEncode = (value) => String(value).replaceAll(/[&"'<>]/g, (match) => htmlEntityMap[match]);
+    const readInputValue = (id) => documentRef.getElementById(id)?.value;
 
     const getThemeStyles = () => {
         const root = documentRef.documentElement;
@@ -250,6 +252,9 @@ function createDashboardApp(dependencies = {}) {
             };
         }
 
+        layout.dragmode = 'select';
+        layout.selectdirection = 'h';
+
         const seriesX = dataset.map((item) => item.commit.sha.slice(0, 7));
         const customdata = createCustomData(dataset);
         const hoverlabel = getHoverLabel();
@@ -307,11 +312,35 @@ function createDashboardApp(dependencies = {}) {
             .replaceAll('/', '_')
             .replaceAll('\\', '_');
 
-    const createDeepLinkUrl = (target) => {
-        const repo = documentRef.getElementById('repository').value;
-        const branch = documentRef.getElementById('branch').value;
+    const applyDashboardFilters = (url) => {
+        const repo = readInputValue('repository');
+        const branch = readInputValue('branch');
+        const startDate = readInputValue('startDate');
+        const endDate = readInputValue('endDate');
 
-        if (!branch || !repo) {
+        if (repo) {
+            url.searchParams.set('repo', repo);
+        }
+
+        if (branch) {
+            url.searchParams.set('branch', branch);
+        }
+
+        if (startDate) {
+            url.searchParams.set('startDate', startDate);
+        } else {
+            url.searchParams.delete('startDate');
+        }
+
+        if (endDate) {
+            url.searchParams.set('endDate', endDate);
+        } else {
+            url.searchParams.delete('endDate');
+        }
+    };
+
+    const createDeepLinkUrl = (target) => {
+        if (!readInputValue('branch') || !readInputValue('repository')) {
             return undefined;
         }
 
@@ -325,8 +354,77 @@ function createDashboardApp(dependencies = {}) {
         }
 
         const url = new URLCtor(href);
-        url.searchParams.set('repo', repo);
-        url.searchParams.set('branch', branch);
+        applyDashboardFilters(url);
+
+        return url;
+    };
+
+    const formatDateValue = (value) => {
+        if (!value) {
+            return undefined;
+        }
+
+        const date = new Date(value);
+
+        if (Number.isNaN(date.getTime())) {
+            return undefined;
+        }
+
+        return date.toISOString().slice(0, 10);
+    };
+
+    const getSelectedDateRange = (points, dataset) => {
+        const uniqueIndexes = [...new Set(points.map((point) => point.pointIndex).filter((pointIndex) => Number.isInteger(pointIndex)))];
+
+        const dates = uniqueIndexes
+            .map((pointIndex) => formatDateValue(dataset[pointIndex]?.timestamp))
+            .filter((value) => typeof value === 'string')
+            .sort();
+
+        if (dates.length < 1) {
+            return undefined;
+        }
+
+        return {
+            endDate: dates[dates.length - 1],
+            startDate: dates[0],
+        };
+    };
+
+    const isValidDateRange = (startDate, endDate) => {
+        if (!startDate || !endDate || startDate > endDate) {
+            return false;
+        }
+
+        const minimumDate = readInputValue('startDate') ? documentRef.getElementById('startDate')?.min : undefined;
+        const maximumDate = readInputValue('endDate') ? documentRef.getElementById('endDate')?.max : undefined;
+
+        if (minimumDate && startDate < minimumDate) {
+            return false;
+        }
+
+        if (maximumDate && endDate > maximumDate) {
+            return false;
+        }
+
+        return true;
+    };
+
+    const applyDateFilter = (startDate, endDate, hash) => {
+        if (!navigateRef || !isValidDateRange(startDate, endDate)) {
+            return undefined;
+        }
+
+        const url = new URLCtor(windowRef.location.href);
+        applyDashboardFilters(url);
+        url.searchParams.set('startDate', startDate);
+        url.searchParams.set('endDate', endDate);
+
+        if (hash) {
+            url.hash = hash;
+        }
+
+        navigateRef(url.toString());
 
         return url;
     };
@@ -532,6 +630,19 @@ function createDashboardApp(dependencies = {}) {
         });
     };
 
+    const configureDateSelection = (chartDefinition) => {
+        chartDefinition.chart.on('plotly_selected', (event) => {
+            const range = getSelectedDateRange(event?.points ?? [], chartDefinition.dataset);
+
+            if (!range || !isValidDateRange(range.startDate, range.endDate)) {
+                return;
+            }
+
+            const chartHash = `#${encodeURIComponent(chartDefinition.chart.parentElement.id)}`;
+            applyDateFilter(range.startDate, range.endDate, chartHash);
+        });
+    };
+
     const renderChart = (chartId, configString) => {
         const config = JSON.parse(configString);
         const chartDefinition = createChartDefinition(chartId, config);
@@ -546,6 +657,7 @@ function createDashboardApp(dependencies = {}) {
         configurePlotHover(chartDefinition.chart);
         configureChartClipboard(chartId, chartDefinition.chart, config.imageFormat);
         configureChartDownload(chartId, chartDefinition.chart, config);
+        configureDateSelection(chartDefinition);
     };
 
     const registerGlobals = () => {
@@ -565,6 +677,7 @@ function createDashboardApp(dependencies = {}) {
 
     const api = {
         applyThemeToLayout,
+        applyDateFilter,
         configureClipboard,
         configureDataDownload,
         configureDeepLinks,
@@ -573,7 +686,10 @@ function createDashboardApp(dependencies = {}) {
         createDashboardApp,
         createDeepLinkUrl,
         createJsonDataUrl,
+        formatDateValue,
         getThemeStyles,
+        getSelectedDateRange,
+        isValidDateRange,
         refreshChartThemes,
         registerGlobals,
         renderChart,

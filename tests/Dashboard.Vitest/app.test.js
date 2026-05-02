@@ -11,6 +11,7 @@ afterEach(() => {
     document.body.innerHTML = '';
     document.documentElement.style.cssText = '';
     document.documentElement.removeAttribute('data-bs-theme');
+    window.history.replaceState({}, '', '/');
     vi.restoreAllMocks();
 });
 
@@ -32,6 +33,7 @@ function createBenchmarkItem(overrides = {}) {
             unit: 'ns',
             value: 123.456,
         },
+        timestamp: '2026-05-02T08:00:00Z',
         ...overrides,
     };
 }
@@ -58,9 +60,10 @@ function createDependencies(overrides = {}) {
         navigatorRef: {
             clipboard: {
                 write: vi.fn(),
-                writeText: vi.fn(),
+                writeText: vi.fn().mockResolvedValue(undefined),
             },
         },
+        navigateRef: vi.fn(),
         openRef: vi.fn(),
         requestAnimationFrameRef: vi.fn((callback) => callback()),
         setTimeoutRef: vi.fn((callback) => callback()),
@@ -398,6 +401,8 @@ describe('DashboardApp', () => {
         document.body.innerHTML = `
       <input id="repository" value="martincostello/benchmarks-dashboard" />
       <input id="branch" value="main" />
+      <input id="startDate" value="2026-05-01" />
+      <input id="endDate" value="2026-05-31" />
     `;
 
         const app = window.DashboardApp.createDashboardApp(createDependencies());
@@ -407,10 +412,12 @@ describe('DashboardApp', () => {
         const url = app.createDeepLinkUrl(target);
 
         expect(url?.toString()).toBe(
-            'https://benchmarks.martincostello.com/?repo=martincostello%2Fbenchmarks-dashboard&branch=main#suite-name'
+            'https://benchmarks.martincostello.com/?repo=martincostello%2Fbenchmarks-dashboard&branch=main&startDate=2026-05-01&endDate=2026-05-31#suite-name'
         );
         expect(url?.searchParams.getAll('repo')).toEqual(['martincostello/benchmarks-dashboard']);
         expect(url?.searchParams.getAll('branch')).toEqual(['main']);
+        expect(url?.searchParams.get('startDate')).toBe('2026-05-01');
+        expect(url?.searchParams.get('endDate')).toBe('2026-05-31');
     });
 
     it('renders charts and sanitizes downloaded image filenames', () => {
@@ -489,6 +496,97 @@ describe('DashboardApp', () => {
             filename: 'My_Benchmark___1_2.png',
             format: 'png',
         });
+    });
+
+    it('applies a dragged chart selection as a shared date filter', () => {
+        window.history.replaceState({}, '', '/');
+
+        document.documentElement.style.setProperty('--bs-body-color', '#123456');
+        document.documentElement.style.setProperty('--bs-body-bg', '#abcdef');
+        document.documentElement.style.setProperty('--plot-hover-color', '#111111');
+        document.documentElement.style.setProperty('--plot-hover-background-color', '#222222');
+        document.documentElement.style.setProperty('--bs-font-sans-serif', 'Inter');
+
+        document.body.innerHTML = `
+      <input id="repository" value="martincostello/benchmarks-dashboard" />
+      <input id="branch" value="main" />
+      <input id="startDate" min="2026-05-01" value="2026-05-01" />
+      <input id="endDate" max="2026-05-31" value="2026-05-31" />
+      <div id="suite-name">
+        <div id="chart"></div>
+      </div>
+      <button id="chart-copy"></button>
+      <button id="chart-download"></button>
+      <div class="nsewdrag"></div>
+    `;
+
+        const chart = document.getElementById('chart');
+        const handlers = new Map();
+        chart.on = vi.fn((eventName, callback) => {
+            handlers.set(eventName, callback);
+        });
+
+        const plotly = {
+            downloadImage: vi.fn(),
+            newPlot: vi.fn(),
+            relayout: vi.fn(),
+            toImage: vi.fn(),
+        };
+
+        const navigateRef = vi.fn();
+
+        const app = window.DashboardApp.createDashboardApp(
+            createDependencies({
+                PlotlyRef: plotly,
+                navigateRef,
+            })
+        );
+
+        app.renderChart(
+            'chart',
+            JSON.stringify({
+                colors: {
+                    memory: '#e34c26',
+                    time: '#178600',
+                },
+                dataset: [
+                    createBenchmarkItem({ timestamp: '2026-05-02T08:00:00Z' }),
+                    createBenchmarkItem({
+                        commit: {
+                            author: {
+                                username: 'martin_costello',
+                            },
+                            message: 'Add more data',
+                            sha: 'fedcba9876543210',
+                            timestamp: '2026-05-12T08:00:00Z',
+                            url: 'https://github.com/martincostello/benchmarks-dashboard/commit/fedcba9876543210',
+                        },
+                        timestamp: '2026-05-12T08:00:00Z',
+                    }),
+                ],
+                errorBars: false,
+                imageFormat: 'png',
+                name: 'My Benchmark',
+            })
+        );
+
+        handlers.get('plotly_selected')({
+            points: [
+                {
+                    pointIndex: 1,
+                },
+                {
+                    pointIndex: 0,
+                },
+                {
+                    pointIndex: 1,
+                },
+            ],
+        });
+
+        expect(navigateRef).toHaveBeenCalledWith(
+            `${window.location.origin}/?repo=martincostello%2Fbenchmarks-dashboard&branch=main&startDate=2026-05-02&endDate=2026-05-12#suite-name`
+        );
     });
 
     it('uses the injected window for default open behavior', () => {

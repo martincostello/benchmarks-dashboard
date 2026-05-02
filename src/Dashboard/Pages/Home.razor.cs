@@ -10,9 +10,17 @@ namespace MartinCostello.Benchmarks.Pages;
 public partial class Home
 {
     private const string DefaultMemoryUnit = "bytes";
+    private const string EndDateQueryParameter = "endDate";
+    private const string QueryDateFormat = "yyyy-MM-dd";
+    private const string StartDateQueryParameter = "startDate";
 
+    private BenchmarkResults? _filteredBenchmarks;
     private bool _loading = true;
+    private DateOnly? _maximumBenchmarkDate;
+    private DateOnly? _minimumBenchmarkDate;
     private bool _notFound;
+    private DateOnly? _selectedEndDate;
+    private DateOnly? _selectedStartDate;
 
     /// <summary>
     /// Gets a value indicating whether to disable the repositories input.
@@ -25,12 +33,47 @@ public partial class Home
     public bool DisableBranches => GitHubService.Branches.Count < 1 || _loading;
 
     /// <summary>
+    /// Gets a value indicating whether to disable the date range inputs.
+    /// </summary>
+    public bool DisableDateInputs => _loading || _minimumBenchmarkDate is null || _maximumBenchmarkDate is null;
+
+    /// <summary>
+    /// Gets the filtered benchmarks for the selected date range.
+    /// </summary>
+    public BenchmarkResults FilteredBenchmarks => _filteredBenchmarks ?? new();
+
+    /// <summary>
+    /// Gets a value indicating whether any benchmarks are available for the selected range.
+    /// </summary>
+    public bool HasFilteredBenchmarks => _filteredBenchmarks is { Suites.Count: > 0 };
+
+    /// <summary>
+    /// Gets the maximum date that can be selected.
+    /// </summary>
+    public string? MaximumDateValue => FormatDate(_maximumBenchmarkDate);
+
+    /// <summary>
+    /// Gets the minimum date that can be selected.
+    /// </summary>
+    public string? MinimumDateValue => FormatDate(_minimumBenchmarkDate);
+
+    /// <summary>
     /// Gets the currently selected branch, if any.
     /// </summary>
     public string? SelectedBranch =>
         Branch ??
         GitHubService.CurrentBranch ??
         GitHubService.CurrentRepository?.DefaultBranch;
+
+    /// <summary>
+    /// Gets the selected end date value.
+    /// </summary>
+    public string? SelectedEndDateValue => FormatDate(_selectedEndDate);
+
+    /// <summary>
+    /// Gets the selected start date value.
+    /// </summary>
+    public string? SelectedStartDateValue => FormatDate(_selectedStartDate);
 
     /// <summary>
     /// Gets a value indicating whether to show the loading indicators.
@@ -44,10 +87,22 @@ public partial class Home
     public string? Branch { get; set; }
 
     /// <summary>
+    /// Gets or sets the end date specified by the query string, if any.
+    /// </summary>
+    [SupplyParameterFromQuery(Name = EndDateQueryParameter)]
+    public string? EndDate { get; set; }
+
+    /// <summary>
     /// Gets or sets the repository specified by the query string, if any.
     /// </summary>
     [SupplyParameterFromQuery(Name = "repo")]
     public string? Repository { get; set; }
+
+    /// <summary>
+    /// Gets or sets the start date specified by the query string, if any.
+    /// </summary>
+    [SupplyParameterFromQuery(Name = StartDateQueryParameter)]
+    public string? StartDate { get; set; }
 
     /// <summary>
     /// Gets the <see cref="IJSRuntime"/> to use.
@@ -92,7 +147,7 @@ public partial class Home
 
                 if (!results.ContainsKey(timestamp))
                 {
-                    results.Add(timestamp, new(run.Commit, benchmark));
+                    results.Add(timestamp, new(run.Commit, benchmark, run.Timestamp));
                 }
             }
         }
@@ -246,7 +301,7 @@ public partial class Home
 
         if (GitHubService.Benchmarks is { } data)
         {
-            var json = System.Text.Json.JsonSerializer.Serialize(data, AppJsonSerializerContext.Default.BenchmarkResults);
+            var json = System.Text.Json.JsonSerializer.Serialize(_filteredBenchmarks ?? data, AppJsonSerializerContext.Default.BenchmarkResults);
             await JS.InvokeVoidAsync("configureDataDownload", [json, Options.Value.BenchmarkFileName]);
             await JS.InvokeVoidAsync("configureDeepLinks", []);
         }
@@ -314,6 +369,72 @@ public partial class Home
         }
     }
 
+    private static BenchmarkResults? FilterBenchmarks(BenchmarkResults? source, DateOnly startDate, DateOnly endDate)
+    {
+        if (source is null)
+        {
+            return null;
+        }
+
+        Dictionary<string, IList<BenchmarkRun>> filtered = [];
+
+        foreach ((var suite, var runs) in source.Suites)
+        {
+            var inRange = runs
+                .Where((run) =>
+                {
+                    var date = ToDate(run.Timestamp);
+                    return date >= startDate && date <= endDate;
+                })
+                .ToList();
+
+            if (inRange.Count > 0)
+            {
+                filtered[suite] = inRange;
+            }
+        }
+
+        return new()
+        {
+            LastUpdated = source.LastUpdated,
+            RepositoryUrl = source.RepositoryUrl,
+            Suites = filtered,
+        };
+    }
+
+    private static string? FormatDate(DateOnly? value)
+        => value?.ToString(QueryDateFormat, CultureInfo.InvariantCulture);
+
+    private static (DateOnly Minimum, DateOnly Maximum)? GetAvailableDateRange(BenchmarkResults? source)
+    {
+        if (source is null)
+        {
+            return null;
+        }
+
+        var dates = source.Suites
+            .Values
+            .SelectMany((runs) => runs)
+            .Select((run) => ToDate(run.Timestamp))
+            .OrderBy((date) => date)
+            .ToList();
+
+        if (dates.Count < 1)
+        {
+            return null;
+        }
+
+        return (dates[0], dates[^1]);
+    }
+
+    private static bool ShouldPersistDateValue(string? value, DateOnly? boundary)
+        => !string.IsNullOrWhiteSpace(value) &&
+           boundary is { } date &&
+           !string.Equals(value, FormatDate(date), StringComparison.Ordinal);
+
+    private static DateOnly ToDate(DateTimeOffset value)
+        => DateOnly.FromDateTime(value.UtcDateTime);
+
     private async Task RepositoryChangedAsync(ChangeEventArgs args)
     {
         if (args.Value is string repository)
@@ -331,6 +452,9 @@ public partial class Home
         }
     }
 
+    private Task EndDateChangedAsync(ChangeEventArgs args)
+        => ApplyDateRangeAsync(_selectedStartDate, args.Value as string);
+
     private async Task LoadAsync(Func<Task> loader)
     {
         try
@@ -342,6 +466,117 @@ public partial class Home
         {
             _loading = false;
             _notFound = GitHubService.Benchmarks is null;
+            RefreshFilteredBenchmarks();
         }
+    }
+
+    private Task StartDateChangedAsync(ChangeEventArgs args)
+        => ApplyDateRangeAsync(args.Value as string, _selectedEndDate);
+
+    private Task ApplyDateRangeAsync(string? startDate, DateOnly? endDate)
+        => ApplyDateRangeAsync(startDate, FormatDate(endDate));
+
+    private Task ApplyDateRangeAsync(DateOnly? startDate, string? endDate)
+        => ApplyDateRangeAsync(FormatDate(startDate), endDate);
+
+    private Task ApplyDateRangeAsync(string? startDate, string? endDate)
+    {
+        if (_minimumBenchmarkDate is null ||
+            _maximumBenchmarkDate is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        startDate = string.IsNullOrWhiteSpace(startDate) ? MinimumDateValue : startDate;
+        endDate = string.IsNullOrWhiteSpace(endDate) ? MaximumDateValue : endDate;
+
+        var uri = Navigation.GetUriWithQueryParameters(
+            new Dictionary<string, object?>()
+            {
+                ["branch"] = SelectedBranch,
+                [EndDateQueryParameter] = ShouldPersistDateValue(endDate, _maximumBenchmarkDate) ? endDate : null,
+                ["repo"] = GitHubService.CurrentRepository?.Name ?? Repository,
+                [StartDateQueryParameter] = ShouldPersistDateValue(startDate, _minimumBenchmarkDate) ? startDate : null,
+            });
+
+        Navigation.NavigateTo(uri, forceLoad: true);
+
+        return Task.CompletedTask;
+    }
+
+    private void RefreshFilteredBenchmarks()
+    {
+        var range = GetAvailableDateRange(GitHubService.Benchmarks);
+
+        if (range is null)
+        {
+            _filteredBenchmarks = GitHubService.Benchmarks;
+            _maximumBenchmarkDate = null;
+            _minimumBenchmarkDate = null;
+            _selectedEndDate = null;
+            _selectedStartDate = null;
+            return;
+        }
+
+        _minimumBenchmarkDate = range.Value.Minimum;
+        _maximumBenchmarkDate = range.Value.Maximum;
+        _selectedStartDate = _minimumBenchmarkDate;
+        _selectedEndDate = _maximumBenchmarkDate;
+
+        if (TryGetRequestedDateRange(range.Value.Minimum, range.Value.Maximum, out var startDate, out var endDate))
+        {
+            _selectedStartDate = startDate;
+            _selectedEndDate = endDate;
+        }
+
+        _filteredBenchmarks = FilterBenchmarks(
+            GitHubService.Benchmarks,
+            _selectedStartDate.GetValueOrDefault(range.Value.Minimum),
+            _selectedEndDate.GetValueOrDefault(range.Value.Maximum));
+    }
+
+    private bool TryGetRequestedDateRange(
+        DateOnly minimumDate,
+        DateOnly maximumDate,
+        out DateOnly startDate,
+        out DateOnly endDate)
+    {
+        startDate = minimumDate;
+        endDate = maximumDate;
+
+        var hasStartDate = !string.IsNullOrWhiteSpace(StartDate);
+        var hasEndDate = !string.IsNullOrWhiteSpace(EndDate);
+
+        if (!hasStartDate && !hasEndDate)
+        {
+            return false;
+        }
+
+        if (hasStartDate &&
+            !DateOnly.TryParseExact(StartDate, QueryDateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out startDate))
+        {
+            startDate = minimumDate;
+            endDate = maximumDate;
+            return false;
+        }
+
+        if (hasEndDate &&
+            !DateOnly.TryParseExact(EndDate, QueryDateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out endDate))
+        {
+            startDate = minimumDate;
+            endDate = maximumDate;
+            return false;
+        }
+
+        if (startDate < minimumDate ||
+            endDate > maximumDate ||
+            startDate > endDate)
+        {
+            startDate = minimumDate;
+            endDate = maximumDate;
+            return false;
+        }
+
+        return true;
     }
 }

@@ -10,4 +10,5 @@ namespace MartinCostello.Benchmarks.Models;
 /// </summary>
 public sealed record BenchmarkItem(
     [property: JsonPropertyName("commit")] GitCommit Commit,
-    [property: JsonPropertyName("result")] BenchmarkResult Result);
+    [property: JsonPropertyName("result")] BenchmarkResult Result,
+    [property: JsonPropertyName("timestamp")] DateTimeOffset Timestamp = default);
