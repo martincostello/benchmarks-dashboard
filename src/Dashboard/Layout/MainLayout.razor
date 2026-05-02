@@ -3,7 +3,7 @@
 @if (!string.IsNullOrWhiteSpace(Options.Value.CustomCssUrl))
 {
     <HeadContent>
-        <link href="@(Options.Value.CustomCssUrl)" rel="stylesheet" />
+        <link href="@(Options.Value.CustomCssUrl)" referrerpolicy="no-referrer" rel="stylesheet" />
     </HeadContent>
 }
 

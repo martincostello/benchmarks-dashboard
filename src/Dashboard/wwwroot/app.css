@@ -91,7 +91,12 @@ img.user-profile {
   flex-direction: column;
 }
 
-.benchmark-anchor,
+.benchmark-anchor {
+  color: initial !important;
+  fill: initial !important;
+  text-decoration: none !important;
+}
+
 text.gtitle > a {
   color: initial !important;
   fill: initial !important;
