@@ -19,7 +19,7 @@ public sealed partial class Navbar : IAsyncDisposable
     /// <summary>
     /// Gets the URL of the data repository.
     /// </summary>
-    public string DataRepositoryUrl => _dataRepoUrl ?? string.Empty;
+    public string? DataRepositoryUrl => _dataRepoUrl;
 
     /// <summary>
     /// Gets the dashboard options.
