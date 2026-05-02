@@ -37,6 +37,15 @@ function createDashboardApp(dependencies = {}) {
     };
 
     const newline = '<br>';
+    const htmlEntityMap = Object.freeze({
+        '&': '&amp;',
+        '"': '&quot;',
+        "'": '&#39;',
+        '<': '&lt;',
+        '>': '&gt;',
+    });
+
+    const htmlEncode = (value) => String(value).replaceAll(/[&"'<>]/g, (match) => htmlEntityMap[match]);
 
     const getThemeStyles = () => {
         const root = documentRef.documentElement;
@@ -103,9 +112,13 @@ function createDashboardApp(dependencies = {}) {
                 .split('\n')
                 .slice(0, 20)
                 .map((part) => (part.length > 70 ? `${part.slice(0, 70)}...` : part))
+                .map((part) => htmlEncode(part))
                 .join(newline);
 
-            return message + newline + newline + `${item.commit.timestamp} authored by @${item.commit.author.username}` + newline;
+            const timestamp = htmlEncode(item.commit.timestamp);
+            const author = htmlEncode(item.commit.author.username);
+
+            return message + newline + newline + `${timestamp} authored by @${author}` + newline;
         });
 
     const createHoverTemplate = () =>
@@ -182,7 +195,7 @@ function createDashboardApp(dependencies = {}) {
         const isDesktop = documentRef.documentElement.clientWidth > settings.mobileBreakpoint;
         const chart = documentRef.getElementById(chartId);
         const parent = chart.parentElement;
-        const chartTitle = `${config.name} <a class="benchmark-anchor text-secondary" href="#${parent.id}" target="_self">#</a>`;
+        const chartTitle = `${htmlEncode(config.name)} <a class="benchmark-anchor text-secondary" href="#${parent.id}" target="_self">#</a>`;
 
         const layout = {
             font: {
@@ -323,7 +336,8 @@ function createDashboardApp(dependencies = {}) {
     };
 
     const copyDeepLink = (event) => {
-        const url = createDeepLinkUrl(event.target);
+        const target = event.currentTarget ?? event.target?.closest?.('a');
+        const url = target ? createDeepLinkUrl(target) : undefined;
 
         if (!url) {
             return;
@@ -331,7 +345,7 @@ function createDashboardApp(dependencies = {}) {
 
         try {
             navigatorRef.clipboard.writeText(url.href);
-            showCopyConfirmation(event.target);
+            showCopyConfirmation(target);
         } catch {
             // Ignore
         }
