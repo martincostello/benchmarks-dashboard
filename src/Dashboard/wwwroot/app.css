@@ -92,8 +92,8 @@ img.user-profile {
 }
 
 .benchmark-anchor {
-  color: initial !important;
-  fill: initial !important;
+  color: inherit !important;
+  fill: inherit !important;
   text-decoration: none !important;
 }
 
