@@ -85,7 +85,9 @@ internal static class AppLauncher
 
         void OnErrorDataReceived(object sender, DataReceivedEventArgs eventArgs)
         {
-            if (eventArgs.Data is { Length: > 0 } data)
+            // HACK Ignore the "Using launch settings from ..." message which is written to stderr
+            // from .NET 11 preview 4. See https://github.com/dotnet/sdk/pull/53797.
+            if (eventArgs.Data is { Length: > 0 } data && !data.StartsWith("Using launch settings from ", StringComparison.Ordinal))
             {
                 _ = completionSource.TrySetException(new InvalidOperationException(data));
                 errorEncountered = true;
