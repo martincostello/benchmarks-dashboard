@@ -16,7 +16,7 @@ namespace MartinCostello.Benchmarks;
 /// </remarks>
 internal static class AppLauncher
 {
-    public static (Process Process, string Url) Launch(string path, TimeSpan timeout)
+    public static async Task<(Process Process, string Url)> LaunchAsync(string path, TimeSpan timeout)
     {
 #if DEBUG
         string configuration = "Debug";
@@ -39,17 +39,33 @@ internal static class AppLauncher
         var completionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         using var tokenSource = new CancellationTokenSource(timeout);
 
-        var server = Process.Start(startInfo);
+        var server = Process.Start(startInfo) ?? throw new InvalidOperationException("Unable to start dashboard.");
 
-        WaitForStart(server, completionSource);
+        var isStarted = false;
+        var errors = new List<string>();
+        var matchTimeout = TimeSpan.FromSeconds(10);
 
-        using var registration = tokenSource.Token.Register(
-            () => completionSource.TrySetException(
-                new TimeoutException($"Failed to start the dashboard within {timeout.TotalSeconds} seconds.")));
+        await foreach (var line in server.ReadAllLinesAsync(tokenSource.Token).WithCancellation(tokenSource.Token))
+        {
+            if (line.StandardError)
+            {
+                errors.Add(line.Content);
+                continue;
+            }
 
-        completionSource.Task.Wait();
+            if (Regex.IsMatch(line.Content, @"^\s*Application started\. Press Ctrl\+C to shut down\.$", RegexOptions.None, matchTimeout))
+            {
+                isStarted = true;
+                break;
+            }
+        }
 
-        return (server!, serverAddress);
+        if (!isStarted)
+        {
+            throw new TimeoutException($"Failed to start the dashboard within {timeout.TotalSeconds} seconds.{string.Join(Environment.NewLine, errors)}");
+        }
+
+        return (server, serverAddress);
     }
 
     private static int GetFreePort()
@@ -64,52 +80,6 @@ internal static class AppLauncher
         finally
         {
             listener.Stop();
-        }
-    }
-
-    private static void WaitForStart(Process? process, TaskCompletionSource completionSource)
-    {
-        if (process is null)
-        {
-            completionSource.TrySetException(new InvalidOperationException("Unable to start dashboard."));
-            return;
-        }
-
-        var errorEncountered = false;
-
-        process.ErrorDataReceived += OnErrorDataReceived;
-        process.BeginErrorReadLine();
-
-        process.OutputDataReceived += OnOutputDataReceived;
-        process.BeginOutputReadLine();
-
-        void OnErrorDataReceived(object sender, DataReceivedEventArgs eventArgs)
-        {
-            // HACK Ignore the "Using launch settings from ..." message which is written to stderr
-            // from .NET 11 preview 4. See https://github.com/dotnet/sdk/pull/53797.
-            if (eventArgs.Data is { Length: > 0 } data && !data.StartsWith("Using launch settings from ", StringComparison.Ordinal))
-            {
-                _ = completionSource.TrySetException(new InvalidOperationException(data));
-                errorEncountered = true;
-            }
-        }
-
-        void OnOutputDataReceived(object sender, DataReceivedEventArgs eventArgs)
-        {
-            if (string.IsNullOrEmpty(eventArgs.Data))
-            {
-                if (!errorEncountered)
-                {
-                    _ = completionSource.TrySetException(new InvalidOperationException("Expected output has not been received from the application."));
-                }
-            }
-            else if (Regex.IsMatch(eventArgs.Data, @"^\s*Application started\. Press Ctrl\+C to shut down\.$", RegexOptions.None, TimeSpan.FromSeconds(10)))
-            {
-                process.OutputDataReceived -= OnOutputDataReceived;
-                process.ErrorDataReceived -= OnErrorDataReceived;
-
-                _ = completionSource.TrySetResult();
-            }
         }
     }
 }
