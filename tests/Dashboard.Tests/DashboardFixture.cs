@@ -6,20 +6,43 @@ using System.Reflection;
 
 namespace MartinCostello.Benchmarks;
 
-public sealed class DashboardFixture : IDisposable
+public sealed class DashboardFixture : IAsyncLifetime
 {
-    private bool _disposed;
     private string? _serverAddress;
     private Process? _server;
 
-    ~DashboardFixture() => Dispose(false);
+    public string ServerAddress => _serverAddress ?? throw new InvalidOperationException("Server is not running.");
 
-    public string ServerAddress => EnsureServer();
-
-    public void Dispose()
+    public async ValueTask InitializeAsync()
     {
-        Dispose(true);
+        if (_serverAddress is null)
+        {
+            var path = GetApplicationDirectory();
+            var timeout = TimeSpan.FromSeconds(45);
+
+            (_server, _serverAddress) = await AppLauncher.LaunchAsync(path, timeout);
+        }
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        if (_server is not null)
+        {
+            try
+            {
+                _server.Kill();
+            }
+            catch (Exception)
+            {
+                // Ignore
+            }
+
+            _server.Dispose();
+            _server = null;
+        }
+
         GC.SuppressFinalize(this);
+        return ValueTask.CompletedTask;
     }
 
     private static string GetApplicationDirectory()
@@ -31,41 +54,5 @@ public sealed class DashboardFixture : IDisposable
             .Single();
 
         return Path.GetFullPath(Path.Combine(solutionPath!, "src", "Dashboard"));
-    }
-
-    private void Dispose(bool disposing)
-    {
-        if (!_disposed)
-        {
-            if (disposing && _server is not null)
-            {
-                try
-                {
-                    _server.Kill();
-                }
-                catch (Exception)
-                {
-                    // Ignore
-                }
-
-                _server.Dispose();
-                _server = null;
-            }
-
-            _disposed = true;
-        }
-    }
-
-    private string EnsureServer()
-    {
-        if (_serverAddress is null)
-        {
-            var path = GetApplicationDirectory();
-            var timeout = TimeSpan.FromSeconds(45);
-
-            (_server, _serverAddress) = AppLauncher.Launch(path, timeout);
-        }
-
-        return _serverAddress;
     }
 }
