@@ -144,6 +144,56 @@ public class HomeTests : DashboardTestContext
     }
 
     [Fact]
+    public static void GroupBenchmarks_Orders_Items_By_Commit_Timestamp_Not_Run_Timestamp()
+    {
+        // Arrange - the runs are published out of order relative to the commit history.
+        // The newer commit's benchmarks finished (and were published) before the older
+        // commit's slower benchmarks, so the newer commit has the earlier run timestamp.
+        var olderCommit = CreateCommit("older");
+        olderCommit.LastUpdated = new DateTimeOffset(2024, 09, 01, 12, 00, 00, TimeSpan.Zero);
+
+        var newerCommit = CreateCommit("newer");
+        newerCommit.LastUpdated = new DateTimeOffset(2024, 09, 02, 12, 00, 00, TimeSpan.Zero);
+
+        var runs = new List<BenchmarkRun>()
+        {
+            new()
+            {
+                // Newer commit, but its run was published first.
+                Timestamp = new DateTimeOffset(2024, 09, 03, 00, 00, 00, TimeSpan.Zero),
+                Commit = newerCommit,
+                Benchmarks =
+                [
+                    new() { Name = "A", Value = 2 },
+                ],
+            },
+            new()
+            {
+                // Older commit, but its run was published later.
+                Timestamp = new DateTimeOffset(2024, 09, 04, 00, 00, 00, TimeSpan.Zero),
+                Commit = olderCommit,
+                Benchmarks =
+                [
+                    new() { Name = "A", Value = 1 },
+                ],
+            },
+        };
+
+        // Act
+        var actual = Home.GroupBenchmarks(runs);
+
+        // Assert - the points are ordered by the commit timestamp (older first), not the
+        // run timestamp or the order in which the runs were published.
+        var values = actual["A"];
+
+        values.Count.ShouldBe(2);
+        values[0].Commit.Sha.ShouldBe("older");
+        values[0].Result.Value.ShouldBe(1);
+        values[1].Commit.Sha.ShouldBe("newer");
+        values[1].Result.Value.ShouldBe(2);
+    }
+
+    [Fact]
     public static void GroupBenchmarks_Groups_Benchmarks_Correctly_With_Multiple_Benchmarks()
     {
         // Arrange

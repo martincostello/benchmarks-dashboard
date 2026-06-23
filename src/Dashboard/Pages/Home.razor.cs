@@ -173,7 +173,14 @@ public partial class Home : IAsyncDisposable
 
         foreach ((var suite, var results) in sortedGroups)
         {
-            var items = results.Select((p) => p.Value).ToList();
+            // Order the points by the commit's timestamp rather than when the benchmark
+            // run was published. Benchmark runs can be published out of order (for example,
+            // a slower benchmark for an earlier commit can finish after a later commit's run),
+            // which would otherwise render the commits out of order along the chart's x-axis.
+            var items = results
+                .Select((p) => p.Value)
+                .OrderBy((p) => p.Commit.LastUpdated ?? p.Timestamp)
+                .ToList();
 
             NormalizeUnits(items);
 
