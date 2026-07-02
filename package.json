@@ -15,7 +15,7 @@
   "devDependencies": {
     "@vitest/coverage-v8": "4.1.9",
     "jsdom": "29.1.1",
-    "prettier": "3.9.1",
+    "prettier": "3.9.3",
     "vitest": "4.1.9"
   },
   "engines": {
