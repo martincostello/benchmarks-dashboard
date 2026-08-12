@@ -78,11 +78,17 @@ public partial class Benchmark
             },
             SerializationOptions);
 
-        await JS.InvokeVoidAsync("renderChart", [ChartId, options]);
-
-        if (firstRender)
+        try
         {
-            await JS.InvokeVoidAsync("scrollToActiveChart", []);
+            await JS.InvokeVoidAsync("renderChart", [ChartId, options]);
+
+            if (firstRender)
+            {
+                await JS.InvokeVoidAsync("scrollToActiveChart", []);
+            }
+        }
+        catch (JSException)
+        {
         }
     }
 

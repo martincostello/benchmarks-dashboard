@@ -349,10 +349,16 @@ public partial class Home : IAsyncDisposable
         if (GitHubService.Benchmarks is { } data)
         {
             var json = System.Text.Json.JsonSerializer.Serialize(_filteredBenchmarks ?? data, AppJsonSerializerContext.Default.BenchmarkResults);
-            await JS.InvokeVoidAsync("configureDataDownload", [json, Options.Value.BenchmarkFileName]);
-            await JS.InvokeVoidAsync("configureDeepLinks", []);
-            _dateFilterNavigationReference ??= DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync("configureDateFilterNavigation", [_dateFilterNavigationReference]);
+            try
+            {
+                await JS.InvokeVoidAsync("configureDataDownload", [json, Options.Value.BenchmarkFileName]);
+                await JS.InvokeVoidAsync("configureDeepLinks", []);
+                _dateFilterNavigationReference ??= DotNetObjectReference.Create(this);
+                await JS.InvokeVoidAsync("configureDateFilterNavigation", [_dateFilterNavigationReference]);
+            }
+            catch (JSException)
+            {
+            }
         }
     }
 
@@ -519,7 +525,6 @@ public partial class Home : IAsyncDisposable
         {
             Branch = branch;
             await LoadAsync(() => GitHubService.LoadBenchmarksAsync(branch));
-            StateHasChanged();
         }
     }
 
@@ -529,7 +534,6 @@ public partial class Home : IAsyncDisposable
     private async Task ResetDateRangeAsync()
     {
         _resettingDateRange = true;
-        StateHasChanged();
 
         await Task.Yield();
         await ApplyDateRangeAsync(MinimumDateValue, MaximumDateValue);

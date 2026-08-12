@@ -16,5 +16,13 @@ public partial class MainLayout
 
     /// <inheritdoc/>
     protected override async Task OnAfterRenderAsync(bool firstRender)
-        => await JS.InvokeVoidAsync("configureToolTips", []);
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("configureToolTips", []);
+        }
+        catch (JSException)
+        {
+        }
+    }
 }

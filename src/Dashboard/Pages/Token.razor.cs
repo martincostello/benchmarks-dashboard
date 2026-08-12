@@ -39,7 +39,13 @@ public partial class Token
     {
         if (_deviceCode is not null)
         {
-            await JS.InvokeVoidAsync("configureClipboard");
+            try
+            {
+                await JS.InvokeVoidAsync("configureClipboard");
+            }
+            catch (JSException)
+            {
+            }
         }
     }
 
@@ -64,8 +70,6 @@ public partial class Token
 
         _authorizing = false;
         _authorizationFailed = false;
-
-        StateHasChanged();
     }
 
     private async Task AuthorizeAsync()
@@ -77,15 +81,11 @@ public partial class Token
 
         _authorizing = true;
 
-        StateHasChanged();
-
         if (await TokenService.WaitForAccessTokenAsync(_deviceCode) is { Length: > 0 } token &&
             await GitHubService.SignInAsync(token))
         {
             Navigation.NavigateTo(Routes.Home);
         }
-
-        StateHasChanged();
 
         _authorizing = false;
         _authorizationFailed = true;
