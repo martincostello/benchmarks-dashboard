@@ -72,6 +72,7 @@ public sealed partial class Navbar : IAsyncDisposable
         }
         catch (JSException)
         {
+            // Ignore
         }
     }
 }

@@ -45,6 +45,7 @@ public partial class Token
             }
             catch (JSException)
             {
+                // Ignore
             }
         }
     }

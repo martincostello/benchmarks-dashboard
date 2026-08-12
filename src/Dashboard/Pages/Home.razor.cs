@@ -353,11 +353,13 @@ public partial class Home : IAsyncDisposable
             {
                 await JS.InvokeVoidAsync("configureDataDownload", [json, Options.Value.BenchmarkFileName]);
                 await JS.InvokeVoidAsync("configureDeepLinks", []);
+
                 _dateFilterNavigationReference ??= DotNetObjectReference.Create(this);
                 await JS.InvokeVoidAsync("configureDateFilterNavigation", [_dateFilterNavigationReference]);
             }
             catch (JSException)
             {
+                // Ignore
             }
         }
     }

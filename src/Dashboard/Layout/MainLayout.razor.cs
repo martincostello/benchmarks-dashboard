@@ -23,6 +23,7 @@ public partial class MainLayout
         }
         catch (JSException)
         {
+            // Ignore
         }
     }
 }

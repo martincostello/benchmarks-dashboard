@@ -89,6 +89,7 @@ public partial class Benchmark
         }
         catch (JSException)
         {
+            // Ignore
         }
     }
 
