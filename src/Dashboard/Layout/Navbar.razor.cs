@@ -65,5 +65,14 @@ public sealed partial class Navbar : IAsyncDisposable
     }
 
     private async Task ToggleThemeAsync()
-        => await JS.InvokeVoidAsync("toggleTheme");
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("toggleTheme");
+        }
+        catch (JSException)
+        {
+            // Ignore
+        }
+    }
 }
