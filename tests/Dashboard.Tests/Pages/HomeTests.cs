@@ -796,6 +796,44 @@ public class HomeTests : DashboardTestContext
     }
 
     [Fact]
+    public void GroupBenchmarks_Copies_Environment_Metadata_From_The_Run()
+    {
+        // Arrange
+        var metadata = new BenchmarkMetadata()
+        {
+            Environment = new Dictionary<string, JsonElement>()
+            {
+                ["ProcessorName"] = JsonSerializer.SerializeToElement("AMD Ryzen 9 5950X"),
+                ["LogicalCoreCount"] = JsonSerializer.SerializeToElement(32),
+            },
+        };
+
+        var runWithMetadata = new BenchmarkRun()
+        {
+            Timestamp = new DateTimeOffset(2024, 09, 03, 12, 00, 00, TimeSpan.Zero),
+            Commit = CreateCommit("with-metadata"),
+            Metadata = metadata,
+            Benchmarks = [new() { Name = "A", Value = 1 }],
+        };
+
+        var runWithoutMetadata = new BenchmarkRun()
+        {
+            Timestamp = new DateTimeOffset(2024, 09, 04, 12, 00, 00, TimeSpan.Zero),
+            Commit = CreateCommit("without-metadata"),
+            Benchmarks = [new() { Name = "A", Value = 2 }],
+        };
+
+        // Act
+        var grouped = Home.GroupBenchmarks([runWithMetadata, runWithoutMetadata]);
+
+        // Assert
+        var items = grouped["A"];
+
+        items[0].Metadata.ShouldBe(metadata);
+        items[1].Metadata.ShouldBeNull();
+    }
+
+    [Fact]
     public void NormalizeUnits_Scales_From_Nanoseconds_To_Microseconds_And_Updates_Range()
     {
         // Arrange

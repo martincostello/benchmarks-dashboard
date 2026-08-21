@@ -297,6 +297,105 @@ describe('DashboardApp', () => {
         expect(definition.data[0].customdata[0]).not.toContain('&quot;');
     });
 
+    it('groups environment metadata into hovercards when present', () => {
+        document.documentElement.style.setProperty('--bs-body-color', '#123456');
+        document.documentElement.style.setProperty('--bs-body-bg', '#abcdef');
+        document.documentElement.style.setProperty('--plot-hover-color', '#111111');
+        document.documentElement.style.setProperty('--plot-hover-background-color', '#222222');
+        document.documentElement.style.setProperty('--bs-font-sans-serif', 'Inter');
+
+        document.body.innerHTML = '<div id="suite-name"><div id="chart"></div></div>';
+
+        Object.defineProperty(document.documentElement, 'clientWidth', {
+            configurable: true,
+            value: 1280,
+        });
+
+        const app = window.DashboardApp.createDashboardApp(createDependencies());
+        const definition = app.createChartDefinition('chart', {
+            colors: {
+                memory: '#e34c26',
+                time: '#178600',
+            },
+            dataset: [
+                createBenchmarkItem({
+                    metadata: {
+                        environment: {
+                            Architecture: 'X64',
+                            BenchmarkDotNetVersion: '0.14.0',
+                            DotNetCliVersion: '8.0.401',
+                            LogicalCoreCount: 16,
+                            OsVersion: 'Windows 11 (10.0.22621.4037/22H2/2022Update/SunValley2)',
+                            PhysicalCoreCount: 12,
+                            PhysicalProcessorCount: 1,
+                            ProcessorName: '12th Gen Intel Core i7-1270P',
+                            RuntimeVersion: '.NET 8.0.8 (8.0.824.36612)',
+                        },
+                    },
+                }),
+            ],
+            errorBars: false,
+            imageFormat: 'png',
+            name: 'My Benchmark',
+        });
+
+        const hover = definition.data[0].customdata[0];
+
+        expect(hover).toContain(
+            ['<b>.NET Versions</b>', '- Runtime: .NET 8.0.8 (8.0.824.36612)', '- .NET SDK: 8.0.401', '- BenchmarkDotNet: 0.14.0'].join(
+                '<br>'
+            )
+        );
+        expect(hover).toContain(
+            [
+                '<b>Processor</b>',
+                '- Processor: 12th Gen Intel Core i7-1270P',
+                '- Architecture: X64',
+                '- Processors: 1',
+                '- Physical cores: 12',
+                '- Logical cores: 16',
+            ].join('<br>')
+        );
+        expect(hover).toContain(['<b>OS</b>', '- Windows 11 (10.0.22621.4037/22H2/2022Update/SunValley2)'].join('<br>'));
+    });
+
+    it('omits the environment metadata section from hovercards when absent', () => {
+        document.documentElement.style.setProperty('--bs-body-color', '#123456');
+        document.documentElement.style.setProperty('--bs-body-bg', '#abcdef');
+        document.documentElement.style.setProperty('--plot-hover-color', '#111111');
+        document.documentElement.style.setProperty('--plot-hover-background-color', '#222222');
+        document.documentElement.style.setProperty('--bs-font-sans-serif', 'Inter');
+
+        document.body.innerHTML = '<div id="suite-name"><div id="chart"></div></div>';
+
+        Object.defineProperty(document.documentElement, 'clientWidth', {
+            configurable: true,
+            value: 1280,
+        });
+
+        const app = window.DashboardApp.createDashboardApp(createDependencies());
+        const definition = app.createChartDefinition('chart', {
+            colors: {
+                memory: '#e34c26',
+                time: '#178600',
+            },
+            dataset: [createBenchmarkItem()],
+            errorBars: false,
+            imageFormat: 'png',
+            name: 'My Benchmark',
+        });
+
+        expect(definition.data[0].customdata[0]).not.toContain('<b>');
+    });
+
+    it('formats an unrecognized environment metadata key using a humanized label', () => {
+        const app = window.DashboardApp.createDashboardApp(createDependencies());
+
+        const lines = app.formatEnvironmentMetadata({ CustomToolingVersion: '1.2.3' });
+
+        expect(lines).toEqual(['<b>Custom Tooling Version</b><br>- 1.2.3']);
+    });
+
     it('HTML-encodes the chart anchor id in chart definitions', () => {
         document.documentElement.style.setProperty('--bs-body-color', '#123456');
         document.documentElement.style.setProperty('--bs-body-bg', '#abcdef');

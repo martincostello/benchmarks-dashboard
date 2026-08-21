@@ -164,7 +164,7 @@ public partial class Home : IAsyncDisposable
 
                 if (!results.ContainsKey(timestamp))
                 {
-                    results.Add(timestamp, new(run.Commit, benchmark, run.Timestamp));
+                    results.Add(timestamp, new(run.Commit, benchmark, run.Timestamp, run.Metadata));
                 }
             }
         }
