@@ -342,21 +342,12 @@ describe('DashboardApp', () => {
         const hover = definition.data[0].customdata[0];
 
         expect(hover).toContain(
-            ['<b>.NET Versions</b>', '- Runtime: .NET 8.0.8 (8.0.824.36612)', '- .NET SDK: 8.0.401', '- BenchmarkDotNet: 0.14.0'].join(
-                '<br>'
-            )
+            'Processor: 12th Gen Intel Core i7-1270P (X64)<br>OS: Windows 11 (10.0.22621.4037/22H2/2022Update/SunValley2)'
         );
-        expect(hover).toContain(
-            [
-                '<b>Processor</b>',
-                '- Processor: 12th Gen Intel Core i7-1270P',
-                '- Architecture: X64',
-                '- Processors: 1',
-                '- Physical cores: 12',
-                '- Logical cores: 16',
-            ].join('<br>')
-        );
-        expect(hover).toContain(['<b>OS</b>', '- Windows 11 (10.0.22621.4037/22H2/2022Update/SunValley2)'].join('<br>'));
+
+        const messageEnd = hover.indexOf('authored by');
+        expect(hover.indexOf('Processor:')).toBeGreaterThan(messageEnd);
+        expect(hover.indexOf('OS:')).toBeGreaterThan(hover.indexOf('Processor:'));
     });
 
     it('omits the environment metadata section from hovercards when absent', () => {
@@ -385,15 +376,24 @@ describe('DashboardApp', () => {
             name: 'My Benchmark',
         });
 
-        expect(definition.data[0].customdata[0]).not.toContain('<b>');
+        expect(definition.data[0].customdata[0]).not.toContain('Processor:');
+        expect(definition.data[0].customdata[0]).not.toContain('OS:');
     });
 
-    it('formats an unrecognized environment metadata key using a humanized label', () => {
+    it('renders only the Processor field when the architecture is not present', () => {
+        const app = window.DashboardApp.createDashboardApp(createDependencies());
+
+        const lines = app.formatEnvironmentMetadata({ ProcessorName: 'AMD EPYC 7763' });
+
+        expect(lines).toEqual(['Processor: AMD EPYC 7763']);
+    });
+
+    it('ignores unrecognized environment metadata keys', () => {
         const app = window.DashboardApp.createDashboardApp(createDependencies());
 
         const lines = app.formatEnvironmentMetadata({ CustomToolingVersion: '1.2.3' });
 
-        expect(lines).toEqual(['<b>Custom Tooling Version</b><br>- 1.2.3']);
+        expect(lines).toEqual([]);
     });
 
     it('HTML-encodes the chart anchor id in chart definitions', () => {
