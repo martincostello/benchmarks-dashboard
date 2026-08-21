@@ -136,68 +136,24 @@ function createDashboardApp(dependencies = {}) {
         return label;
     };
 
-    const environmentMetadataFieldLabels = Object.freeze({
-        Architecture: 'Architecture',
-        BenchmarkDotNetVersion: 'BenchmarkDotNet',
-        DotNetCliVersion: '.NET SDK',
-        LogicalCoreCount: 'Logical cores',
-        OsVersion: 'OS',
-        PhysicalCoreCount: 'Physical cores',
-        PhysicalProcessorCount: 'Processors',
-        ProcessorName: 'Processor',
-        RuntimeVersion: 'Runtime',
-    });
-
-    const environmentMetadataGroups = Object.freeze([
-        Object.freeze({ label: '.NET Versions', keys: Object.freeze(['RuntimeVersion', 'DotNetCliVersion', 'BenchmarkDotNetVersion']) }),
-        Object.freeze({
-            label: 'Processor',
-            keys: Object.freeze(['ProcessorName', 'Architecture', 'PhysicalProcessorCount', 'PhysicalCoreCount', 'LogicalCoreCount']),
-        }),
-        Object.freeze({ label: 'OS', keys: Object.freeze(['OsVersion']) }),
-    ]);
-
-    const humanizeMetadataKey = (key) => key.replaceAll(/([a-z0-9])([A-Z])/g, '$1 $2');
-    const formatMetadataFieldLabel = (key) => environmentMetadataFieldLabels[key] ?? humanizeMetadataKey(key);
     const formatMetadataFieldValue = (value) => (typeof value === 'string' ? normalizeHtml(value) : String(value));
-
-    const formatMetadataGroup = (group, environment) => {
-        const keys = group.keys.filter((key) => key in environment);
-
-        if (keys.length === 0) {
-            return undefined;
-        }
-
-        const items = keys.map((key) => {
-            const label = formatMetadataFieldLabel(key);
-            const value = formatMetadataFieldValue(environment[key]);
-            const text = keys.length === 1 && label === group.label ? value : `${label}: ${value}`;
-
-            return `- ${text}`;
-        });
-
-        return [`<b>${htmlEncode(group.label)}</b>`, ...items].join(newline);
-    };
 
     const formatEnvironmentMetadata = (environment) => {
         if (!environment || typeof environment !== 'object') {
             return [];
         }
 
-        const ungroupedKeys = new Set(Object.keys(environment));
         const blocks = [];
 
-        for (const group of environmentMetadataGroups) {
-            const block = formatMetadataGroup(group, environment);
+        if (environment.ProcessorName) {
+            const processor = formatMetadataFieldValue(environment.ProcessorName);
+            const architecture = environment.Architecture ? ` (${formatMetadataFieldValue(environment.Architecture)})` : '';
 
-            if (block !== undefined) {
-                group.keys.forEach((key) => ungroupedKeys.delete(key));
-                blocks.push(block);
-            }
+            blocks.push(`Processor: ${processor}${architecture}`);
         }
 
-        for (const key of ungroupedKeys) {
-            blocks.push(formatMetadataGroup({ label: formatMetadataFieldLabel(key), keys: [key] }, environment));
+        if (environment.OsVersion) {
+            blocks.push(`OS: ${formatMetadataFieldValue(environment.OsVersion)}`);
         }
 
         return blocks;
@@ -215,7 +171,12 @@ function createDashboardApp(dependencies = {}) {
             const timestamp = normalizeHtml(item.commit.timestamp);
             const author = normalizeHtml(item.commit.author.username);
 
-            const blocks = [message, `${timestamp} authored by @${author}`, ...formatEnvironmentMetadata(item.metadata?.environment)];
+            const metadataLines = formatEnvironmentMetadata(item.metadata?.environment);
+            const blocks = [message, `${timestamp} authored by @${author}`];
+
+            if (metadataLines.length > 0) {
+                blocks.push(metadataLines.join(newline));
+            }
 
             return blocks.join(newline + newline) + newline;
         });
