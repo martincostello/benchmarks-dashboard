@@ -24,6 +24,12 @@ public sealed class BenchmarkRun
     public DateTimeOffset Timestamp { get; set; }
 
     /// <summary>
+    /// Gets or sets the metadata associated with the run, if any.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public BenchmarkMetadata? Metadata { get; set; }
+
+    /// <summary>
     /// Gets or sets benchmark results for the run.
     /// </summary>
     [JsonPropertyName("benches")]
