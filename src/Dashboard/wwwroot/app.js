@@ -168,12 +168,15 @@ function createDashboardApp(dependencies = {}) {
             return undefined;
         }
 
-        const summary =
-            keys.length === 1
-                ? formatMetadataFieldValue(environment[keys[0]])
-                : keys.map((key) => `${formatMetadataFieldLabel(key)}: ${formatMetadataFieldValue(environment[key])}`).join(' · ');
+        const items = keys.map((key) => {
+            const label = formatMetadataFieldLabel(key);
+            const value = formatMetadataFieldValue(environment[key]);
+            const text = keys.length === 1 && label === group.label ? value : `${label}: ${value}`;
 
-        return `<b>${htmlEncode(group.label)}:</b> ${summary}`;
+            return `- ${text}`;
+        });
+
+        return [`<b>${htmlEncode(group.label)}</b>`, ...items].join(newline);
     };
 
     const formatEnvironmentMetadata = (environment) => {
@@ -182,22 +185,22 @@ function createDashboardApp(dependencies = {}) {
         }
 
         const ungroupedKeys = new Set(Object.keys(environment));
-        const lines = [];
+        const blocks = [];
 
         for (const group of environmentMetadataGroups) {
-            const line = formatMetadataGroup(group, environment);
+            const block = formatMetadataGroup(group, environment);
 
-            if (line !== undefined) {
+            if (block !== undefined) {
                 group.keys.forEach((key) => ungroupedKeys.delete(key));
-                lines.push(line);
+                blocks.push(block);
             }
         }
 
         for (const key of ungroupedKeys) {
-            lines.push(`<b>${htmlEncode(formatMetadataFieldLabel(key))}:</b> ${formatMetadataFieldValue(environment[key])}`);
+            blocks.push(formatMetadataGroup({ label: formatMetadataFieldLabel(key), keys: [key] }, environment));
         }
 
-        return lines;
+        return blocks;
     };
 
     const createCustomData = (dataset) =>
@@ -212,12 +215,7 @@ function createDashboardApp(dependencies = {}) {
             const timestamp = normalizeHtml(item.commit.timestamp);
             const author = normalizeHtml(item.commit.author.username);
 
-            const blocks = [message, `${timestamp} authored by @${author}`];
-            const environmentLines = formatEnvironmentMetadata(item.metadata?.environment);
-
-            if (environmentLines.length > 0) {
-                blocks.push(environmentLines.join(newline));
-            }
+            const blocks = [message, `${timestamp} authored by @${author}`, ...formatEnvironmentMetadata(item.metadata?.environment)];
 
             return blocks.join(newline + newline) + newline;
         });
