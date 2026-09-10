@@ -29,7 +29,7 @@ This file provides guidance to coding agents when working with code in this repo
 ## High-level architecture
 
 - This repository is a Blazor WebAssembly static app in `src/Dashboard`. CI publishes the site and uploads `artifacts/publish/Dashboard/release/wwwroot` for GitHub Pages deployment.
-- `Program.cs` is the composition root. It binds the `Dashboard` configuration section into `DashboardOptions`, registers `Blazored.LocalStorage`, and wires the app services: `GitHubDeviceTokenService`, `GitHubClient`, `GitHubService`, and `GitHubTokenStore`.
+- `Program.cs` is the composition root. It binds the `Dashboard` configuration section into `DashboardOptions` and wires the app services: `GitHubDeviceTokenService`, `GitHubClient`, `GitHubService`, and `GitHubTokenStore`.
 - `GitHubService` is the stateful orchestration layer. It owns the selected repository, branch, current commit, benchmark payload, and current user, and raises `OnUserChanged` for UI updates.
 - `GitHubClient` is the HTTP boundary. It handles GitHub REST calls, device-flow token exchange, and benchmark-data downloads. For public GitHub.com repositories it reads benchmark JSON from `raw.githubusercontent.com`; for private repositories or GitHub Enterprise it switches to the GitHub API and adds auth/version headers.
 - Routing is intentionally small and centralized in `Routes.cs`: the home dashboard page and the token/device-flow page. `Pages/Home.razor.cs` also binds `repo` and `branch` from the query string so deep links are part of the main app flow.
@@ -53,7 +53,7 @@ This file provides guidance to coding agents when working with code in this repo
   - `GitHubClient` should stay focused on HTTP and serialization.
   - `GitHubService` should own app state transitions and higher-level loading/sign-in behavior.
 - When changing benchmark presentation, keep the normalization and duplicate-job handling in `Home.razor.cs` aligned with the chart payload expected by `Benchmark.razor.cs` and `wwwroot\app.js`.
-- The app persists the GitHub token through `GitHubTokenStore` and `Blazored.LocalStorage`; authentication changes usually touch the token store, device token service, `GitHubService`, and the `Token` page together.
+- The app persists the GitHub token through `GitHubTokenStore`, which reads and writes browser `localStorage` directly via `IJSRuntime`; authentication changes usually touch the token store, device token service, `GitHubService`, and the `Token` page together.
 - Tests assume explicit registration of every outbound HTTP call. In `DashboardTestContext`, `HttpClientInterceptorOptions().ThrowsOnMissingRegistration()` is intentional; add new response registrations instead of loosening interception behavior.
 - UI tests are categorized with `[Category("UI")]`, automatically install Playwright, and launch the real app via `DashboardFixture`. Changes to app startup, routes, or static assets can affect those tests even when unit tests stay green.
 - Build outputs go under `artifacts\` because `Directory.Build.props` sets `UseArtifactsOutput=true`; the CI publish/deploy steps depend on that layout.

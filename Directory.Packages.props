@@ -4,7 +4,6 @@
     <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageVersion Include="bunit" Version="2.10.3" />
     <PackageVersion Include="coverlet.msbuild" Version="10.0.1" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="3.0.5" />

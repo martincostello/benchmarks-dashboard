@@ -2,11 +2,11 @@
 // Licensed under the Apache 2.0 license. See the LICENSE file in the project root for full license information.
 
 using System.Net;
-using Blazored.LocalStorage;
 using Bunit;
 using JustEat.HttpClientInterception;
 using MartinCostello.Benchmarks.Models;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.JSInterop;
 
 namespace MartinCostello.Benchmarks;
 
@@ -16,7 +16,7 @@ public abstract class DashboardTestContext : BunitContext
         : base()
     {
         Interceptor = new HttpClientInterceptorOptions().ThrowsOnMissingRegistration();
-        LocalStorage = new();
+        LocalStorage = new(JSInterop.JSRuntime);
         Options = new()
         {
             BenchmarkFileName = "data.json",
@@ -37,8 +37,7 @@ public abstract class DashboardTestContext : BunitContext
 
         Services.AddSingleton(TimeProvider.System);
 
-        Services.AddSingleton<ILocalStorageService>(LocalStorage);
-        Services.AddSingleton<ISyncLocalStorageService>(LocalStorage);
+        Services.AddSingleton<IJSRuntime>(LocalStorage);
 
         Services.AddSingleton<GitHubDeviceTokenService>();
         Services.AddSingleton<GitHubClient>();

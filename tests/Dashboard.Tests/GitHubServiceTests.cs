@@ -31,7 +31,6 @@ public class GitHubServiceTests
 
         TokenStore = new GitHubTokenStore(
             storage,
-            storage,
             options);
 
         var client = new GitHubClient(Interceptor.CreateHttpClient(), TokenStore, options);
