@@ -30,7 +30,6 @@ public class GitHubClientTests
 
         TokenStore = new GitHubTokenStore(
             storage,
-            storage,
             options);
 
         Target = new(Interceptor.CreateHttpClient(), TokenStore, options);
