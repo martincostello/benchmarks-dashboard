@@ -468,6 +468,125 @@ public class HomeTests : DashboardTestContext
     }
 
     [Fact]
+    public async Task Page_Filters_Benchmarks_By_Selected_Environment_Metadata()
+    {
+        // Arrange
+        const string Repository = "benchmarks-demo";
+        const string Branch = "main";
+        const string SuiteName = "EnvironmentBenchmarks";
+        const string BenchmarkName = "EnvironmentBenchmarks.Method";
+        const string AmdProcessor = "AMD EPYC 9V74";
+        const string IntelProcessor = "Intel Xeon 6973P-C";
+
+        await WithValidAccessToken();
+
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Repository}", $"{Repository}-repo");
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Repository}/branches", $"{Repository}-branches");
+
+        static BenchmarkMetadata CreateMetadata(string processorName) =>
+            new()
+            {
+                Environment = new Dictionary<string, JsonElement>()
+                {
+                    ["ProcessorName"] = JsonSerializer.SerializeToElement(processorName),
+                    ["Architecture"] = JsonSerializer.SerializeToElement("X64"),
+                },
+            };
+
+        var builder = new HttpRequestInterceptionBuilder()
+            .ForUrl($"https://api.github.local/repos/{Options.RepositoryOwner}/{Options.RepositoryName}/contents/{Repository}/data.json?ref={Branch}")
+            .WithJsonContent(new BenchmarkResults()
+            {
+                LastUpdated = DateTimeOffset.UtcNow,
+                RepositoryUrl = $"https://github.local/{Options.RepositoryOwner}/{Repository}",
+                Suites = new Dictionary<string, IList<BenchmarkRun>>()
+                {
+                    [SuiteName] =
+                    [
+                        new()
+                        {
+                            Commit = CreateCommit("aaaaaaa1"),
+                            Timestamp = new DateTimeOffset(2024, 08, 20, 00, 00, 00, TimeSpan.Zero),
+                            Metadata = CreateMetadata(AmdProcessor),
+                            Benchmarks = [new() { Name = BenchmarkName, Value = 1, Unit = "ns" }],
+                        },
+                        new()
+                        {
+                            Commit = CreateCommit("bbbbbbb2"),
+                            Timestamp = new DateTimeOffset(2024, 08, 21, 00, 00, 00, TimeSpan.Zero),
+                            Metadata = CreateMetadata(IntelProcessor),
+                            Benchmarks = [new() { Name = BenchmarkName, Value = 2, Unit = "ns" }],
+                        },
+                        new()
+                        {
+                            Commit = CreateCommit("ccccccc3"),
+                            Timestamp = new DateTimeOffset(2024, 08, 22, 00, 00, 00, TimeSpan.Zero),
+                            Metadata = CreateMetadata(AmdProcessor),
+                            Benchmarks = [new() { Name = BenchmarkName, Value = 3, Unit = "ns" }],
+                        },
+                    ],
+                },
+            });
+
+        builder.RegisterWith(Interceptor);
+
+        SetupJSInterop();
+
+        Services.GetRequiredService<NavigationManager>()
+            .NavigateTo($"?repo={Repository}&branch={Branch}");
+
+        // Act
+        var actual = Render<Home>();
+
+        // Assert - "Architecture" is the same for every run so it should not be
+        // selectable, but "ProcessorName" has distinct values so it should be.
+        actual.WaitForAssertion(
+            () =>
+            {
+                actual.FindAll("#env-filter-Architecture").Count.ShouldBe(0);
+                actual.Find("#env-filter-ProcessorName").ShouldNotBeNull();
+
+                var benchmark = actual.FindComponents<Benchmark>()
+                    .Single((item) => item.Instance.Name == BenchmarkName && item.Instance.Suite == SuiteName);
+
+                benchmark.Instance.Items.Count.ShouldBe(3);
+            },
+            TimeSpan.FromSeconds(2));
+
+        // Act - filter down to only the runs with the AMD processor
+        await actual.Find("#env-filter-ProcessorName")
+            .TriggerEventAsync("onchange", new ChangeEventArgs() { Value = $"\"{AmdProcessor}\"" });
+
+        // Assert
+        actual.WaitForAssertion(
+            () =>
+            {
+                var benchmark = actual.FindComponents<Benchmark>()
+                    .Single((item) => item.Instance.Name == BenchmarkName && item.Instance.Suite == SuiteName);
+
+                benchmark.Instance.Items.Count.ShouldBe(2);
+                benchmark.Instance.Items.ShouldAllBe(
+                    (item) => item.Metadata!.Environment!["ProcessorName"].GetString() == AmdProcessor);
+            },
+            TimeSpan.FromSeconds(2));
+
+        // Act - reset the filter back to "All"
+        await actual.Find("#env-filter-ProcessorName")
+            .TriggerEventAsync("onchange", new ChangeEventArgs() { Value = string.Empty });
+
+        // Assert
+        actual.WaitForAssertion(
+            () =>
+            {
+                var benchmark = actual.FindComponents<Benchmark>()
+                    .Single((item) => item.Instance.Name == BenchmarkName && item.Instance.Suite == SuiteName);
+
+                benchmark.Instance.Items.Count.ShouldBe(3);
+            },
+            TimeSpan.FromSeconds(2));
+    }
+
+    [Fact]
     public async Task Page_Treats_Invalid_Date_Filter_As_Absent()
     {
         // Arrange
@@ -834,6 +953,67 @@ public class HomeTests : DashboardTestContext
     }
 
     [Fact]
+    public void GetEnvironmentFilterOptions_Returns_Empty_List_For_Null_Source()
+    {
+        // Act
+        var actual = Home.GetEnvironmentFilterOptions(null);
+
+        // Assert
+        actual.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void GetEnvironmentFilterOptions_Excludes_Metadata_With_A_Single_Distinct_Value()
+    {
+        // Arrange
+        var results = CreateBenchmarkResultsWithEnvironmentMetadata(
+            [
+                new() { ["ProcessorName"] = "AMD EPYC 9V74", ["Architecture"] = "X64" },
+                new() { ["ProcessorName"] = "Intel Xeon 6973P-C", ["Architecture"] = "X64" },
+                new() { ["ProcessorName"] = "AMD EPYC 9V74" }, // No Architecture value at all
+            ]);
+
+        // Act
+        var actual = Home.GetEnvironmentFilterOptions(results);
+
+        // Assert
+        actual.Select((option) => option.Key).ShouldBe(["ProcessorName"]);
+
+        var processorName = actual.Single();
+
+        processorName.Values.Select((value) => value.DisplayValue).ShouldBe(
+            ["AMD EPYC 9V74", "Intel Xeon 6973P-C"],
+            ignoreOrder: true);
+    }
+
+    [Fact]
+    public void GetEnvironmentFilterOptions_Ignores_Runs_Without_Metadata()
+    {
+        // Arrange
+        var results = new BenchmarkResults()
+        {
+            Suites = new Dictionary<string, IList<BenchmarkRun>>()
+            {
+                ["Suite"] =
+                [
+                    new()
+                    {
+                        Commit = CreateCommit("no-metadata"),
+                        Timestamp = DateTimeOffset.UtcNow,
+                        Benchmarks = [new() { Name = "A", Value = 1 }],
+                    },
+                ],
+            },
+        };
+
+        // Act
+        var actual = Home.GetEnvironmentFilterOptions(results);
+
+        // Assert
+        actual.ShouldBeEmpty();
+    }
+
+    [Fact]
     public void NormalizeUnits_Scales_From_Nanoseconds_To_Microseconds_And_Updates_Range()
     {
         // Arrange
@@ -1016,6 +1196,36 @@ public class HomeTests : DashboardTestContext
 
         // Act and Assert
         Should.NotThrow(() => Home.NormalizeUnits(items));
+    }
+
+    private static BenchmarkResults CreateBenchmarkResultsWithEnvironmentMetadata(
+        IReadOnlyList<Dictionary<string, string>> environmentValuesByRun)
+    {
+        List<BenchmarkRun> runs = [];
+
+        for (var i = 0; i < environmentValuesByRun.Count; i++)
+        {
+            var environment = environmentValuesByRun[i]
+                .ToDictionary(
+                    (p) => p.Key,
+                    (p) => JsonSerializer.SerializeToElement(p.Value));
+
+            runs.Add(new()
+            {
+                Commit = CreateCommit($"commit-{i}"),
+                Timestamp = new DateTimeOffset(2024, 09, 01, 00, 00, 00, TimeSpan.Zero).AddDays(i),
+                Metadata = new() { Environment = environment },
+                Benchmarks = [new() { Name = "A", Value = i }],
+            });
+        }
+
+        return new()
+        {
+            Suites = new Dictionary<string, IList<BenchmarkRun>>()
+            {
+                ["Suite"] = runs,
+            },
+        };
     }
 
     private static GitCommit CreateCommit(string sha) =>

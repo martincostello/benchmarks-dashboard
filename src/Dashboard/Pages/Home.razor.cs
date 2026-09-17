@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Martin Costello, 2024. All rights reserved.
 // Licensed under the Apache 2.0 license. See the LICENSE file in the project root for full license information.
 
+using System.Text.Json;
 using MartinCostello.Benchmarks.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -14,9 +15,12 @@ public partial class Home : IAsyncDisposable
     private const string QueryDateFormat = "yyyy-MM-dd";
     private const string StartDateQueryParameter = "startDate";
 
+    private readonly Dictionary<string, string> _selectedEnvironmentFilters = [];
+
     private DotNetObjectReference<Home>? _dateFilterNavigationReference;
     private BenchmarkResults? _filteredBenchmarks;
     private bool _applyingDateRange;
+    private IReadOnlyList<EnvironmentFilterOption> _environmentFilterOptions = [];
     private bool _loading = true;
     private DateOnly? _maximumBenchmarkDate;
     private DateOnly? _minimumBenchmarkDate;
@@ -50,6 +54,11 @@ public partial class Home : IAsyncDisposable
          !ShouldPersistDateValue(SelectedEndDateValue, _maximumBenchmarkDate));
 
     /// <summary>
+    /// Gets the environment metadata that can be used to filter the benchmark data.
+    /// </summary>
+    public IReadOnlyList<EnvironmentFilterOption> AvailableEnvironmentFilters => _environmentFilterOptions;
+
+    /// <summary>
     /// Gets the filtered benchmarks for the selected date range.
     /// </summary>
     public BenchmarkResults FilteredBenchmarks => _filteredBenchmarks ?? new();
@@ -58,6 +67,11 @@ public partial class Home : IAsyncDisposable
     /// Gets a value indicating whether benchmark data has an available date range.
     /// </summary>
     public bool HasAvailableBenchmarkDateRange => _minimumBenchmarkDate is not null && _maximumBenchmarkDate is not null;
+
+    /// <summary>
+    /// Gets a value indicating whether one or more environment metadata filters are currently applied.
+    /// </summary>
+    public bool HasActiveEnvironmentFilters => _selectedEnvironmentFilters.Count > 0;
 
     /// <summary>
     /// Gets a value indicating whether any benchmarks are available for the selected range.
@@ -276,6 +290,61 @@ public partial class Home : IAsyncDisposable
     }
 
     /// <summary>
+    /// Gets the environment metadata filters that are available to select from the specified benchmark results,
+    /// excluding any metadata that has the same value (or is missing) across all of the benchmark runs.
+    /// </summary>
+    /// <param name="source">The benchmark results to get the available environment filters from.</param>
+    /// <returns>
+    /// A <see cref="IReadOnlyList{T}"/> containing the available environment filters, ordered by key.
+    /// </returns>
+    public static IReadOnlyList<EnvironmentFilterOption> GetEnvironmentFilterOptions(BenchmarkResults? source)
+    {
+        var options = new List<EnvironmentFilterOption>();
+
+        if (source is null)
+        {
+            return options;
+        }
+
+        var valuesByKey = new Dictionary<string, Dictionary<string, string>>();
+
+        foreach (var run in source.Suites.Values.SelectMany((runs) => runs))
+        {
+            if (run.Metadata?.Environment is not { } environment)
+            {
+                continue;
+            }
+
+            foreach ((var key, var element) in environment)
+            {
+                if (!valuesByKey.TryGetValue(key, out var values))
+                {
+                    valuesByKey[key] = values = [];
+                }
+
+                values[element.GetRawText()] = GetEnvironmentValueDisplayText(element);
+            }
+        }
+
+        foreach ((var key, var values) in valuesByKey)
+        {
+            if (values.Count < 2)
+            {
+                continue;
+            }
+
+            var sortedValues = values
+                .Select((p) => new EnvironmentFilterValue(p.Key, p.Value))
+                .OrderBy((p) => p.DisplayValue, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            options.Add(new EnvironmentFilterOption(key, sortedValues));
+        }
+
+        return [.. options.OrderBy((option) => option.Key, StringComparer.OrdinalIgnoreCase)];
+    }
+
+    /// <summary>
     /// Applies the specified date range from a chart interaction.
     /// </summary>
     /// <param name="startDate">The start date to apply.</param>
@@ -287,6 +356,16 @@ public partial class Home : IAsyncDisposable
     [JSInvokable]
     public Task ApplyDateRangeFromChartAsync(string? startDate, string? endDate, string? hash)
         => ApplyDateRangeAsync(startDate, endDate, hash);
+
+    /// <summary>
+    /// Gets the currently selected value of the environment metadata filter with the specified key, if any.
+    /// </summary>
+    /// <param name="key">The key of the environment metadata filter.</param>
+    /// <returns>
+    /// The currently selected raw value for the filter, or <see langword="null"/> if no value is selected.
+    /// </returns>
+    public string? GetSelectedEnvironmentFilterValue(string key)
+        => _selectedEnvironmentFilters.TryGetValue(key, out var value) ? value : null;
 
     /// <inheritdoc/>
     public ValueTask DisposeAsync()
@@ -474,6 +553,63 @@ public partial class Home : IAsyncDisposable
         };
     }
 
+    private static BenchmarkResults? FilterBenchmarksByEnvironment(
+        BenchmarkResults? source,
+        Dictionary<string, string> selectedFilters)
+    {
+        if (source is null || selectedFilters.Count < 1)
+        {
+            return source;
+        }
+
+        var filtered = new Dictionary<string, IList<BenchmarkRun>>();
+
+        foreach ((var suite, var runs) in source.Suites)
+        {
+            var matching = runs.Where((p) => MatchesEnvironmentFilters(p, selectedFilters)).ToList();
+
+            if (matching.Count > 0)
+            {
+                filtered[suite] = matching;
+            }
+        }
+
+        return new()
+        {
+            LastUpdated = source.LastUpdated,
+            RepositoryUrl = source.RepositoryUrl,
+            Suites = filtered,
+        };
+    }
+
+    private static bool MatchesEnvironmentFilters(BenchmarkRun run, Dictionary<string, string> selectedFilters)
+    {
+        if (run.Metadata?.Environment is not { } environment)
+        {
+            return false;
+        }
+
+        foreach ((var key, var rawValue) in selectedFilters)
+        {
+            if (!environment.TryGetValue(key, out var element) ||
+                !string.Equals(element.GetRawText(), rawValue, StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static string GetEnvironmentValueDisplayText(JsonElement element) => element.ValueKind switch
+    {
+        JsonValueKind.String => element.GetString() ?? string.Empty,
+        JsonValueKind.True => "true",
+        JsonValueKind.False => "false",
+        JsonValueKind.Null => string.Empty,
+        _ => element.GetRawText(),
+    };
+
     private static string? FormatDate(DateOnly? value)
         => value?.ToString(QueryDateFormat, CultureInfo.InvariantCulture);
 
@@ -517,6 +653,7 @@ public partial class Home : IAsyncDisposable
     {
         if (args.Value is string repository)
         {
+            _selectedEnvironmentFilters.Clear();
             await LoadAsync(() => GitHubService.LoadRepositoryAsync(repository));
         }
     }
@@ -526,8 +663,28 @@ public partial class Home : IAsyncDisposable
         if (args.Value is string branch)
         {
             Branch = branch;
+            _selectedEnvironmentFilters.Clear();
             await LoadAsync(() => GitHubService.LoadBenchmarksAsync(branch));
         }
+    }
+
+    private void EnvironmentFilterChanged(string key, ChangeEventArgs args)
+    {
+        if (args.Value is not string value)
+        {
+            return;
+        }
+
+        if (string.IsNullOrEmpty(value))
+        {
+            _selectedEnvironmentFilters.Remove(key);
+        }
+        else
+        {
+            _selectedEnvironmentFilters[key] = value;
+        }
+
+        RefreshFilteredBenchmarks();
     }
 
     private Task EndDateChangedAsync(ChangeEventArgs args)
@@ -612,6 +769,8 @@ public partial class Home : IAsyncDisposable
             _minimumBenchmarkDate = null;
             _selectedEndDate = null;
             _selectedStartDate = null;
+            _environmentFilterOptions = [];
+            _selectedEnvironmentFilters.Clear();
             return;
         }
 
@@ -626,10 +785,35 @@ public partial class Home : IAsyncDisposable
             _selectedEndDate = endDate;
         }
 
-        _filteredBenchmarks = FilterBenchmarks(
+        var dateFilteredBenchmarks = FilterBenchmarks(
             GitHubService.Benchmarks,
             _selectedStartDate.GetValueOrDefault(range.Value.Minimum),
             _selectedEndDate.GetValueOrDefault(range.Value.Maximum));
+
+        _environmentFilterOptions = GetEnvironmentFilterOptions(dateFilteredBenchmarks);
+
+        PruneStaleEnvironmentFilters();
+
+        _filteredBenchmarks = FilterBenchmarksByEnvironment(dateFilteredBenchmarks, _selectedEnvironmentFilters);
+    }
+
+    private void PruneStaleEnvironmentFilters()
+    {
+        if (_selectedEnvironmentFilters.Count < 1)
+        {
+            return;
+        }
+
+        foreach (var key in _selectedEnvironmentFilters.Keys.ToList())
+        {
+            var option = _environmentFilterOptions.FirstOrDefault((candidate) => candidate.Key == key);
+            var value = _selectedEnvironmentFilters[key];
+
+            if (option is null || !option.Values.Any((candidate) => candidate.RawValue == value))
+            {
+                _selectedEnvironmentFilters.Remove(key);
+            }
+        }
     }
 
     private bool TryGetRequestedDateRange(

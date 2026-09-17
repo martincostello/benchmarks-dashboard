@@ -101,6 +101,34 @@
                 </div>
             </div>
         </div>
+        @if (AvailableEnvironmentFilters.Count > 0)
+        {
+            <hr/>
+            <div class="g-3 mt-1 row row-cols-1 row-cols-sm-2 row-cols-lg-3" id="environment-filters">
+                @foreach (var filter in AvailableEnvironmentFilters)
+                {
+                    <div class="col">
+                        <div class="input-group">
+                            <label class="input-group-text col-auto" for="env-filter-@(filter.Key)" title="@(filter.Key)" aria-label="@(filter.Key)">
+                                <Icon Name="@(Icons.Filter)" FixedWidth="true" />
+                            </label>
+                            <select class="form-select"
+                                    data-environment-filter="@(filter.Key)"
+                                    disabled="@(ShowLoaders)"
+                                    id="env-filter-@(filter.Key)"
+                                    @onchange="@((args) => EnvironmentFilterChanged(filter.Key, args))">
+                                <option value="">@(filter.Key) (All)</option>
+                                @foreach (var value in filter.Values)
+                                {
+                                    var selected = GetSelectedEnvironmentFilterValue(filter.Key) == value.RawValue;
+                                    <option value="@(value.RawValue)" selected="@(selected)">@(value.DisplayValue)</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
     </form>
 </header>
 <hr />
@@ -214,7 +242,7 @@ else if (!ShowLoaders && GitHubService.Benchmarks is not null && !HasFilteredBen
 {
     <div class="alert alert-warning m-2" id="no-benchmarks-in-range" role="alert">
         No benchmark data is available between <span class="font-monospace">@(SelectedStartDateValue)</span> and
-        <span class="font-monospace">@(SelectedEndDateValue)</span>.
+        <span class="font-monospace">@(SelectedEndDateValue)</span>@(HasActiveEnvironmentFilters ? " for the selected environment filters" : "").
     </div>
 }
 else if (!ShowLoaders && HasFilteredBenchmarks)

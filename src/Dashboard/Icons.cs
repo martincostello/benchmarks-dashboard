@@ -64,6 +64,11 @@ public static class Icons
     public static string FileArrowDown => "fa-solid fa-file-arrow-down";
 
     /// <summary>
+    /// Gets the <c>filter</c> icon.
+    /// </summary>
+    public static string Filter => "fa-solid fa-filter";
+
+    /// <summary>
     /// Gets the <c>github</c> icon.
     /// </summary>
     public static string GitHub => "fa-brands fa-github";
