@@ -981,9 +981,49 @@ public class HomeTests : DashboardTestContext
 
         var processorName = actual.Single();
 
+        processorName.DisplayName.ShouldBe("Processor");
         processorName.Values.Select((value) => value.DisplayValue).ShouldBe(
             ["AMD EPYC 9V74", "Intel Xeon 6973P-C"],
             ignoreOrder: true);
+    }
+
+    [Theory]
+    [InlineData("DotNetCliVersion", ".NET SDK")]
+    [InlineData("OsVersion", "OS")]
+    [InlineData("ProcessorName", "Processor")]
+    [InlineData("RuntimeVersion", ".NET Runtime")]
+    [InlineData("LogicalCoreCount", "LogicalCoreCount")]
+    public void GetEnvironmentFilterOptions_Uses_Friendly_Display_Names(string key, string expectedDisplayName)
+    {
+        // Arrange
+        var results = CreateBenchmarkResultsWithEnvironmentMetadata(
+            [
+                new() { [key] = "first" },
+                new() { [key] = "second" },
+            ]);
+
+        // Act
+        var actual = Home.GetEnvironmentFilterOptions(results);
+
+        // Assert
+        actual.Single().DisplayName.ShouldBe(expectedDisplayName);
+    }
+
+    [Fact]
+    public void GetEnvironmentFilterOptions_Sorts_By_Display_Name_Not_Key()
+    {
+        // Arrange
+        var results = CreateBenchmarkResultsWithEnvironmentMetadata(
+            [
+                new() { ["ProcessorName"] = "AMD", ["RuntimeVersion"] = "8.0.0" },
+                new() { ["ProcessorName"] = "Intel", ["RuntimeVersion"] = "9.0.0" },
+            ]);
+
+        // Act
+        var actual = Home.GetEnvironmentFilterOptions(results);
+
+        // Assert
+        actual.Select((option) => option.DisplayName).ShouldBe([".NET Runtime", "Processor"]);
     }
 
     [Fact]

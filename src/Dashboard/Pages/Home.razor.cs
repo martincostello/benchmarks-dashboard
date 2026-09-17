@@ -15,6 +15,14 @@ public partial class Home : IAsyncDisposable
     private const string QueryDateFormat = "yyyy-MM-dd";
     private const string StartDateQueryParameter = "startDate";
 
+    private static readonly Dictionary<string, string> EnvironmentFilterDisplayNames = new(StringComparer.Ordinal)
+    {
+        ["DotNetCliVersion"] = ".NET SDK",
+        ["OsVersion"] = "OS",
+        ["ProcessorName"] = "Processor",
+        ["RuntimeVersion"] = ".NET Runtime",
+    };
+
     private readonly Dictionary<string, string> _selectedEnvironmentFilters = [];
 
     private DotNetObjectReference<Home>? _dateFilterNavigationReference;
@@ -295,7 +303,7 @@ public partial class Home : IAsyncDisposable
     /// </summary>
     /// <param name="source">The benchmark results to get the available environment filters from.</param>
     /// <returns>
-    /// A <see cref="IReadOnlyList{T}"/> containing the available environment filters, ordered by key.
+    /// A <see cref="IReadOnlyList{T}"/> containing the available environment filters, ordered by display name.
     /// </returns>
     public static IReadOnlyList<EnvironmentFilterOption> GetEnvironmentFilterOptions(BenchmarkResults? source)
     {
@@ -338,10 +346,10 @@ public partial class Home : IAsyncDisposable
                 .OrderBy((p) => p.DisplayValue, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            options.Add(new EnvironmentFilterOption(key, sortedValues));
+            options.Add(new EnvironmentFilterOption(key, GetEnvironmentFilterDisplayName(key), sortedValues));
         }
 
-        return [.. options.OrderBy((option) => option.Key, StringComparer.OrdinalIgnoreCase)];
+        return [.. options.OrderBy((option) => option.DisplayName, StringComparer.OrdinalIgnoreCase)];
     }
 
     /// <summary>
@@ -600,6 +608,9 @@ public partial class Home : IAsyncDisposable
 
         return true;
     }
+
+    private static string GetEnvironmentFilterDisplayName(string key)
+        => EnvironmentFilterDisplayNames.TryGetValue(key, out var displayName) ? displayName : key;
 
     private static string GetEnvironmentValueDisplayText(JsonElement element) => element.ValueKind switch
     {

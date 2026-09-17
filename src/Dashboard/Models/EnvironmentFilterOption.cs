@@ -7,5 +7,6 @@ namespace MartinCostello.Benchmarks.Models;
 /// A class representing a filterable piece of environment metadata and its distinct values. This class cannot be inherited.
 /// </summary>
 /// <param name="Key">The name of the environment metadata.</param>
+/// <param name="DisplayName">The human-readable name of the environment metadata.</param>
 /// <param name="Values">The distinct values of the environment metadata that can be filtered on.</param>
-public sealed record EnvironmentFilterOption(string Key, IReadOnlyList<EnvironmentFilterValue> Values);
+public sealed record EnvironmentFilterOption(string Key, string DisplayName, IReadOnlyList<EnvironmentFilterValue> Values);
