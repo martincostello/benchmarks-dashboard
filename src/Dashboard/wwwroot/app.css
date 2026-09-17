@@ -204,6 +204,14 @@ text.gtitle > a {
   overflow-y: auto;
 }
 
+.environment-filters-chevron {
+  transition: transform 0.2s ease-in-out;
+}
+
+#environment-filters-toggle[aria-expanded='true'] .environment-filters-chevron {
+  transform: rotate(180deg);
+}
+
 :root[data-bs-theme='dark'] .form-control,
 :root[data-bs-theme='dark'] .form-select {
   background-color: var(--bs-secondary-bg) !important;

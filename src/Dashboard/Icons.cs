@@ -29,6 +29,11 @@ public static class Icons
     public static string Check => "fa-solid fa-check";
 
     /// <summary>
+    /// Gets the <c>chevron-down</c> icon.
+    /// </summary>
+    public static string ChevronDown => "fa-solid fa-chevron-down";
+
+    /// <summary>
     /// Gets the <c>clipboard</c> icon.
     /// </summary>
     public static string Clipboard => "fa-regular fa-clipboard";

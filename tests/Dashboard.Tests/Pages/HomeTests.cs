@@ -540,12 +540,19 @@ public class HomeTests : DashboardTestContext
         var actual = Render<Home>();
 
         // Assert - "Architecture" is the same for every run so it should not be
-        // selectable, but "ProcessorName" has distinct values so it should be.
+        // selectable, but "ProcessorName" has distinct values so it should be. The filters
+        // are collapsed by default so they don't take up space until the user expands them.
         actual.WaitForAssertion(
             () =>
             {
                 actual.FindAll("#env-filter-Architecture").Count.ShouldBe(0);
                 actual.Find("#env-filter-ProcessorName").ShouldNotBeNull();
+
+                var toggle = actual.Find("#environment-filters-toggle");
+                toggle.GetAttribute("aria-expanded").ShouldBe("false");
+                toggle.QuerySelectorAll(".badge").Length.ShouldBe(0);
+
+                actual.Find("#environment-filters").ClassList.ShouldNotContain("show");
 
                 var benchmark = actual.FindComponents<Benchmark>()
                     .Single((item) => item.Instance.Name == BenchmarkName && item.Instance.Suite == SuiteName);
@@ -560,10 +567,14 @@ public class HomeTests : DashboardTestContext
                 "onchange",
                 new ChangeEventArgs() { Value = new[] { $"\"{AmdProcessorA}\"", $"\"{AmdProcessorB}\"" } });
 
-        // Assert
+        // Assert - a badge showing the number of active filters is now shown on the toggle
         actual.WaitForAssertion(
             () =>
             {
+                var badge = actual.Find("#environment-filters-toggle").QuerySelector(".badge");
+                badge.ShouldNotBeNull();
+                badge.TextContent.ShouldBe("1");
+
                 var benchmark = actual.FindComponents<Benchmark>()
                     .Single((item) => item.Instance.Name == BenchmarkName && item.Instance.Suite == SuiteName);
 

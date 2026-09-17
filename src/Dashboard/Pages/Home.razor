@@ -104,32 +104,49 @@
         @if (AvailableEnvironmentFilters.Count > 0)
         {
             <hr/>
-            <div class="g-3 mt-1 row row-cols-1 row-cols-sm-2 row-cols-lg-3" id="environment-filters">
-                @foreach (var filter in AvailableEnvironmentFilters)
+            <button class="btn btn-link p-0 d-inline-flex align-items-center gap-2 text-decoration-none"
+                    id="environment-filters-toggle"
+                    type="button"
+                    aria-controls="environment-filters"
+                    aria-expanded="false"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#environment-filters">
+                <Icon Name="@(Icons.Filter)" FixedWidth="true" />
+                <span>Environment filters</span>
+                @if (HasActiveEnvironmentFilters)
                 {
-                    <div class="col">
-                        <div class="input-group">
-                            <label class="input-group-text col-auto" for="env-filter-@(filter.Key)" title="@(filter.DisplayName)" aria-label="@(filter.DisplayName)">
-                                <Icon Name="@(Icons.Filter)" FixedWidth="true" />
-                            </label>
-                            <select class="form-select environment-filter-select"
-                                    data-environment-filter="@(filter.Key)"
-                                    disabled="@(ShowLoaders)"
-                                    id="env-filter-@(filter.Key)"
-                                    multiple
-                                    size="@(Math.Min(filter.Values.Count + 1, 4))"
-                                    title="Hold Ctrl (Cmd on Mac) to select multiple values"
-                                    @onchange="@((args) => EnvironmentFilterChanged(filter.Key, args))">
-                                <option value="" selected="@(IsAllSelectedForEnvironmentFilter(filter.Key))">@(filter.DisplayName) (All)</option>
-                                @foreach (var value in filter.Values)
-                                {
-                                    var selected = IsEnvironmentFilterValueSelected(filter.Key, value.RawValue);
-                                    <option value="@(value.RawValue)" selected="@(selected)">@(value.DisplayValue)</option>
-                                }
-                            </select>
-                        </div>
-                    </div>
+                    <span class="badge rounded-pill text-bg-primary">@(_selectedEnvironmentFilters.Count)</span>
                 }
+                <Icon Name="@(Icons.ChevronDown)" Classes="@(["environment-filters-chevron"])" FixedWidth="true" />
+            </button>
+            <div class="collapse" id="environment-filters">
+                <div class="g-3 mt-2 row row-cols-1 row-cols-sm-2 row-cols-lg-3">
+                    @foreach (var filter in AvailableEnvironmentFilters)
+                    {
+                        <div class="col">
+                            <div class="input-group">
+                                <label class="input-group-text col-auto" for="env-filter-@(filter.Key)" title="@(filter.DisplayName)" aria-label="@(filter.DisplayName)">
+                                    <Icon Name="@(Icons.Filter)" FixedWidth="true" />
+                                </label>
+                                <select class="form-select environment-filter-select"
+                                        data-environment-filter="@(filter.Key)"
+                                        disabled="@(ShowLoaders)"
+                                        id="env-filter-@(filter.Key)"
+                                        multiple
+                                        size="@(Math.Min(filter.Values.Count + 1, 4))"
+                                        title="Hold Ctrl (Cmd on Mac) to select multiple values"
+                                        @onchange="@((args) => EnvironmentFilterChanged(filter.Key, args))">
+                                    <option value="" selected="@(IsAllSelectedForEnvironmentFilter(filter.Key))">@(filter.DisplayName) (All)</option>
+                                    @foreach (var value in filter.Values)
+                                    {
+                                        var selected = IsEnvironmentFilterValueSelected(filter.Key, value.RawValue);
+                                        <option value="@(value.RawValue)" selected="@(selected)">@(value.DisplayValue)</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
         }
     </form>
