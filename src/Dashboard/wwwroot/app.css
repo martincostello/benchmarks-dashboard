@@ -200,6 +200,10 @@ text.gtitle > a {
   color: white;
 }
 
+.environment-filter-select {
+  overflow-y: auto;
+}
+
 :root[data-bs-theme='dark'] .form-control,
 :root[data-bs-theme='dark'] .form-select {
   background-color: var(--bs-secondary-bg) !important;
