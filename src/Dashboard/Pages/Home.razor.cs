@@ -23,11 +23,12 @@ public partial class Home : IAsyncDisposable
         ["RuntimeVersion"] = ".NET Runtime",
     };
 
-    private readonly Dictionary<string, string> _selectedEnvironmentFilters = [];
+    private readonly Dictionary<string, HashSet<string>> _selectedEnvironmentFilters = [];
 
     private DotNetObjectReference<Home>? _dateFilterNavigationReference;
     private BenchmarkResults? _filteredBenchmarks;
     private bool _applyingDateRange;
+    private bool _applyingEnvironmentFilter;
     private IReadOnlyList<EnvironmentFilterOption> _environmentFilterOptions = [];
     private bool _loading = true;
     private DateOnly? _maximumBenchmarkDate;
@@ -117,7 +118,7 @@ public partial class Home : IAsyncDisposable
     /// <summary>
     /// Gets a value indicating whether to show the loading indicators.
     /// </summary>
-    public bool ShowLoaders => _loading || _applyingDateRange;
+    public bool ShowLoaders => _loading || _applyingDateRange || _applyingEnvironmentFilter;
 
     /// <summary>
     /// Gets or sets the branch specified by the query string, if any.
@@ -366,14 +367,27 @@ public partial class Home : IAsyncDisposable
         => ApplyDateRangeAsync(startDate, endDate, hash);
 
     /// <summary>
-    /// Gets the currently selected value of the environment metadata filter with the specified key, if any.
+    /// Gets a value indicating whether the "All" option is selected (i.e. no specific values
+    /// are selected) for the environment metadata filter with the specified key.
     /// </summary>
     /// <param name="key">The key of the environment metadata filter.</param>
     /// <returns>
-    /// The currently selected raw value for the filter, or <see langword="null"/> if no value is selected.
+    /// <see langword="true"/> if no specific values are selected for the filter; otherwise, <see langword="false"/>.
     /// </returns>
-    public string? GetSelectedEnvironmentFilterValue(string key)
-        => _selectedEnvironmentFilters.TryGetValue(key, out var value) ? value : null;
+    public bool IsAllSelectedForEnvironmentFilter(string key)
+        => !_selectedEnvironmentFilters.ContainsKey(key);
+
+    /// <summary>
+    /// Gets a value indicating whether the specified raw value is currently selected for the
+    /// environment metadata filter with the specified key.
+    /// </summary>
+    /// <param name="key">The key of the environment metadata filter.</param>
+    /// <param name="rawValue">The raw value of the environment metadata filter to check.</param>
+    /// <returns>
+    /// <see langword="true"/> if the value is currently selected; otherwise, <see langword="false"/>.
+    /// </returns>
+    public bool IsEnvironmentFilterValueSelected(string key, string rawValue)
+        => _selectedEnvironmentFilters.TryGetValue(key, out var values) && values.Contains(rawValue);
 
     /// <inheritdoc/>
     public ValueTask DisposeAsync()
@@ -563,7 +577,7 @@ public partial class Home : IAsyncDisposable
 
     private static BenchmarkResults? FilterBenchmarksByEnvironment(
         BenchmarkResults? source,
-        Dictionary<string, string> selectedFilters)
+        Dictionary<string, HashSet<string>> selectedFilters)
     {
         if (source is null || selectedFilters.Count < 1)
         {
@@ -590,17 +604,17 @@ public partial class Home : IAsyncDisposable
         };
     }
 
-    private static bool MatchesEnvironmentFilters(BenchmarkRun run, Dictionary<string, string> selectedFilters)
+    private static bool MatchesEnvironmentFilters(BenchmarkRun run, Dictionary<string, HashSet<string>> selectedFilters)
     {
         if (run.Metadata?.Environment is not { } environment)
         {
             return false;
         }
 
-        foreach ((var key, var rawValue) in selectedFilters)
+        foreach ((var key, var rawValues) in selectedFilters)
         {
             if (!environment.TryGetValue(key, out var element) ||
-                !string.Equals(element.GetRawText(), rawValue, StringComparison.Ordinal))
+                !rawValues.Contains(element.GetRawText()))
             {
                 return false;
             }
@@ -611,6 +625,14 @@ public partial class Home : IAsyncDisposable
 
     private static string GetEnvironmentFilterDisplayName(string key)
         => EnvironmentFilterDisplayNames.TryGetValue(key, out var displayName) ? displayName : key;
+
+    private static string[] GetSelectedValues(object? changeEventValue) => changeEventValue switch
+    {
+        string[] values => values,
+        IEnumerable<object?> values => [.. values.Select((value) => value?.ToString() ?? string.Empty)],
+        string value => [value],
+        _ => [],
+    };
 
     private static string GetEnvironmentValueDisplayText(JsonElement element) => element.ValueKind switch
     {
@@ -679,23 +701,30 @@ public partial class Home : IAsyncDisposable
         }
     }
 
-    private void EnvironmentFilterChanged(string key, ChangeEventArgs args)
+    private async Task EnvironmentFilterChanged(string key, ChangeEventArgs args)
     {
-        if (args.Value is not string value)
-        {
-            return;
-        }
+        var selectedValues = GetSelectedValues(args.Value);
 
-        if (string.IsNullOrEmpty(value))
+        // The "All" option (an empty value) is mutually exclusive with every other value:
+        // selecting it - even alongside other values - clears any specific selection.
+        if (selectedValues.Length < 1 || selectedValues.Contains(string.Empty))
         {
             _selectedEnvironmentFilters.Remove(key);
         }
         else
         {
-            _selectedEnvironmentFilters[key] = value;
+            _selectedEnvironmentFilters[key] = new HashSet<string>(selectedValues, StringComparer.Ordinal);
         }
 
+        _applyingEnvironmentFilter = true;
+        StateHasChanged();
+
+        await Task.Yield();
+
         RefreshFilteredBenchmarks();
+
+        _applyingEnvironmentFilter = false;
+        StateHasChanged();
     }
 
     private Task EndDateChangedAsync(ChangeEventArgs args)
@@ -818,9 +847,19 @@ public partial class Home : IAsyncDisposable
         foreach (var key in _selectedEnvironmentFilters.Keys.ToList())
         {
             var option = _environmentFilterOptions.FirstOrDefault((candidate) => candidate.Key == key);
-            var value = _selectedEnvironmentFilters[key];
 
-            if (option is null || !option.Values.Any((candidate) => candidate.RawValue == value))
+            if (option is null)
+            {
+                _selectedEnvironmentFilters.Remove(key);
+                continue;
+            }
+
+            var validValues = option.Values.Select((candidate) => candidate.RawValue).ToHashSet(StringComparer.Ordinal);
+            var selectedValues = _selectedEnvironmentFilters[key];
+
+            selectedValues.RemoveWhere((value) => !validValues.Contains(value));
+
+            if (selectedValues.Count < 1)
             {
                 _selectedEnvironmentFilters.Remove(key);
             }

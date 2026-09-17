@@ -475,7 +475,8 @@ public class HomeTests : DashboardTestContext
         const string Branch = "main";
         const string SuiteName = "EnvironmentBenchmarks";
         const string BenchmarkName = "EnvironmentBenchmarks.Method";
-        const string AmdProcessor = "AMD EPYC 9V74";
+        const string AmdProcessorA = "AMD EPYC 9V74";
+        const string AmdProcessorB = "AMD EPYC 9754";
         const string IntelProcessor = "Intel Xeon 6973P-C";
 
         await WithValidAccessToken();
@@ -507,7 +508,7 @@ public class HomeTests : DashboardTestContext
                         {
                             Commit = CreateCommit("aaaaaaa1"),
                             Timestamp = new DateTimeOffset(2024, 08, 20, 00, 00, 00, TimeSpan.Zero),
-                            Metadata = CreateMetadata(AmdProcessor),
+                            Metadata = CreateMetadata(AmdProcessorA),
                             Benchmarks = [new() { Name = BenchmarkName, Value = 1, Unit = "ns" }],
                         },
                         new()
@@ -521,7 +522,7 @@ public class HomeTests : DashboardTestContext
                         {
                             Commit = CreateCommit("ccccccc3"),
                             Timestamp = new DateTimeOffset(2024, 08, 22, 00, 00, 00, TimeSpan.Zero),
-                            Metadata = CreateMetadata(AmdProcessor),
+                            Metadata = CreateMetadata(AmdProcessorB),
                             Benchmarks = [new() { Name = BenchmarkName, Value = 3, Unit = "ns" }],
                         },
                     ],
@@ -553,9 +554,11 @@ public class HomeTests : DashboardTestContext
             },
             TimeSpan.FromSeconds(2));
 
-        // Act - filter down to only the runs with the AMD processor
+        // Act - multi-select both AMD processor variants at once
         await actual.Find("#env-filter-ProcessorName")
-            .TriggerEventAsync("onchange", new ChangeEventArgs() { Value = $"\"{AmdProcessor}\"" });
+            .TriggerEventAsync(
+                "onchange",
+                new ChangeEventArgs() { Value = new[] { $"\"{AmdProcessorA}\"", $"\"{AmdProcessorB}\"" } });
 
         // Assert
         actual.WaitForAssertion(
@@ -566,13 +569,16 @@ public class HomeTests : DashboardTestContext
 
                 benchmark.Instance.Items.Count.ShouldBe(2);
                 benchmark.Instance.Items.ShouldAllBe(
-                    (item) => item.Metadata!.Environment!["ProcessorName"].GetString() == AmdProcessor);
+                    (item) => item.Metadata!.Environment!["ProcessorName"].GetString() == AmdProcessorA ||
+                              item.Metadata!.Environment!["ProcessorName"].GetString() == AmdProcessorB);
             },
             TimeSpan.FromSeconds(2));
 
-        // Act - reset the filter back to "All"
+        // Act - selecting "All" alongside other values is mutually exclusive: it wins over any other selection
         await actual.Find("#env-filter-ProcessorName")
-            .TriggerEventAsync("onchange", new ChangeEventArgs() { Value = string.Empty });
+            .TriggerEventAsync(
+                "onchange",
+                new ChangeEventArgs() { Value = new[] { string.Empty, $"\"{AmdProcessorA}\"" } });
 
         // Assert
         actual.WaitForAssertion(
@@ -584,6 +590,93 @@ public class HomeTests : DashboardTestContext
                 benchmark.Instance.Items.Count.ShouldBe(3);
             },
             TimeSpan.FromSeconds(2));
+    }
+
+    [Fact]
+    public async Task Page_Shows_Loading_Spinner_While_Environment_Filter_Changes()
+    {
+        // Arrange
+        const string Repository = "benchmarks-demo";
+        const string Branch = "main";
+        const string SuiteName = "EnvironmentBenchmarks";
+        const string AmdProcessor = "AMD EPYC 9V74";
+        const string IntelProcessor = "Intel Xeon 6973P-C";
+
+        await WithValidAccessToken();
+
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Repository}", $"{Repository}-repo");
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Repository}/branches", $"{Repository}-branches");
+
+        static BenchmarkMetadata CreateMetadata(string processorName) =>
+            new()
+            {
+                Environment = new Dictionary<string, JsonElement>()
+                {
+                    ["ProcessorName"] = JsonSerializer.SerializeToElement(processorName),
+                },
+            };
+
+        var builder = new HttpRequestInterceptionBuilder()
+            .ForUrl($"https://api.github.local/repos/{Options.RepositoryOwner}/{Options.RepositoryName}/contents/{Repository}/data.json?ref={Branch}")
+            .WithJsonContent(new BenchmarkResults()
+            {
+                LastUpdated = DateTimeOffset.UtcNow,
+                RepositoryUrl = $"https://github.local/{Options.RepositoryOwner}/{Repository}",
+                Suites = new Dictionary<string, IList<BenchmarkRun>>()
+                {
+                    [SuiteName] =
+                    [
+                        new()
+                        {
+                            Commit = CreateCommit("aaaaaaa1"),
+                            Timestamp = new DateTimeOffset(2024, 08, 20, 00, 00, 00, TimeSpan.Zero),
+                            Metadata = CreateMetadata(AmdProcessor),
+                            Benchmarks = [new() { Name = "EnvironmentBenchmarks.Method", Value = 1, Unit = "ns" }],
+                        },
+                        new()
+                        {
+                            Commit = CreateCommit("bbbbbbb2"),
+                            Timestamp = new DateTimeOffset(2024, 08, 21, 00, 00, 00, TimeSpan.Zero),
+                            Metadata = CreateMetadata(IntelProcessor),
+                            Benchmarks = [new() { Name = "EnvironmentBenchmarks.Method", Value = 2, Unit = "ns" }],
+                        },
+                    ],
+                },
+            });
+
+        builder.RegisterWith(Interceptor);
+
+        SetupJSInterop();
+
+        Services.GetRequiredService<NavigationManager>()
+            .NavigateTo($"?repo={Repository}&branch={Branch}");
+
+        var actual = Render<Home>();
+
+        actual.WaitForAssertion(
+            () => actual.FindAll("#benchmarks").Count.ShouldBe(1),
+            TimeSpan.FromSeconds(2));
+
+        // Capture a snapshot of the rendered markup after every render so that the
+        // transient "applying the filter" render can be inspected once settled, even
+        // though it may have already been superseded by the time we can assert on it.
+        List<string> renders = [];
+        actual.OnAfterRender += (_, _) => renders.Add(actual.Markup);
+
+        // Act
+        await actual
+            .Find("#env-filter-ProcessorName")
+            .TriggerEventAsync("onchange", new ChangeEventArgs() { Value = new[] { $"\"{AmdProcessor}\"" } });
+
+        // Assert - a render occurred where the spinner was shown and the charts were hidden
+        // while the filter was being applied, and the final state has the filtered charts shown.
+        renders.ShouldContain(
+            (markup) => markup.Contains("id=\"date-range-loader\"", StringComparison.Ordinal) &&
+                        !markup.Contains("date-range-loader d-none", StringComparison.Ordinal) &&
+                        !markup.Contains("id=\"benchmarks\"", StringComparison.Ordinal));
+
+        actual.FindAll("#benchmarks").Count.ShouldBe(1);
+        actual.Find("#date-range-loader").ClassList.ShouldContain("d-none");
     }
 
     [Fact]

@@ -116,11 +116,14 @@
                                     data-environment-filter="@(filter.Key)"
                                     disabled="@(ShowLoaders)"
                                     id="env-filter-@(filter.Key)"
+                                    multiple
+                                    size="@(Math.Min(filter.Values.Count + 1, 4))"
+                                    title="Hold Ctrl (Cmd on Mac) to select multiple values"
                                     @onchange="@((args) => EnvironmentFilterChanged(filter.Key, args))">
-                                <option value="">@(filter.DisplayName) (All)</option>
+                                <option value="" selected="@(IsAllSelectedForEnvironmentFilter(filter.Key))">@(filter.DisplayName) (All)</option>
                                 @foreach (var value in filter.Values)
                                 {
-                                    var selected = GetSelectedEnvironmentFilterValue(filter.Key) == value.RawValue;
+                                    var selected = IsEnvironmentFilterValueSelected(filter.Key, value.RawValue);
                                     <option value="@(value.RawValue)" selected="@(selected)">@(value.DisplayValue)</option>
                                 }
                             </select>
