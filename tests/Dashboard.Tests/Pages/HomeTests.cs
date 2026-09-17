@@ -525,6 +525,14 @@ public class HomeTests : DashboardTestContext
                             Metadata = CreateMetadata(AmdProcessorB),
                             Benchmarks = [new() { Name = BenchmarkName, Value = 3, Unit = "ns" }],
                         },
+                        new()
+                        {
+                            // No metadata at all: should be included when "All" is selected, but
+                            // excluded once any specific environment filter value is applied.
+                            Commit = CreateCommit("ddddddd4"),
+                            Timestamp = new DateTimeOffset(2024, 08, 23, 00, 00, 00, TimeSpan.Zero),
+                            Benchmarks = [new() { Name = BenchmarkName, Value = 4, Unit = "ns" }],
+                        },
                     ],
                 },
             });
@@ -557,7 +565,7 @@ public class HomeTests : DashboardTestContext
                 var benchmark = actual.FindComponents<Benchmark>()
                     .Single((item) => item.Instance.Name == BenchmarkName && item.Instance.Suite == SuiteName);
 
-                benchmark.Instance.Items.Count.ShouldBe(3);
+                benchmark.Instance.Items.Count.ShouldBe(4);
             },
             TimeSpan.FromSeconds(2));
 
@@ -567,7 +575,8 @@ public class HomeTests : DashboardTestContext
                 "onchange",
                 new ChangeEventArgs() { Value = new[] { $"\"{AmdProcessorA}\"", $"\"{AmdProcessorB}\"" } });
 
-        // Assert - a badge showing the number of active filters is now shown on the toggle
+        // Assert - a badge showing the number of active filters is now shown on the toggle, and
+        // the run with no environment metadata at all is excluded now that a filter is active.
         actual.WaitForAssertion(
             () =>
             {
@@ -598,7 +607,7 @@ public class HomeTests : DashboardTestContext
                 var benchmark = actual.FindComponents<Benchmark>()
                     .Single((item) => item.Instance.Name == BenchmarkName && item.Instance.Suite == SuiteName);
 
-                benchmark.Instance.Items.Count.ShouldBe(3);
+                benchmark.Instance.Items.Count.ShouldBe(4);
             },
             TimeSpan.FromSeconds(2));
     }
@@ -688,6 +697,428 @@ public class HomeTests : DashboardTestContext
 
         actual.FindAll("#benchmarks").Count.ShouldBe(1);
         actual.Find("#date-range-loader").ClassList.ShouldContain("d-none");
+    }
+
+    [Fact]
+    public async Task Page_Accepts_Environment_Filter_Selections_In_Any_Change_Event_Value_Shape()
+    {
+        // Arrange
+        const string Repository = "benchmarks-demo";
+        const string Branch = "main";
+        const string SuiteName = "EnvironmentBenchmarks";
+        const string BenchmarkName = "EnvironmentBenchmarks.Method";
+        const string AmdProcessor = "AMD EPYC 9V74";
+        const string IntelProcessor = "Intel Xeon 6973P-C";
+
+        await WithValidAccessToken();
+
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Repository}", $"{Repository}-repo");
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Repository}/branches", $"{Repository}-branches");
+
+        static BenchmarkMetadata CreateMetadata(string processorName) =>
+            new()
+            {
+                Environment = new Dictionary<string, JsonElement>()
+                {
+                    ["ProcessorName"] = JsonSerializer.SerializeToElement(processorName),
+                },
+            };
+
+        var builder = new HttpRequestInterceptionBuilder()
+            .ForUrl($"https://api.github.local/repos/{Options.RepositoryOwner}/{Options.RepositoryName}/contents/{Repository}/data.json?ref={Branch}")
+            .WithJsonContent(new BenchmarkResults()
+            {
+                LastUpdated = DateTimeOffset.UtcNow,
+                RepositoryUrl = $"https://github.local/{Options.RepositoryOwner}/{Repository}",
+                Suites = new Dictionary<string, IList<BenchmarkRun>>()
+                {
+                    [SuiteName] =
+                    [
+                        new()
+                        {
+                            Commit = CreateCommit("aaaaaaa1"),
+                            Timestamp = new DateTimeOffset(2024, 08, 20, 00, 00, 00, TimeSpan.Zero),
+                            Metadata = CreateMetadata(AmdProcessor),
+                            Benchmarks = [new() { Name = BenchmarkName, Value = 1, Unit = "ns" }],
+                        },
+                        new()
+                        {
+                            Commit = CreateCommit("bbbbbbb2"),
+                            Timestamp = new DateTimeOffset(2024, 08, 21, 00, 00, 00, TimeSpan.Zero),
+                            Metadata = CreateMetadata(IntelProcessor),
+                            Benchmarks = [new() { Name = BenchmarkName, Value = 2, Unit = "ns" }],
+                        },
+                    ],
+                },
+            });
+
+        builder.RegisterWith(Interceptor);
+
+        SetupJSInterop();
+
+        Services.GetRequiredService<NavigationManager>()
+            .NavigateTo($"?repo={Repository}&branch={Branch}");
+
+        var actual = Render<Home>();
+
+        actual.WaitForAssertion(
+            () => actual.Find("#env-filter-ProcessorName").ShouldNotBeNull(),
+            TimeSpan.FromSeconds(2));
+
+        // Act - a value provided as a non-array IEnumerable<object?> (e.g. a List<string>)
+        await actual.Find("#env-filter-ProcessorName")
+            .TriggerEventAsync("onchange", new ChangeEventArgs() { Value = new List<string>() { $"\"{IntelProcessor}\"" } });
+
+        // Assert
+        actual.WaitForAssertion(
+            () =>
+            {
+                var benchmark = actual.FindComponents<Benchmark>()
+                    .Single((item) => item.Instance.Name == BenchmarkName && item.Instance.Suite == SuiteName);
+
+                benchmark.Instance.Items.Count.ShouldBe(1);
+                benchmark.Instance.Items[0].Metadata!.Environment!["ProcessorName"].GetString().ShouldBe(IntelProcessor);
+            },
+            TimeSpan.FromSeconds(2));
+
+        // Act - a value provided as a single, non-array string
+        await actual.Find("#env-filter-ProcessorName")
+            .TriggerEventAsync("onchange", new ChangeEventArgs() { Value = $"\"{AmdProcessor}\"" });
+
+        // Assert
+        actual.WaitForAssertion(
+            () =>
+            {
+                var benchmark = actual.FindComponents<Benchmark>()
+                    .Single((item) => item.Instance.Name == BenchmarkName && item.Instance.Suite == SuiteName);
+
+                benchmark.Instance.Items.Count.ShouldBe(1);
+                benchmark.Instance.Items[0].Metadata!.Environment!["ProcessorName"].GetString().ShouldBe(AmdProcessor);
+            },
+            TimeSpan.FromSeconds(2));
+
+        // Act - a value of an unexpected shape is treated as no selection at all, clearing the filter
+        await actual.Find("#env-filter-ProcessorName")
+            .TriggerEventAsync("onchange", new ChangeEventArgs() { Value = 42 });
+
+        // Assert
+        actual.WaitForAssertion(
+            () =>
+            {
+                actual.Find("#environment-filters-toggle").QuerySelectorAll(".badge").Length.ShouldBe(0);
+
+                var benchmark = actual.FindComponents<Benchmark>()
+                    .Single((item) => item.Instance.Name == BenchmarkName && item.Instance.Suite == SuiteName);
+
+                benchmark.Instance.Items.Count.ShouldBe(2);
+            },
+            TimeSpan.FromSeconds(2));
+    }
+
+    [Fact]
+    public async Task Page_Clears_Environment_Filters_When_The_Repository_Changes()
+    {
+        // Arrange
+        const string Repository = "benchmarks-demo";
+        const string Branch = "main";
+        const string SuiteName = "EnvironmentBenchmarks";
+        const string AmdProcessor = "AMD EPYC 9V74";
+        const string IntelProcessor = "Intel Xeon 6973P-C";
+
+        await WithValidAccessToken();
+
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Repository}", $"{Repository}-repo");
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Repository}/branches", $"{Repository}-branches");
+        WithBenchmarks("website", "main");
+
+        static BenchmarkMetadata CreateMetadata(string processorName) =>
+            new()
+            {
+                Environment = new Dictionary<string, JsonElement>()
+                {
+                    ["ProcessorName"] = JsonSerializer.SerializeToElement(processorName),
+                },
+            };
+
+        var builder = new HttpRequestInterceptionBuilder()
+            .ForUrl($"https://api.github.local/repos/{Options.RepositoryOwner}/{Options.RepositoryName}/contents/{Repository}/data.json?ref={Branch}")
+            .WithJsonContent(new BenchmarkResults()
+            {
+                LastUpdated = DateTimeOffset.UtcNow,
+                RepositoryUrl = $"https://github.local/{Options.RepositoryOwner}/{Repository}",
+                Suites = new Dictionary<string, IList<BenchmarkRun>>()
+                {
+                    [SuiteName] =
+                    [
+                        new()
+                        {
+                            Commit = CreateCommit("aaaaaaa1"),
+                            Timestamp = new DateTimeOffset(2024, 08, 20, 00, 00, 00, TimeSpan.Zero),
+                            Metadata = CreateMetadata(AmdProcessor),
+                            Benchmarks = [new() { Name = "EnvironmentBenchmarks.Method", Value = 1, Unit = "ns" }],
+                        },
+                        new()
+                        {
+                            Commit = CreateCommit("bbbbbbb2"),
+                            Timestamp = new DateTimeOffset(2024, 08, 21, 00, 00, 00, TimeSpan.Zero),
+                            Metadata = CreateMetadata(IntelProcessor),
+                            Benchmarks = [new() { Name = "EnvironmentBenchmarks.Method", Value = 2, Unit = "ns" }],
+                        },
+                    ],
+                },
+            });
+
+        builder.RegisterWith(Interceptor);
+
+        SetupJSInterop();
+
+        Services.GetRequiredService<NavigationManager>()
+            .NavigateTo($"?repo={Repository}&branch={Branch}");
+
+        var actual = Render<Home>();
+
+        actual.WaitForAssertion(
+            () => actual.Find("#env-filter-ProcessorName").ShouldNotBeNull(),
+            TimeSpan.FromSeconds(2));
+
+        // Act - select a specific environment filter value
+        await actual.Find("#env-filter-ProcessorName")
+            .TriggerEventAsync("onchange", new ChangeEventArgs() { Value = new[] { $"\"{AmdProcessor}\"" } });
+
+        actual.WaitForAssertion(
+            () => actual.Find("#environment-filters-toggle").QuerySelectorAll(".badge").Length.ShouldBe(1),
+            TimeSpan.FromSeconds(2));
+
+        // Act - switch to a repository with no environment metadata, then back to the original one
+        await actual.Find("#repository").TriggerEventAsync("onchange", new ChangeEventArgs() { Value = "website" });
+
+        actual.WaitForAssertion(
+            () => Services.GetRequiredService<GitHubService>().CurrentRepository!.Name.ShouldBe("website"),
+            TimeSpan.FromSeconds(2));
+
+        await actual.Find("#repository").TriggerEventAsync("onchange", new ChangeEventArgs() { Value = Repository });
+
+        // Assert - the previously selected environment filter value was not retained even though the
+        // same filter option is available again for the repository that was originally selected
+        actual.WaitForAssertion(
+            () =>
+            {
+                Services.GetRequiredService<GitHubService>().CurrentRepository!.Name.ShouldBe(Repository);
+                actual.Find("#env-filter-ProcessorName").ShouldNotBeNull();
+                actual.FindAll("#environment-filters-toggle .badge").Count.ShouldBe(0);
+            },
+            TimeSpan.FromSeconds(2));
+    }
+
+    [Fact]
+    public async Task Page_Prunes_Environment_Filters_That_Are_No_Longer_Available_After_The_Date_Range_Changes()
+    {
+        // Arrange
+        const string Repository = "benchmarks-demo";
+        const string Branch = "main";
+        const string SuiteName = "EnvironmentBenchmarks";
+        const string BenchmarkName = "EnvironmentBenchmarks.Method";
+        const string ProcessorA = "AMD EPYC 9V74";
+        const string ProcessorB = "Intel Xeon 6973P-C";
+        const string RegionX = "us-east";
+        const string RegionY = "us-west";
+        const string RegionZ = "eu-west";
+
+        await WithValidAccessToken();
+
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Repository}", $"{Repository}-repo");
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Repository}/branches", $"{Repository}-branches");
+
+        static BenchmarkMetadata CreateMetadata(string processorName, string region) =>
+            new()
+            {
+                Environment = new Dictionary<string, JsonElement>()
+                {
+                    ["ProcessorName"] = JsonSerializer.SerializeToElement(processorName),
+                    ["Region"] = JsonSerializer.SerializeToElement(region),
+                },
+            };
+
+        var builder = new HttpRequestInterceptionBuilder()
+            .ForUrl($"https://api.github.local/repos/{Options.RepositoryOwner}/{Options.RepositoryName}/contents/{Repository}/data.json?ref={Branch}")
+            .WithJsonContent(new BenchmarkResults()
+            {
+                LastUpdated = DateTimeOffset.UtcNow,
+                RepositoryUrl = $"https://github.local/{Options.RepositoryOwner}/{Repository}",
+                Suites = new Dictionary<string, IList<BenchmarkRun>>()
+                {
+                    [SuiteName] =
+                    [
+                        new()
+                        {
+                            // Only run with ProcessorB and RegionX - both become stale once excluded by date.
+                            Commit = CreateCommit("aaaaaaa1"),
+                            Timestamp = new DateTimeOffset(2024, 08, 20, 00, 00, 00, TimeSpan.Zero),
+                            Metadata = CreateMetadata(ProcessorB, RegionX),
+                            Benchmarks = [new() { Name = BenchmarkName, Value = 1, Unit = "ns" }],
+                        },
+                        new()
+                        {
+                            Commit = CreateCommit("bbbbbbb2"),
+                            Timestamp = new DateTimeOffset(2024, 08, 21, 00, 00, 00, TimeSpan.Zero),
+                            Metadata = CreateMetadata(ProcessorA, RegionY),
+                            Benchmarks = [new() { Name = BenchmarkName, Value = 2, Unit = "ns" }],
+                        },
+                        new()
+                        {
+                            Commit = CreateCommit("ccccccc3"),
+                            Timestamp = new DateTimeOffset(2024, 08, 22, 00, 00, 00, TimeSpan.Zero),
+                            Metadata = CreateMetadata(ProcessorA, RegionZ),
+                            Benchmarks = [new() { Name = BenchmarkName, Value = 3, Unit = "ns" }],
+                        },
+                        new()
+                        {
+                            Commit = CreateCommit("ddddddd4"),
+                            Timestamp = new DateTimeOffset(2024, 08, 23, 00, 00, 00, TimeSpan.Zero),
+                            Metadata = CreateMetadata(ProcessorA, RegionY),
+                            Benchmarks = [new() { Name = BenchmarkName, Value = 4, Unit = "ns" }],
+                        },
+                    ],
+                },
+            });
+
+        builder.RegisterWith(Interceptor);
+
+        SetupJSInterop();
+
+        var navigation = Services.GetRequiredService<NavigationManager>();
+        navigation.NavigateTo($"?repo={Repository}&branch={Branch}");
+
+        var actual = Render<Home>();
+
+        actual.WaitForAssertion(
+            () =>
+            {
+                actual.Find("#env-filter-ProcessorName").ShouldNotBeNull();
+                actual.Find("#env-filter-Region").ShouldNotBeNull();
+            },
+            TimeSpan.FromSeconds(2));
+
+        // Act - select values that only exist on the first run (2024-08-20)
+        await actual.Find("#env-filter-ProcessorName")
+            .TriggerEventAsync("onchange", new ChangeEventArgs() { Value = new[] { $"\"{ProcessorB}\"" } });
+        await actual.Find("#env-filter-Region")
+            .TriggerEventAsync("onchange", new ChangeEventArgs() { Value = new[] { $"\"{RegionX}\"" } });
+
+        actual.WaitForAssertion(
+            () => actual.Find("#environment-filters-toggle").QuerySelectorAll(".badge").Single().TextContent.ShouldBe("2"),
+            TimeSpan.FromSeconds(2));
+
+        // Act - narrow the date range to exclude the first run: "ProcessorName" then has only a single
+        // distinct value (ProcessorA) so the option disappears entirely, while "Region" still has more
+        // than one distinct value (RegionY and RegionZ) but no longer includes the selected "RegionX".
+        await actual.Find("#startDate")
+            .TriggerEventAsync("onchange", new ChangeEventArgs() { Value = "2024-08-21" });
+
+        // Assert
+        actual.WaitForAssertion(
+            () =>
+            {
+                actual.FindAll("#env-filter-ProcessorName").Count.ShouldBe(0);
+                actual.Find("#env-filter-Region").ShouldNotBeNull();
+                actual.FindAll("#environment-filters-toggle .badge").Count.ShouldBe(0);
+
+                var benchmark = actual.FindComponents<Benchmark>()
+                    .Single((item) => item.Instance.Name == BenchmarkName && item.Instance.Suite == SuiteName);
+
+                benchmark.Instance.Items.Count.ShouldBe(3);
+            },
+            TimeSpan.FromSeconds(2));
+    }
+
+    [Fact]
+    public async Task Page_Shows_Environment_Filter_Context_When_No_Benchmarks_Match()
+    {
+        // Arrange
+        const string Repository = "benchmarks-demo";
+        const string Branch = "main";
+        const string SuiteName = "EnvironmentBenchmarks";
+        const string ProcessorA = "AMD EPYC 9V74";
+        const string ProcessorB = "Intel Xeon 6973P-C";
+        const string RegionX = "us-east";
+        const string RegionY = "us-west";
+
+        await WithValidAccessToken();
+
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Repository}", $"{Repository}-repo");
+        RegisterResponse($"https://api.github.local/repos/{Options.RepositoryOwner}/{Repository}/branches", $"{Repository}-branches");
+
+        static BenchmarkMetadata CreateMetadata(string processorName, string region) =>
+            new()
+            {
+                Environment = new Dictionary<string, JsonElement>()
+                {
+                    ["ProcessorName"] = JsonSerializer.SerializeToElement(processorName),
+                    ["Region"] = JsonSerializer.SerializeToElement(region),
+                },
+            };
+
+        var builder = new HttpRequestInterceptionBuilder()
+            .ForUrl($"https://api.github.local/repos/{Options.RepositoryOwner}/{Options.RepositoryName}/contents/{Repository}/data.json?ref={Branch}")
+            .WithJsonContent(new BenchmarkResults()
+            {
+                LastUpdated = DateTimeOffset.UtcNow,
+                RepositoryUrl = $"https://github.local/{Options.RepositoryOwner}/{Repository}",
+                Suites = new Dictionary<string, IList<BenchmarkRun>>()
+                {
+                    [SuiteName] =
+                    [
+                        new()
+                        {
+                            // ProcessorA is never paired with RegionX, so selecting both together
+                            // (an AND match) leaves no benchmarks in the selected date range.
+                            Commit = CreateCommit("aaaaaaa1"),
+                            Timestamp = new DateTimeOffset(2024, 08, 20, 00, 00, 00, TimeSpan.Zero),
+                            Metadata = CreateMetadata(ProcessorA, RegionY),
+                            Benchmarks = [new() { Name = "EnvironmentBenchmarks.Method", Value = 1, Unit = "ns" }],
+                        },
+                        new()
+                        {
+                            Commit = CreateCommit("bbbbbbb2"),
+                            Timestamp = new DateTimeOffset(2024, 08, 21, 00, 00, 00, TimeSpan.Zero),
+                            Metadata = CreateMetadata(ProcessorB, RegionX),
+                            Benchmarks = [new() { Name = "EnvironmentBenchmarks.Method", Value = 2, Unit = "ns" }],
+                        },
+                    ],
+                },
+            });
+
+        builder.RegisterWith(Interceptor);
+
+        SetupJSInterop();
+
+        Services.GetRequiredService<NavigationManager>()
+            .NavigateTo($"?repo={Repository}&branch={Branch}");
+
+        var actual = Render<Home>();
+
+        actual.WaitForAssertion(
+            () =>
+            {
+                actual.Find("#env-filter-ProcessorName").ShouldNotBeNull();
+                actual.Find("#env-filter-Region").ShouldNotBeNull();
+            },
+            TimeSpan.FromSeconds(2));
+
+        // Act - select a combination of filters that no single run satisfies
+        await actual.Find("#env-filter-ProcessorName")
+            .TriggerEventAsync("onchange", new ChangeEventArgs() { Value = new[] { $"\"{ProcessorA}\"" } });
+        await actual.Find("#env-filter-Region")
+            .TriggerEventAsync("onchange", new ChangeEventArgs() { Value = new[] { $"\"{RegionX}\"" } });
+
+        // Assert
+        actual.WaitForAssertion(
+            () =>
+            {
+                var message = actual.Find("#no-benchmarks-in-range");
+                message.TextContent.ShouldContain("for the selected environment filters");
+            },
+            TimeSpan.FromSeconds(2));
     }
 
     [Fact]
@@ -1155,6 +1586,56 @@ public class HomeTests : DashboardTestContext
 
         // Assert
         actual.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void GetEnvironmentFilterOptions_Formats_Display_Values_For_All_Json_Value_Kinds()
+    {
+        // Arrange
+        static IDictionary<string, JsonElement> CreateEnvironment(bool isCloud, string? region, int cpuCount) =>
+            new Dictionary<string, JsonElement>()
+            {
+                ["IsCloud"] = JsonSerializer.SerializeToElement(isCloud),
+                ["Region"] = region is null ? JsonSerializer.SerializeToElement<string?>(null) : JsonSerializer.SerializeToElement(region),
+                ["CpuCount"] = JsonSerializer.SerializeToElement(cpuCount),
+            };
+
+        var results = new BenchmarkResults()
+        {
+            Suites = new Dictionary<string, IList<BenchmarkRun>>()
+            {
+                ["Suite"] =
+                [
+                    new()
+                    {
+                        Commit = CreateCommit("commit-1"),
+                        Timestamp = DateTimeOffset.UtcNow,
+                        Metadata = new() { Environment = CreateEnvironment(isCloud: true, region: null, cpuCount: 1) },
+                        Benchmarks = [new() { Name = "A", Value = 1 }],
+                    },
+                    new()
+                    {
+                        Commit = CreateCommit("commit-2"),
+                        Timestamp = DateTimeOffset.UtcNow,
+                        Metadata = new() { Environment = CreateEnvironment(isCloud: false, region: "us", cpuCount: 2) },
+                        Benchmarks = [new() { Name = "A", Value = 2 }],
+                    },
+                ],
+            },
+        };
+
+        // Act
+        var actual = Home.GetEnvironmentFilterOptions(results);
+
+        // Assert
+        actual.Single((option) => option.Key == "IsCloud").Values.Select((value) => value.DisplayValue)
+            .ShouldBe(["false", "true"], ignoreOrder: true);
+
+        actual.Single((option) => option.Key == "Region").Values.Select((value) => value.DisplayValue)
+            .ShouldBe([string.Empty, "us"], ignoreOrder: true);
+
+        actual.Single((option) => option.Key == "CpuCount").Values.Select((value) => value.DisplayValue)
+            .ShouldBe(["1", "2"], ignoreOrder: true);
     }
 
     [Fact]
