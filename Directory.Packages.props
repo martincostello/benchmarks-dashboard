@@ -20,7 +20,7 @@
     <PackageVersion Include="Microsoft.Playwright" Version="1.63.0" />
     <PackageVersion Include="ReportGenerator" Version="5.5.11" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
-    <PackageVersion Include="Verify.ImageMagick" Version="3.10.0" />
+    <PackageVersion Include="Verify.ImageMagick" Version="3.11.0" />
     <PackageVersion Include="Verify.Playwright" Version="3.1.1" />
     <PackageVersion Include="Verify.XunitV3" Version="33.2.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
