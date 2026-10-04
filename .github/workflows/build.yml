@@ -74,6 +74,10 @@ jobs:
       shell: pwsh
       run: dotnet workload install wasm-tools
 
+    - name: Install .NET Tools
+      shell: pwsh
+      run: dotnet tool restore
+
     - name: Build, Test and Publish
       shell: pwsh
       run: ./build.ps1
