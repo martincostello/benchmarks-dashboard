@@ -29,6 +29,11 @@ public static class Icons
     public static string Check => "fa-solid fa-check";
 
     /// <summary>
+    /// Gets the <c>chevron-down</c> icon.
+    /// </summary>
+    public static string ChevronDown => "fa-solid fa-chevron-down";
+
+    /// <summary>
     /// Gets the <c>clipboard</c> icon.
     /// </summary>
     public static string Clipboard => "fa-regular fa-clipboard";
@@ -62,6 +67,11 @@ public static class Icons
     /// Gets the <c>file-arrow-down</c> icon.
     /// </summary>
     public static string FileArrowDown => "fa-solid fa-file-arrow-down";
+
+    /// <summary>
+    /// Gets the <c>filter</c> icon.
+    /// </summary>
+    public static string Filter => "fa-solid fa-filter";
 
     /// <summary>
     /// Gets the <c>github</c> icon.

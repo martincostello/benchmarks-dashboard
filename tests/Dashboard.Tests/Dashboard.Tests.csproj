@@ -15,24 +15,31 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="bunit" />
-    <PackageReference Include="coverlet.msbuild" />
     <PackageReference Include="GitHubActionsTestLogger" />
-    <PackageReference Include="JunitXml.TestLogger" />
     <PackageReference Include="JustEat.HttpClientInterception" />
     <PackageReference Include="MartinCostello.Logging.XUnit.v3" />
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Microsoft.Playwright" />
-    <PackageReference Include="ReportGenerator" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
     <PackageReference Include="Shouldly" />
     <PackageReference Include="Verify.ImageMagick" />
     <PackageReference Include="Verify.Playwright" />
     <PackageReference Include="Verify.XunitV3" />
     <PackageReference Include="xunit.runner.visualstudio" />
-    <PackageReference Include="xunit.v3.mtp-off" />
+    <PackageReference Include="xunit.v3.mtp-v2" />
   </ItemGroup>
   <PropertyGroup>
     <CollectCoverage>true</CollectCoverage>
     <Threshold>75</Threshold>
   </PropertyGroup>
+  <!--
+    The project has already been built when dotnet test evaluates the ComputeRunArguments target, so do not build
+    the Blazor WebAssembly project reference again as the WebAssembly SDK tasks cannot run in the .NET CLI's process.
+  -->
+  <Target Name="_DoNotBuildProjectReferencesForRunArguments" BeforeTargets="_MTPAddArguments">
+    <PropertyGroup>
+      <BuildProjectReferences>false</BuildProjectReferences>
+    </PropertyGroup>
+  </Target>
 </Project>

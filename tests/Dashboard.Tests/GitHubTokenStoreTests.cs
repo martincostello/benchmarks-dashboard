@@ -15,7 +15,7 @@ public static class GitHubTokenStoreTests
         // Arrange
         var storage = new LocalStorage();
         var options = Options.Create(new DashboardOptions() { GitHubServerUrl = new("https://github.local") });
-        var target = new GitHubTokenStore(storage, storage, options);
+        var target = new GitHubTokenStore(storage, options);
 
         // Act
         var actual = target.GetToken();

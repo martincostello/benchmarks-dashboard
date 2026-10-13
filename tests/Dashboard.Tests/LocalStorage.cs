@@ -1,102 +1,71 @@
 ﻿// Copyright (c) Martin Costello, 2024. All rights reserved.
 // Licensed under the Apache 2.0 license. See the LICENSE file in the project root for full license information.
 
-using Blazored.LocalStorage;
+using Microsoft.JSInterop;
 
 namespace MartinCostello.Benchmarks;
 
-internal sealed class LocalStorage : ILocalStorageService, ISyncLocalStorageService
+/// <summary>
+/// A fake <see cref="IJSRuntime"/> that emulates the browser's <c>localStorage</c>
+/// API for use with <see cref="GitHubTokenStore"/> in tests. Any JS interop call
+/// other than reading or writing local storage is delegated to the optionally
+/// supplied fallback runtime, such as bUnit's own <see cref="IJSRuntime"/> fake.
+/// </summary>
+/// <param name="fallback">The optional fallback <see cref="IJSRuntime"/> to delegate other calls to.</param>
+internal sealed class LocalStorage(IJSRuntime? fallback = null) : IJSInProcessRuntime
 {
     private readonly Dictionary<string, string?> _storage = [];
 
-#pragma warning disable CS0067
-    public event EventHandler<ChangingEventArgs>? Changing;
-
-    public event EventHandler<ChangedEventArgs>? Changed;
-#pragma warning restore CS0067
-
-    public void Clear() => _storage.Clear();
-
-    public ValueTask ClearAsync(CancellationToken cancellationToken = default)
+    public TValue Invoke<TValue>(string identifier, params object?[]? args)
     {
-        Clear();
-        return ValueTask.CompletedTask;
-    }
-
-    public bool ContainKey(string key) => _storage.ContainsKey(key);
-
-    public ValueTask<bool> ContainKeyAsync(string key, CancellationToken cancellationToken = default)
-    {
-        var result = ContainKey(key);
-        return ValueTask.FromResult(result);
-    }
-
-    public string? GetItemAsString(string key)
-    {
-        if (!_storage.TryGetValue(key, out var result))
+        if (!TryGet(identifier, args, out TValue? result))
         {
-            result = null;
+            return ((IJSInProcessRuntime)Fallback()).Invoke<TValue>(identifier, args);
         }
 
-        return result;
+        return result!;
     }
 
-    public ValueTask<string?> GetItemAsStringAsync(string key, CancellationToken cancellationToken = default)
+    public ValueTask<TValue> InvokeAsync<TValue>(string identifier, object?[]? args)
     {
-        var result = GetItemAsString(key);
-        return ValueTask.FromResult(result);
+        if (!TryGet(identifier, args, out TValue? result))
+        {
+            return Fallback().InvokeAsync<TValue>(identifier, args);
+        }
+
+        return ValueTask.FromResult(result!);
     }
 
-    public void SetItemAsString(string key, string data)
-        => _storage[key] = data;
-
-    public ValueTask SetItemAsStringAsync(string key, string data, CancellationToken cancellationToken = default)
+    public ValueTask<TValue> InvokeAsync<TValue>(string identifier, CancellationToken cancellationToken, object?[]? args)
     {
-        SetItemAsString(key, data);
-        return ValueTask.CompletedTask;
+        if (!TryGet(identifier, args, out TValue? result))
+        {
+            return Fallback().InvokeAsync<TValue>(identifier, cancellationToken, args);
+        }
+
+        return ValueTask.FromResult(result!);
     }
 
-    public T? GetItem<T>(string key)
+    private IJSRuntime Fallback()
+        => fallback ?? throw new NotImplementedException($"No fallback {nameof(IJSRuntime)} was configured.");
+
+    private bool TryGet<TValue>(string identifier, object?[]? args, out TValue? result)
     {
-        throw new NotImplementedException();
+        switch (identifier)
+        {
+            case "localStorage.getItem":
+                _storage.TryGetValue((string)args![0]!, out var value);
+                result = (TValue?)(object?)value;
+                return true;
+
+            case "localStorage.setItem":
+                _storage[(string)args![0]!] = (string)args[1]!;
+                result = default;
+                return true;
+
+            default:
+                result = default;
+                return false;
+        }
     }
-
-    public ValueTask<T?> GetItemAsync<T>(string key, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
-
-    public string? Key(int index)
-        => throw new NotImplementedException();
-
-    public ValueTask<string?> KeyAsync(int index, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
-
-    public IEnumerable<string> Keys()
-        => throw new NotImplementedException();
-
-    public ValueTask<IEnumerable<string>> KeysAsync(CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
-
-    public int Length()
-        => throw new NotImplementedException();
-
-    public ValueTask<int> LengthAsync(CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
-
-    public void RemoveItem(string key)
-        => throw new NotImplementedException();
-
-    public ValueTask RemoveItemAsync(string key, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
-
-    public void RemoveItems(IEnumerable<string> keys)
-        => throw new NotImplementedException();
-
-    public ValueTask RemoveItemsAsync(IEnumerable<string> keys, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
-
-    public void SetItem<T>(string key, T data)
-        => throw new NotImplementedException();
-
-    public ValueTask SetItemAsync<T>(string key, T data, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
 }
