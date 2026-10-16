@@ -3,6 +3,8 @@
 
 using Microsoft.JSInterop;
 
+#pragma warning disable BL0016
+
 namespace MartinCostello.Benchmarks;
 
 /// <summary>
