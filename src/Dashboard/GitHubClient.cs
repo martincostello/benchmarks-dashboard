@@ -103,9 +103,8 @@ public sealed class GitHubClient(
 
         var baseAddress = useApi ? current.GitHubApiUrl : current.GitHubDataUrl;
 
-        var relativeUri =
-            useApi ?
-            $"repos/{current.RepositoryOwner}/{current.RepositoryName}/contents/{repository}/{fileName}?ref={branch}"
+        var relativeUri = useApi
+            ? $"repos/{current.RepositoryOwner}/{current.RepositoryName}/contents/{repository}/{fileName}?ref={branch}"
             : $"{current.RepositoryOwner}/{current.RepositoryName}/{branch}/{repository}/{fileName}";
 
         var requestUri = new Uri(baseAddress, relativeUri);
