@@ -36,7 +36,6 @@ internal static class AppLauncher
             WorkingDirectory = path,
         };
 
-        var completionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         using var tokenSource = new CancellationTokenSource(timeout);
 
         var server = Process.Start(startInfo) ?? throw new InvalidOperationException("Unable to start dashboard.");
